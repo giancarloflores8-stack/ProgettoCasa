@@ -424,18 +424,19 @@
     <div id="modal-account" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-sm font-bold text-white">Nuovo Conto / Carta</h3>
+                <h3 id="acc-modal-title" class="text-sm font-bold text-white">Nuovo Conto / Carta</h3>
                 <button onclick="closeModal('modal-account')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveAccount(event)" class="space-y-3">
+                <input type="hidden" id="acc-id" value="">
                 <input type="text" id="acc-name" required placeholder="Nome Conto (es. Revolut)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                 <select id="acc-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                     <option value="Banca">Banca / Conto Corrente</option>
                     <option value="Carta">Carta Ricaricabile</option>
                     <option value="Cassa">Contanti / Cassa</option>
                 </select>
-                <input type="number" step="0.01" id="acc-balance" required placeholder="Saldo Iniziale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Conto</button>
+                <input type="number" step="0.01" id="acc-balance" required placeholder="Saldo (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <button type="submit" id="acc-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Conto</button>
             </form>
         </div>
     </div>
@@ -682,7 +683,7 @@
             accGrid.innerHTML = '';
             store.accounts.forEach(acc => {
                 accGrid.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex justify-between items-center shadow-sm">
+                    <div onclick="openAccountEdit(${acc.id})" class="bg-slate-900 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 flex justify-between items-center shadow-sm cursor-pointer">
                         <div class="flex items-center space-x-3">
                             <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
                                 <i class="fa-solid fa-credit-card text-sm"></i>
@@ -693,8 +694,8 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-sm font-extrabold text-white">€ ${acc.balance.toFixed(2)}</span>
-                            <button onclick="deleteAccount(${acc.id})" class="block ml-auto text-[10px] text-rose-400/80 mt-0.5"><i class="fa-solid fa-trash"></i></button>
+                            <span class="text-sm font-extrabold text-white"><i class="fa-solid fa-pen text-[9px] text-indigo-400/70 mr-1.5"></i>€ ${acc.balance.toFixed(2)}</span>
+                            <button onclick="event.stopPropagation(); deleteAccount(${acc.id})" class="block ml-auto text-[10px] text-rose-400/80 mt-0.5"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -789,6 +790,29 @@
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             if(id === 'modal-transaction') document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+            if(id === 'modal-account') resetAccountForm();
+        }
+
+        function resetAccountForm() {
+            document.getElementById('acc-id').value = '';
+            document.getElementById('acc-name').value = '';
+            document.getElementById('acc-type').value = 'Banca';
+            document.getElementById('acc-balance').value = '';
+            document.getElementById('acc-modal-title').innerText = 'Nuovo Conto / Carta';
+            document.getElementById('acc-submit').innerText = 'Aggiungi Conto';
+        }
+
+        // Modifica di un conto esistente (nome, tipo, saldo)
+        function openAccountEdit(id) {
+            const acc = store.accounts.find(a => a.id === id);
+            if (!acc) return;
+            document.getElementById('modal-account').classList.remove('hidden');
+            document.getElementById('acc-id').value = String(acc.id);
+            document.getElementById('acc-name').value = acc.name;
+            document.getElementById('acc-type').value = acc.type;
+            document.getElementById('acc-balance').value = acc.balance;
+            document.getElementById('acc-modal-title').innerText = 'Modifica Conto';
+            document.getElementById('acc-submit').innerText = 'Salva Modifiche';
         }
 
         function closeModal(id) {
@@ -813,12 +837,22 @@
 
         function saveAccount(e) {
             e.preventDefault();
-            store.accounts.push({
-                id: Date.now(),
-                name: document.getElementById('acc-name').value,
-                type: document.getElementById('acc-type').value,
-                balance: parseFloat(document.getElementById('acc-balance').value)
-            });
+            const editId = document.getElementById('acc-id').value;
+            const name = document.getElementById('acc-name').value.trim();
+            const type = document.getElementById('acc-type').value;
+            const balance = parseFloat(String(document.getElementById('acc-balance').value).replace(',', '.'));
+            if (!name || isNaN(balance)) return;
+
+            if (editId) {
+                const acc = store.accounts.find(a => String(a.id) === editId);
+                if (acc) {
+                    acc.name = name;
+                    acc.type = type;
+                    acc.balance = Math.round(balance * 100) / 100;
+                }
+            } else {
+                store.accounts.push({ id: Date.now(), name: name, type: type, balance: Math.round(balance * 100) / 100 });
+            }
             saveData();
             closeModal('modal-account');
         }
