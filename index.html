@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Conti Chiari - Mobile Finance App</title>
     <meta name="apple-mobile-web-app-title" content="Conti Chiari">
+    <meta name="theme-color" content="#090d16">
+    <script>try { if (localStorage.getItem('cc_theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
     <!-- Tailwind CSS -->
@@ -57,6 +59,46 @@
         .tab-item-active i {
             transform: translateY(-2px) scale(1.1);
         }
+
+        /* ===== TEMA CHIARO (attivato dal pulsante in alto: classe "light" su <html>) ===== */
+        html.light { color-scheme: light; }
+        html.light, html.light body { background-color: #f1f5f9; color: #0f172a; }
+        html.light .bg-slate-950 { background-color: #f1f5f9; }
+        html.light .bg-slate-900 { background-color: #ffffff; }
+        html.light .bg-slate-900\/95 { background-color: rgba(255,255,255,0.95); }
+        html.light .bg-slate-900\/90 { background-color: rgba(255,255,255,0.92); }
+        html.light .bg-slate-900\/60 { background-color: rgba(255,255,255,0.75); }
+        html.light .bg-slate-800 { background-color: #f1f5f9; }
+        html.light .bg-slate-800\/50 { background-color: rgba(241,245,249,0.95); }
+        html.light .bg-slate-800\/40 { background-color: rgba(241,245,249,0.8); }
+        html.light .hover\:bg-slate-700:hover { background-color: #e2e8f0; }
+        html.light .bg-indigo-950\/60 { background-color: #e0e7ff; }
+        html.light .border-slate-800, html.light .border-slate-800\/80 { border-color: #e2e8f0; }
+        html.light .border-slate-700 { border-color: #cbd5e1; }
+        html.light .text-white { color: #0f172a; }
+        html.light .hover\:text-white:hover { color: #0f172a; }
+        html.light .text-slate-100 { color: #0f172a; }
+        html.light .text-slate-200 { color: #1e293b; }
+        html.light .text-slate-300 { color: #334155; }
+        html.light .text-slate-400, html.light .text-slate-500 { color: #64748b; }
+        html.light .text-indigo-300, html.light .text-indigo-400 { color: #4f46e5; }
+        html.light .text-indigo-400\/70 { color: rgba(79,70,229,0.7); }
+        html.light .text-emerald-400 { color: #059669; }
+        html.light .text-rose-400 { color: #e11d48; }
+        html.light .text-rose-400\/80 { color: rgba(225,29,72,0.8); }
+        html.light .text-amber-400 { color: #d97706; }
+        html.light .text-blue-400 { color: #2563eb; }
+        html.light .from-indigo-900\/80 { --tw-gradient-from: #c7d2fe; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(199,210,254,0)); }
+        html.light .from-indigo-950\/80 { --tw-gradient-from: #e0e7ff; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(224,231,255,0)); }
+        html.light .via-slate-900 { --tw-gradient-stops: var(--tw-gradient-from), #ffffff, var(--tw-gradient-to, rgba(255,255,255,0)); }
+        html.light .to-slate-900 { --tw-gradient-to: #ffffff; }
+        /* il testo bianco sui pulsanti colorati resta bianco */
+        html.light [class*="bg-indigo-600"].text-white,
+        html.light [class*="bg-emerald-600"].text-white,
+        html.light [class*="bg-emerald-500"].text-white,
+        html.light [class*="from-indigo-600"].text-white,
+        html.light [class*="from-emerald-600"].text-white { color: #ffffff; }
+        html.light .shadow-xl, html.light .shadow-sm, html.light .shadow-md { box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.06); }
     </style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
@@ -74,6 +116,11 @@
         </div>
 
         <div class="flex items-center space-x-2">
+            <!-- Tema chiaro / scuro -->
+            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Cambia tema" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2 w-9 h-9 rounded-xl text-xs flex items-center justify-center transition-all active:scale-95">
+                <i id="theme-icon" class="fa-solid fa-sun text-sm text-amber-400"></i>
+            </button>
+
             <!-- Backup & Restore Quick Button -->
             <button onclick="openModal('modal-backup')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-indigo-500/30 p-2.5 rounded-xl text-xs flex items-center justify-center transition-all active:scale-95">
                 <i class="fa-solid fa-database text-sm"></i>
@@ -1146,13 +1193,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                        legend: { position: 'bottom', labels: { color: ccIsLight() ? '#475569' : '#94a3b8', font: { size: 10 } } }
                     }
                 }
             });
         }
 
         let catChartInstance = null;
+        // ===== TEMA CHIARO / SCURO =====
+        function ccIsLight() { return document.documentElement.classList.contains('light'); }
+        function syncThemeUI() {
+            const light = ccIsLight();
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = 'fa-solid text-sm ' + (light ? 'fa-moon text-indigo-500' : 'fa-sun text-amber-400');
+            }
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', light ? '#f1f5f9' : '#090d16');
+        }
+        function toggleTheme() {
+            const next = ccIsLight() ? 'dark' : 'light';
+            document.documentElement.classList.toggle('light', next === 'light');
+            try { localStorage.setItem('cc_theme', next); } catch (e) {}
+            syncThemeUI();
+            updateAllViews(); // ridisegna i grafici con i colori del tema
+        }
+
         // ===== UTILITY =====
         const MESI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
         const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
@@ -1352,8 +1418,8 @@
 
         function renderAnalysisCharts() {
             if (typeof Chart === 'undefined') return;
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.borderColor = 'rgba(148,163,184,0.12)';
+            Chart.defaults.color = ccIsLight() ? '#475569' : '#94a3b8';
+            Chart.defaults.borderColor = ccIsLight() ? 'rgba(100,116,139,0.18)' : 'rgba(148,163,184,0.12)';
             Chart.defaults.font.family = 'Inter, sans-serif';
 
             // Periodo
@@ -1481,7 +1547,7 @@
                     type: 'bar',
                     data: { labels: goals.map(g => g.name), datasets: [
                         { label: 'Risparmiato', data: goals.map(g => Math.round(goalSaved(g) * 100) / 100), backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Obiettivo', data: goals.map(g => g.target), backgroundColor: '#334155', borderRadius: 6 }
+                        { label: 'Obiettivo', data: goals.map(g => g.target), backgroundColor: ccIsLight() ? '#cbd5e1' : '#334155', borderRadius: 6 }
                     ] },
                     options: Object.assign({}, common, { indexAxis: 'y', plugins: { legend: legend, tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.x) } } } })
                 });
@@ -1496,6 +1562,7 @@
         }
 
         window.onload = function() {
+            syncThemeUI();
             recordSnapshot();
             updateAllViews();
         };
