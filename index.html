@@ -117,6 +117,31 @@
                 </div>
             </div>
 
+            <!-- Conto Corrente e Contanti separati -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('carte-contanti')" class="bg-slate-900/90 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between cursor-pointer">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Conto Corrente</span>
+                        <i class="fa-solid fa-building-columns text-indigo-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-bank" class="text-lg font-bold text-white">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5 truncate">Saldo in banca</p>
+                    </div>
+                </div>
+
+                <div onclick="switchTab('carte-contanti')" class="bg-slate-900/90 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between cursor-pointer">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Contanti</span>
+                        <i class="fa-solid fa-money-bill-wave text-emerald-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-cash" class="text-lg font-bold text-white">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5 truncate">Cassa in mano</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- KPI Cards Grid (2x2 Mobile Responsive) -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between">
@@ -649,6 +674,10 @@
             document.getElementById('top-net-worth').innerText = `€ ${netWorth.toFixed(2)}`;
             document.getElementById('dash-total-net').innerText = `€ ${netWorth.toFixed(2)}`;
             document.getElementById('dash-liquid').innerText = `€ ${totalLiquid.toFixed(2)}`;
+            const totalBank = store.accounts.filter(a => a.type === 'Banca').reduce((acc, curr) => acc + curr.balance, 0);
+            const totalCash = store.accounts.filter(a => a.type === 'Cassa').reduce((acc, curr) => acc + curr.balance, 0);
+            document.getElementById('dash-bank').innerText = `€ ${totalBank.toFixed(2)}`;
+            document.getElementById('dash-cash').innerText = `€ ${totalCash.toFixed(2)}`;
             document.getElementById('dash-invested').innerText = `€ ${totalInvested.toFixed(2)}`;
             document.getElementById('dash-debt').innerText = `€ ${totalDebt.toFixed(2)}`;
 
