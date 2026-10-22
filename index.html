@@ -1,393 +1,407 @@
 <!DOCTYPE html>
-<html lang="it" class="h-full bg-slate-900 text-slate-100">
+<html lang="it" class="h-full bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conti Chiari - Dashboard Finanziaria Modulare</title>
-    <!-- Tailwind CSS CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Conti Chiari - Mobile Finance App</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js per Analisi e Grafici -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        ios: {
+                            bg: '#090d16',
+                            card: '#131b2e',
+                            border: '#1e293b',
+                            accent: '#6366f1'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbar for clean internal section views */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        /* Modern Mobile OS Enhancements & Safe Area Padding */
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .safe-top { padding-top: max(var(--sat), 12px); }
+        .safe-bottom { padding-bottom: max(var(--sab), 16px); }
+        .pb-safe-nav { padding-bottom: calc(75px + var(--sab)); }
+
+        /* Custom scrollbar handling */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Active Navigation Tab Bounce */
+        .tab-item-active i {
+            transform: translateY(-2px) scale(1.1);
+        }
     </style>
 </head>
-<body class="h-full flex flex-col md:flex-row overflow-hidden bg-slate-950 text-slate-100">
+<body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
 
-    <!-- SIDEBAR DI NAVIGAZIONE PER TABS -->
-    <aside class="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between shrink-0 z-20">
-        <div>
-            <!-- Header Brand -->
-            <div class="p-5 flex items-center justify-between border-b border-slate-800/60">
-                <div class="flex items-center space-x-3">
-                    <div class="p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
-                        <i class="fa-solid font-bold fa-wallet text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg text-white leading-none">Conti Chiari</h1>
-                        <span class="text-xs text-slate-400 font-medium">Finanze Personali</span>
-                    </div>
-                </div>
+    <!-- TOP MOBILE HEADER (iOS Dynamic Island Safe) -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 safe-top px-4 pb-3 flex items-center justify-between shrink-0 shadow-md">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                <i class="fa-solid fa-wallet text-sm"></i>
             </div>
-
-            <!-- Menù di Navigazione Tab -->
-            <nav class="p-3 space-y-1" id="main-nav">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-                    <i class="fa-solid fa-chart-pie text-lg w-5 text-center"></i>
-                    <span>Dashboard General</span>
-                </button>
-                <button onclick="switchTab('carte-contanti')" id="nav-carte-contanti" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-credit-card text-lg w-5 text-center"></i>
-                    <span>Carte & Contanti</span>
-                </button>
-                <button onclick="switchTab('investimenti')" id="nav-investimenti" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-arrow-trend-up text-lg w-5 text-center"></i>
-                    <span>Azioni & ETF</span>
-                </button>
-                <button onclick="switchTab('rateizzazioni')" id="nav-rateizzazioni" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-clock-rotate-left text-lg w-5 text-center"></i>
-                    <span>Klarna & Rate</span>
-                </button>
-                <button onclick="switchTab('transazioni')" id="nav-transazioni" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-list-check text-lg w-5 text-center"></i>
-                    <span>Movimenti</span>
-                </button>
-                <button onclick="switchTab('analisi')" id="nav-analisi" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-chart-line text-lg w-5 text-center"></i>
-                    <span>Grafici & Analytics</span>
-                </button>
-                <button onclick="switchTab('assistant')" id="nav-assistant" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all duration-150">
-                    <i class="fa-solid fa-robot text-lg w-5 text-center text-emerald-400"></i>
-                    <span>Assistente AI</span>
-                </button>
-            </nav>
+            <div>
+                <h1 class="font-bold text-base text-white leading-tight tracking-tight">Conti Chiari</h1>
+                <p id="header-subtitle" class="text-[11px] text-slate-400 font-medium">Panoramica Patrimoniale</p>
+            </div>
         </div>
 
-        <!-- Quick Action / Import Botton -->
-        <div class="p-4 border-t border-slate-800/60 space-y-2">
-            <button onclick="openTransactionModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 transition-all shadow-lg shadow-emerald-600/20">
-                <i class="fa-solid fa-plus"></i>
-                <span>Nuova Operazione</span>
+        <div class="flex items-center space-x-2">
+            <!-- Backup & Restore Quick Button -->
+            <button onclick="openModal('modal-backup')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-indigo-500/30 p-2.5 rounded-xl text-xs flex items-center justify-center transition-all active:scale-95">
+                <i class="fa-solid fa-database text-sm"></i>
             </button>
-        </div>
-    </aside>
 
-    <!-- AREA DI CONTENUTO PRINCIPALE (A SCHEDE ISOLATE) -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-950">
-        <!-- Top Bar con riassunto veloce -->
-        <header class="h-16 border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
-            <div id="section-title" class="text-base font-semibold text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-gauge text-indigo-400"></i>
-                <span>Dashboard Patrimoniale</span>
+            <!-- Total Quick Badge -->
+            <div class="bg-indigo-950/60 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-right">
+                <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Net Worth</span>
+                <span id="top-net-worth" class="text-xs font-extrabold text-emerald-400">€ 0.00</span>
             </div>
-            <!-- Quick Indicators -->
-            <div class="flex items-center space-x-6 text-sm">
-                <div>
-                    <span class="text-xs text-slate-400 block">Patrimonio Netto</span>
-                    <span id="top-net-worth" class="font-bold text-emerald-400">€ 0.00</span>
+        </div>
+    </header>
+
+    <!-- AREA PRINCIPALE ADATTA A SCHERMI MOBILE (Full Viewport without overflow break) -->
+    <main class="flex-1 overflow-y-auto px-4 pt-4 pb-safe-nav space-y-5">
+
+        <!-- 1. DASHBOARD OVERVIEW TAB -->
+        <section id="tab-dashboard" class="tab-content space-y-4">
+            <!-- Main Balance Card iOS Style -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-indigo-900/80 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-3xl p-5 shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Patrimonio Netto</span>
+                    <span class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i>In Salute
+                    </span>
                 </div>
-                <div class="h-8 w-px bg-slate-800"></div>
-                <div>
-                    <span class="text-xs text-slate-400 block">Disponibile</span>
-                    <span id="top-liquid" class="font-bold text-slate-200">€ 0.00</span>
+                
+                <h2 id="dash-total-net" class="text-3xl font-extrabold text-white tracking-tight">€ 0.00</h2>
+
+                <div class="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-800/80">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-medium block">Liquidità Disponibile</span>
+                        <span id="dash-liquid" class="text-sm font-bold text-emerald-400">€ 0.00</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-medium block">Investimenti Totali</span>
+                        <span id="dash-invested" class="text-sm font-bold text-blue-400">€ 0.00</span>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <!-- CONTENUTO DELLE SEZIONI (SWITCH SENZA CASCATA) -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-
-            <!-- 1. DASHBOARD PATRIMONIALE -->
-            <section id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Summary KPI Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Patrimonio Totale</p>
-                                <h3 id="dash-total-net" class="text-2xl font-bold text-white mt-1">€ 0.00</h3>
-                            </div>
-                            <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
-                                <i class="fa-solid fa-vault"></i>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-4 flex items-center gap-1">
-                            <i class="fa-solid fa-shield-halved text-indigo-400"></i> Liquido + Investimenti - Debiti
-                        </p>
+            <!-- KPI Cards Grid (2x2 Mobile Responsive) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Debiti / Rate</span>
+                        <i class="fa-solid fa-credit-card text-rose-400 text-xs"></i>
                     </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Liquidità Carte & Cassa</p>
-                                <h3 id="dash-liquid" class="text-2xl font-bold text-emerald-400 mt-1">€ 0.00</h3>
-                            </div>
-                            <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
-                                <i class="fa-solid fa-wallet"></i>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-4">Prontamente disponibile</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Portafoglio Investito</p>
-                                <h3 id="dash-invested" class="text-2xl font-bold text-blue-400 mt-1">€ 0.00</h3>
-                            </div>
-                            <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
-                                <i class="fa-solid fa-chart-line"></i>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-4" id="dash-invested-profit">Profit/Loss: € 0.00</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Debiti Residui (Klarna/Rate)</p>
-                                <h3 id="dash-debt" class="text-2xl font-bold text-rose-400 mt-1">€ 0.00</h3>
-                            </div>
-                            <span class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-                                <i class="fa-solid fa-scale-unbalanced"></i>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-4" id="dash-next-payment">Prossima rata: -</p>
-                    </div>
-                </div>
-
-                <!-- Dashboard Grid Layout -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Panoramica Grafico -->
-                    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="font-semibold text-slate-200">Ripartizione del Patrimonio</h2>
-                            <span class="text-xs text-slate-400">Aggiornato in tempo reale</span>
-                        </div>
-                        <div class="relative h-64 w-full">
-                            <canvas id="assetOverviewChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Attività Recenti Card -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="font-semibold text-slate-200">Ultimi Movimenti</h2>
-                            <button onclick="switchTab('transazioni')" class="text-xs text-indigo-400 hover:underline">Vedi Tutti</button>
-                        </div>
-                        <div class="space-y-3 flex-1 overflow-y-auto pr-1" id="dash-recent-list">
-                            <!-- Inserito dinamicamente -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. CARTE & CONTANTI -->
-            <section id="tab-carte-contanti" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-lg font-bold text-white">Saldi Conti, Carte & Contanti</h2>
-                        <p class="text-xs text-slate-400">Gestisci la tua liquidità e imposta i saldi dei tuoi conti</p>
+                        <h3 id="dash-debt" class="text-lg font-bold text-rose-400">€ 0.00</h3>
+                        <p id="dash-next-payment" class="text-[10px] text-slate-400 mt-0.5 truncate">Klarna & Finanziamenti</p>
                     </div>
-                    <button onclick="openAccountModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Aggiungi Conto/Carta
-                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="accounts-grid">
-                    <!-- Carte e conti inseriti dinamicamente via JS -->
-                </div>
-            </section>
-
-            <!-- 3. PORTAFOGLIO AZIONI & ETF -->
-            <section id="tab-investimenti" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Profit / Loss Titoli</span>
+                        <i class="fa-solid fa-chart-line text-indigo-400 text-xs"></i>
+                    </div>
                     <div>
-                        <h2 class="text-lg font-bold text-white">Portafoglio Titoli & ETF</h2>
-                        <p class="text-xs text-slate-400">Monitoraggio investimenti e rendimento medio</p>
-                    </div>
-                    <button onclick="openAssetModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Aggiungi Asset
-                    </button>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-300">
-                            <thead class="bg-slate-800/50 text-slate-400 uppercase text-xs font-semibold">
-                                <tr>
-                                    <th class="p-4">Strumento</th>
-                                    <th class="p-4">Quantità</th>
-                                    <th class="p-4">Prezzo Medio d'Acquisto</th>
-                                    <th class="p-4">Valore Attuale</th>
-                                    <th class="p-4">Profit/Loss</th>
-                                    <th class="p-4 text-right">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="assets-table-body" class="divide-y divide-slate-800/60">
-                                <!-- Righe Asset via JS -->
-                            </tbody>
-                        </table>
+                        <h3 id="dash-invested-profit" class="text-lg font-bold text-slate-200">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Rendimento totale</p>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- 4. KLARNA & FINANZIAMENTI RATEALI -->
-            <section id="tab-rateizzazioni" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-lg font-bold text-white">Piani Rateali & Finanziamenti</h2>
-                        <p class="text-xs text-slate-400">Traccia le scadenze dei tuoi acquisti a rate (Klarna, PayPal, ecc.)</p>
-                    </div>
-                    <button onclick="openInstallmentModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nuova Rata
-                    </button>
+            <!-- Donut Chart Asset Allocation -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Distribuzione Patrimonio</h3>
+                <div class="relative h-48 w-full flex items-center justify-center">
+                    <canvas id="assetOverviewChart"></canvas>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="installments-grid">
-                    <!-- Piani di rateizzazione inseriti dinamicamente -->
+            <!-- Ultimi Movimenti -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Ultimi Movimenti</h3>
+                    <button onclick="switchTab('transazioni')" class="text-xs text-indigo-400 font-semibold active:opacity-75">Vedi tutti</button>
                 </div>
-            </section>
-
-            <!-- 5. CATEGORIE & TRANSAZIONI -->
-            <section id="tab-transazioni" class="tab-content hidden space-y-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-white">Registro Movimenti</h2>
-                        <p class="text-xs text-slate-400">Storico completo delle entrate e uscite</p>
-                    </div>
-                    <!-- Filtri rapidi -->
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="search-tx" oninput="filterTransactions()" placeholder="Cerca movimento..." class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 w-48">
-                        <select id="filter-type" onchange="filterTransactions()" class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
-                            <option value="ALL font-bold">Tutti i tipi</option>
-                            <option value="Uscita">Uscita</option>
-                            <option value="Entrata">Entrata</option>
-                        </select>
-                    </div>
+                <div id="dash-recent-list" class="space-y-2.5">
+                    <!-- Inseriti via Javascript -->
                 </div>
+            </div>
+        </section>
 
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-300">
-                            <thead class="bg-slate-800/50 text-slate-400 uppercase text-xs font-semibold">
-                                <tr>
-                                    <th class="p-4">Data</th>
-                                    <th class="p-4">Descrizione</th>
-                                    <th class="p-4">Categoria</th>
-                                    <th class="p-4">Conto</th>
-                                    <th class="p-4">Importo</th>
-                                    <th class="p-4 text-right">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactions-table-body" class="divide-y divide-slate-800/60">
-                                <!-- Contenuto movimenti generato da JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. GRAFICI & ANALISI -->
-            <section id="tab-analisi" class="tab-content hidden space-y-6">
+        <!-- 2. CARTE & CONTANTI -->
+        <section id="tab-carte-contanti" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Analisi Finanziaria Avanzata</h2>
-                    <p class="text-xs text-slate-400">Visualizza graficamente l'andamento del tuo budget</p>
+                    <h2 class="text-base font-bold text-white">Saldi & Conti</h2>
+                    <p class="text-[11px] text-slate-400">Conti Correnti, Carte di Credito e Cassa</p>
+                </div>
+                <button onclick="openModal('modal-account')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Nuovo</span>
+                </button>
+            </div>
+
+            <div id="accounts-grid" class="space-y-3">
+                <!-- Generato da JS -->
+            </div>
+        </section>
+
+        <!-- 3. AZIONI & ETF -->
+        <section id="tab-investimenti" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white">Titoli & ETF</h2>
+                    <p class="text-[11px] text-slate-400">Monitora i tuoi investimenti di lungo termine</p>
+                </div>
+                <button onclick="openModal('modal-asset')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Aggiungi</span>
+                </button>
+            </div>
+
+            <div id="assets-mobile-list" class="space-y-3">
+                <!-- Generato da JS per Mobile -->
+            </div>
+        </section>
+
+        <!-- 4. KLARNA & RATE -->
+        <section id="tab-rateizzazioni" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white">Rateizzazioni & Debiti</h2>
+                    <p class="text-[11px] text-slate-400">Klarna, PayPal e finanziamenti in corso</p>
+                </div>
+                <button onclick="openModal('modal-installment')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Nuova Rata</span>
+                </button>
+            </div>
+
+            <div id="installments-grid" class="space-y-3">
+                <!-- Generato da JS -->
+            </div>
+        </section>
+
+        <!-- 5. MOVIMENTI & REGISTRO -->
+        <section id="tab-transazioni" class="tab-content hidden space-y-4">
+            <div class="flex flex-col space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-bold text-white">Registro Movimenti</h2>
+                        <p class="text-[11px] text-slate-400">Storico uscite ed entrate</p>
+                    </div>
+                    <button onclick="openModal('modal-transaction')" class="bg-emerald-600 active:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-emerald-600/20">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Aggiungi</span>
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                        <h3 class="text-sm font-semibold text-slate-300 mb-4">Spese per Categoria</h3>
-                        <div class="h-64 relative">
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                    </div>
+                <!-- Filtri Mobile -->
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="search-tx" oninput="filterTransactions()" placeholder="Cerca movimento..." class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
+                    <select id="filter-type" onchange="filterTransactions()" class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
+                        <option value="ALL">Tutti i Tipi</option>
+                        <option value="Uscita">Uscite</option>
+                        <option value="Entrata">Entrate</option>
+                    </select>
+                </div>
+            </div>
 
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                        <h3 class="text-sm font-semibold text-slate-300 mb-4">Entrate vs Uscite</h3>
-                        <div class="h-64 relative">
-                            <canvas id="cashflowChart"></canvas>
+            <div id="transactions-mobile-list" class="space-y-2.5">
+                <!-- Generato da JS -->
+            </div>
+        </section>
+
+        <!-- 6. ANALISI & GRAFICI -->
+        <section id="tab-analisi" class="tab-content hidden space-y-4">
+            <div>
+                <h2 class="text-base font-bold text-white">Analytics & Grafici</h2>
+                <p class="text-[11px] text-slate-400">Analisi visiva del tuo bilancio</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Spese per Categoria</h3>
+                <div class="h-56 relative">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. ASSISTENTE AI -->
+        <section id="tab-assistant" class="tab-content hidden space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[70vh] max-h-[520px] overflow-hidden shadow-lg">
+                <div class="p-3 border-b border-slate-800 bg-slate-800/40 flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xs text-white">Assistente Finanziario AI</h3>
+                        <p class="text-[10px] text-slate-400">Analisi predittiva e suggerimenti</p>
+                    </div>
+                </div>
+
+                <div id="chat-box" class="flex-1 p-3 overflow-y-auto space-y-3">
+                    <div class="flex items-start space-x-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
+                        <div class="bg-slate-800 border border-slate-700/60 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed max-w-[85%]">
+                            Ciao! Sono il tuo assistente **Conti Chiari**. Chiedimi qualsiasi cosa sul tuo patrimonio, sui tuoi risparmi o sull'estinzione delle tue rate!
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- 7. ASSISTENTE AI / CHATBOT -->
-            <section id="tab-assistant" class="tab-content hidden space-y-6">
-                <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl flex flex-col h-[600px] overflow-hidden">
-                    <div class="p-4 border-b border-slate-800 bg-slate-800/30 flex items-center space-x-3">
-                        <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                            <i class="fa-solid fa-robot text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-sm text-white">Assistente Finanziario AI</h3>
-                            <p class="text-xs text-slate-400">Analizza i tuoi dati e ti dà consigli su misura</p>
-                        </div>
-                    </div>
-
-                    <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold">AI</div>
-                            <div class="bg-slate-800 border border-slate-700/60 p-3 rounded-2xl text-xs text-slate-200 max-w-[80%]">
-                                Ciao! Sono il tuo assistente Conti Chiari. Posso analizzare le tue spese, dirti quanto puoi risparmiare questo mese o consigliarti su come gestire i tuoi debiti a rate. Chiedimi pure!
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3 border-t border-slate-800 bg-slate-900/80 flex items-center space-x-2">
-                        <input type="text" id="chat-input" placeholder="Scrivi un messaggio o chiedi un'analisi..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-                        <button onclick="sendChatMessage()" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl transition-all">
-                            <i class="fa-solid fa-paper-plane text-xs px-1"></i>
-                        </button>
-                    </div>
+                <div class="p-2.5 border-t border-slate-800 bg-slate-900/90 flex items-center space-x-2">
+                    <input type="text" id="chat-input" placeholder="Scrivi una domanda..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <button onclick="sendChatMessage()" class="bg-emerald-600 active:bg-emerald-500 text-white p-2 rounded-xl transition-all shadow-md shadow-emerald-600/20">
+                        <i class="fa-solid fa-paper-plane text-xs px-1"></i>
+                    </button>
                 </div>
-            </section>
+            </div>
+        </section>
 
-        </div>
     </main>
 
-    <!-- MODALE MODULARE: NUOVA TRANSAZIONE -->
-    <div id="modal-transaction" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
-            <button onclick="closeModal('modal-transaction')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <h3 class="text-base font-bold text-white mb-4">Nuova Transazione</h3>
+    <!-- FLOATING ACTION BUTTON (FAB) PER AGGIUNTA RAPIDA -->
+    <button onclick="openModal('modal-transaction')" class="fixed bottom-20 right-5 z-40 bg-gradient-to-tr from-emerald-600 to-emerald-400 active:scale-95 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-600/30 flex items-center justify-center text-lg transition-transform">
+        <i class="fa-solid fa-plus"></i>
+    </button>
 
-            <form id="form-transaction" onsubmit="saveTransaction(event)" class="space-y-4">
+    <!-- BOTTOM NAVIGATION BAR STYLE iOS FOR IPHONE 17 PRO -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-2xl border-t border-slate-800/80 safe-bottom px-2 pt-2 pb-1 flex justify-around items-center text-center">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-item flex-1 py-1 text-indigo-400 tab-item-active transition-all">
+            <i class="fa-solid fa-chart-pie text-lg block mx-auto"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">Home</span>
+        </button>
+
+        <button onclick="switchTab('carte-contanti')" id="nav-carte-contanti" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-wallet text-lg block mx-auto"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">Conti</span>
+        </button>
+
+        <button onclick="switchTab('investimenti')" id="nav-investimenti" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-arrow-trend-up text-lg block mx-auto"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">Titoli</span>
+        </button>
+
+        <button onclick="switchTab('rateizzazioni')" id="nav-rateizzazioni" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-clock-rotate-left text-lg block mx-auto"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">Rate</span>
+        </button>
+
+        <button onclick="switchTab('transazioni')" id="nav-transazioni" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-list-check text-lg block mx-auto"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">Movimenti</span>
+        </button>
+
+        <button onclick="switchTab('assistant')" id="nav-assistant" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-robot text-lg block mx-auto text-emerald-400"></i>
+            <span class="text-[10px] font-medium tracking-tight block mt-1">AI</span>
+        </button>
+    </nav>
+
+
+    <!-- MODALE BACKUP E RIPRISTINO DATA (JSON) -->
+    <div id="modal-backup" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-database text-indigo-400"></i>
+                    <h3 class="text-sm font-bold text-white">Gestione Backup JSON</h3>
+                </div>
+                <button onclick="closeModal('modal-backup')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- CARICA JSON -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-300"> Ripristina Dati da File JSON</label>
+                <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-4 text-center cursor-pointer bg-slate-800/40" onclick="document.getElementById('json-file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-2"></i>
+                    <p class="text-xs text-slate-300 font-medium">Tocca qui per caricare il file .json</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Sostituirà il database locale in uso</p>
+                    <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSONBackup(event)">
+                </div>
+            </div>
+
+            <div class="h-px bg-slate-800"></div>
+
+            <!-- ESPORTA / SCARICA BACKUP -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-300"> Esporta / Salva Backup</label>
+                <button onclick="exportJSONBackup()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download text-indigo-400"></i>
+                    <span>Scarica File Backup JSON</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE NUOVA TRANSAZIONE -->
+    <div id="modal-transaction" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Aggiungi Movimento</h3>
+                <button onclick="closeModal('modal-transaction')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveTransaction(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Tipo</label>
-                    <select id="tx-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipo</label>
+                    <select id="tx-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                         <option value="Uscita">Uscita / Spesa</option>
                         <option value="Entrata">Entrata / Guadagno</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Descrizione</label>
-                    <input type="text" id="tx-desc" required placeholder="Es. Spesa Supermercato" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Descrizione</label>
+                    <input type="text" id="tx-desc" required placeholder="Es. Spesa, Benzina..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Importo (€)</label>
-                        <input type="number" step="0.01" id="tx-amount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" id="tx-amount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Data</label>
-                        <input type="date" id="tx-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Data</label>
+                        <input type="date" id="tx-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Categoria</label>
-                    <select id="tx-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Categoria</label>
+                    <select id="tx-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
                         <option value="Alimentari">Alimentari</option>
                         <option value="Casa">Casa & Bollette</option>
                         <option value="Trasporti">Trasporti & Auto</option>
@@ -396,21 +410,81 @@
                         <option value="Altro">Altro</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl text-xs transition-all mt-2">
-                    Salva Transazione
+                <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs transition-all shadow-lg shadow-emerald-600/20 mt-2">
+                    Salva Operazione
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- LOGICA JASCROPT INTEGRATA E COMPLETA -->
+    <!-- MODALI SECONDARIE AGGIUNTIVE -->
+    <div id="modal-account" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Nuovo Conto / Carta</h3>
+                <button onclick="closeModal('modal-account')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveAccount(event)" class="space-y-3">
+                <input type="text" id="acc-name" required placeholder="Nome Conto (es. Revolut)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <select id="acc-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <option value="Banca">Banca / Conto Corrente</option>
+                    <option value="Carta">Carta Ricaricabile</option>
+                    <option value="Cassa">Contanti / Cassa</option>
+                </select>
+                <input type="number" step="0.01" id="acc-balance" required placeholder="Saldo Iniziale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Conto</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Aggiungi Titolo / ETF</h3>
+                <button onclick="closeModal('modal-asset')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveAsset(event)" class="space-y-3">
+                <input type="text" id="ast-name" required placeholder="Nome Strumento (es. VWCE, AAPL)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.0001" id="ast-qty" required placeholder="Quantità" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="number" step="0.01" id="ast-buy" required placeholder="Prezzo d'Acquisto (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <input type="number" step="0.01" id="ast-current" required placeholder="Prezzo Attuale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Salva Titolo</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-installment" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Nuova Rata / Klarna</h3>
+                <button onclick="closeModal('modal-installment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveInstallment(event)" class="space-y-3">
+                <input type="text" id="inst-name" required placeholder="Descrizione Acquisto" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" id="inst-total" required placeholder="Importo Totale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="number" step="0.01" id="inst-remaining" required placeholder="Debito Residuo (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" id="inst-monthly" required placeholder="Rata Mensile (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="date" id="inst-next" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Rata</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JS APPLICATION LOGIC -->
     <script>
-        // STORE / STATO DELL'APPLICAZIONE (con persistenza LocalStorage)
-        const store = {
+        // STORE DATI LOCALI (Con Default Fallback)
+        let store = {
             accounts: JSON.parse(localStorage.getItem('cc_accounts')) || [
-                { id: 1, name: 'Conto Corrente Principale', type: 'Banca', balance: 2450.00 },
-                { id: 2, name: 'Carta Revolut', type: 'Carta', balance: 320.50 },
-                { id: 3, name: 'Contanti Wallet', type: 'Cassa', balance: 85.00 }
+                { id: 1, name: 'Conto Corrente', type: 'Banca', balance: 2450.00 },
+                { id: 2, name: 'Revolut', type: 'Carta', balance: 320.50 },
+                { id: 3, name: 'Contanti', type: 'Cassa', balance: 85.00 }
             ],
             assets: JSON.parse(localStorage.getItem('cc_assets')) || [
                 { id: 1, name: 'VWCE ETF World', qty: 15, buyPrice: 102.50, currentPrice: 118.20 },
@@ -420,12 +494,11 @@
                 { id: 1, name: 'Smartphone Klarna', total: 600.00, remaining: 200.00, monthly: 50.00, nextDate: '2026-11-15' }
             ],
             transactions: JSON.parse(localStorage.getItem('cc_transactions')) || [
-                { id: 1, date: '2026-10-20', desc: 'Spesa Esselunga', type: 'Uscita', category: 'Alimentari', amount: 64.50, account: 'Carta Revolut' },
-                { id: 2, date: '2026-10-18', desc: 'Stipendio Mese', type: 'Entrata', category: 'Stipendio', amount: 1850.00, account: 'Conto Corrente Principale' }
+                { id: 1, date: '2026-10-20', desc: 'Spesa Esselunga', type: 'Uscita', category: 'Alimentari', amount: 64.50, account: 'Revolut' },
+                { id: 2, date: '2026-10-18', desc: 'Stipendio Mese', type: 'Entrata', category: 'Stipendio', amount: 1850.00, account: 'Conto Corrente' }
             ]
         };
 
-        // Salva dati nel LocalStorage
         function saveData() {
             localStorage.setItem('cc_accounts', JSON.stringify(store.accounts));
             localStorage.setItem('cc_assets', JSON.stringify(store.assets));
@@ -434,31 +507,25 @@
             updateAllViews();
         }
 
-        // NAVIGAZIONE A TAB (EVITA L'EFFETTO A CASCATA)
+        // NAVIGATION LOGIC FOR MOBILE TABS
         function switchTab(tabId) {
-            // Nascondi tutte le sezioni
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // Rimuovi lo stato attivo da tutti i pulsanti del menù
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+            document.querySelectorAll('.tab-item').forEach(btn => {
+                btn.classList.remove('text-indigo-400', 'tab-item-active');
                 btn.classList.add('text-slate-400');
             });
 
-            // Mostra la sezione selezionata
             const target = document.getElementById(`tab-${tabId}`);
             if(target) target.classList.remove('hidden');
 
-            // Evidenzia il pulsante attivo
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if(activeBtn) {
-                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+                activeBtn.classList.add('text-indigo-400', 'tab-item-active');
                 activeBtn.classList.remove('text-slate-400');
             }
 
-            // Update title header
-            const titles = {
-                'dashboard': 'Dashboard Patrimoniale',
+            const subtitles = {
+                'dashboard': 'Panoramica Patrimoniale',
                 'carte-contanti': 'Saldi Conti & Carte',
                 'investimenti': 'Portafoglio Azioni & ETF',
                 'rateizzazioni': 'Finanziamenti & Klarna',
@@ -466,133 +533,160 @@
                 'analisi': 'Grafici & Analytics',
                 'assistant': 'Assistente Finanziario AI'
             };
-            document.getElementById('section-title').querySelector('span').innerText = titles[tabId] || 'Dashboard';
-            
-            // Re-render charts when switching to analysis tab
+            document.getElementById('header-subtitle').innerText = subtitles[tabId] || 'Mobile Finance';
+
             if(tabId === 'analisi') renderAnalysisCharts();
         }
 
-        // CALCOLI E AGGIORNAMENTO INTERFACCIA
+        // CARICAMENTO E SALVATAGGIO JSON BACKUP
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `conti-chiari-backup-${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importJSONBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.accounts && importedData.transactions) {
+                        store = importedData;
+                        saveData();
+                        closeModal('modal-backup');
+                        alert(' Backup caricato con successo!');
+                    } else {
+                        alert(' Errore: Il file JSON caricato non è nel formato corretto di Conti Chiari.');
+                    }
+                } catch (err) {
+                    alert(' File JSON non valido o danneggiato.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // AGGIORNAMENTO INTERFACCIA
         function updateAllViews() {
-            // 1. Calcoli Saldi
             const totalLiquid = store.accounts.reduce((acc, curr) => acc + curr.balance, 0);
             const totalInvested = store.assets.reduce((acc, curr) => acc + (curr.qty * curr.currentPrice), 0);
             const totalDebt = store.installments.reduce((acc, curr) => acc + curr.remaining, 0);
             const netWorth = totalLiquid + totalInvested - totalDebt;
 
-            // Update Top Bar KPI
             document.getElementById('top-net-worth').innerText = `€ ${netWorth.toFixed(2)}`;
-            document.getElementById('top-liquid').innerText = `€ ${totalLiquid.toFixed(2)}`;
-
-            // Update Dashboard KPI Cards
             document.getElementById('dash-total-net').innerText = `€ ${netWorth.toFixed(2)}`;
             document.getElementById('dash-liquid').innerText = `€ ${totalLiquid.toFixed(2)}`;
             document.getElementById('dash-invested').innerText = `€ ${totalInvested.toFixed(2)}`;
             document.getElementById('dash-debt').innerText = `€ ${totalDebt.toFixed(2)}`;
 
-            // Profit/Loss Investimenti
             const investedCost = store.assets.reduce((acc, curr) => acc + (curr.qty * curr.buyPrice), 0);
             const profit = totalInvested - investedCost;
-            document.getElementById('dash-invested-profit').innerText = `Profit/Loss: € ${profit >= 0 ? '+' : ''}${profit.toFixed(2)}`;
+            document.getElementById('dash-invested-profit').innerText = `${profit >= 0 ? '+' : ''}€ ${profit.toFixed(2)}`;
 
-            // Ultimi movimenti in dashboard
+            // Movimenti recenti
             const recentContainer = document.getElementById('dash-recent-list');
             recentContainer.innerHTML = '';
-            store.transactions.slice(0, 5).forEach(tx => {
+            store.transactions.slice(0, 4).forEach(tx => {
                 recentContainer.innerHTML += `
-                    <div class="flex justify-between items-center p-2.5 bg-slate-800/40 rounded-xl text-xs">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 ${tx.type === 'Entrata' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} rounded-lg">
-                                <i class="fa-solid ${tx.type === 'Entrata' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                    <div class="flex justify-between items-center p-2.5 bg-slate-800/40 rounded-xl text-xs border border-slate-800">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-7 h-7 rounded-lg ${tx.type === 'Entrata' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center shrink-0">
+                                <i class="fa-solid ${tx.type === 'Entrata' ? 'fa-arrow-down' : 'fa-arrow-up'} text-[10px]"></i>
                             </div>
                             <div>
-                                <p class="font-medium text-slate-200">${tx.desc}</p>
-                                <span class="text-[10px] text-slate-400">${tx.date} • ${tx.category}</span>
+                                <p class="font-semibold text-slate-200 text-xs">${tx.desc}</p>
+                                <span class="text-[9px] text-slate-400">${tx.date} • ${tx.category}</span>
                             </div>
                         </div>
-                        <span class="font-bold ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
+                        <span class="font-bold text-xs ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
                             ${tx.type === 'Entrata' ? '+' : '-'}€ ${tx.amount.toFixed(2)}
                         </span>
                     </div>
                 `;
             });
 
-            // Tabella Carte / Conti
+            // Conti Mobile Card
             const accGrid = document.getElementById('accounts-grid');
             accGrid.innerHTML = '';
             store.accounts.forEach(acc => {
                 accGrid.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400 font-medium">${acc.type}</span>
-                            <i class="fa-solid fa-credit-card text-slate-500"></i>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                                <i class="fa-solid fa-credit-card text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">${acc.name}</h4>
+                                <span class="text-[10px] text-slate-400">${acc.type}</span>
+                            </div>
                         </div>
-                        <div class="my-3">
-                            <h4 class="text-sm font-semibold text-slate-200">${acc.name}</h4>
-                            <p class="text-xl font-bold text-white mt-1">€ ${acc.balance.toFixed(2)}</p>
+                        <div class="text-right">
+                            <span class="text-sm font-extrabold text-white">€ ${acc.balance.toFixed(2)}</span>
+                            <button onclick="deleteAccount(${acc.id})" class="block ml-auto text-[10px] text-rose-400/80 mt-0.5"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             });
 
-            // Tabella Investimenti
-            const assetsTable = document.getElementById('assets-table-body');
-            assetsTable.innerHTML = '';
+            // Assets Mobile List
+            const assetsList = document.getElementById('assets-mobile-list');
+            assetsList.innerHTML = '';
             store.assets.forEach(ast => {
                 const totalVal = ast.qty * ast.currentPrice;
                 const gain = totalVal - (ast.qty * ast.buyPrice);
-                assetsTable.innerHTML += `
-                    <tr class="hover:bg-slate-800/30">
-                        <td class="p-4 font-semibold text-slate-200">${ast.name}</td>
-                        <td class="p-4">${ast.qty}</td>
-                        <td class="p-4">€ ${ast.buyPrice.toFixed(2)}</td>
-                        <td class="p-4 font-bold text-white">€ ${ast.currentPrice.toFixed(2)}</td>
-                        <td class="p-4 font-bold ${gain >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
-                            ${gain >= 0 ? '+' : ''}€ ${gain.toFixed(2)}
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="deleteAsset(${ast.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
+                assetsList.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-200">${ast.name}</h4>
+                            <span class="text-xs font-extrabold text-white">€ ${totalVal.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-400">
+                            <span>Qta: ${ast.qty} • Prezzo: € ${ast.currentPrice.toFixed(2)}</span>
+                            <span class="font-bold ${gain >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                                ${gain >= 0 ? '+' : ''}€ ${gain.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
                 `;
             });
 
-            // Piani Rateali Grid
+            // Rate List
             const instGrid = document.getElementById('installments-grid');
             instGrid.innerHTML = '';
             store.installments.forEach(inst => {
                 instGrid.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
                         <div class="flex justify-between items-start">
-                            <h4 class="font-semibold text-slate-200 text-sm">${inst.name}</h4>
-                            <span class="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-md font-medium">Rata: € ${inst.monthly}/mo</span>
+                            <h4 class="font-bold text-slate-200 text-xs">${inst.name}</h4>
+                            <span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-md font-semibold">€ ${inst.monthly}/mese</span>
                         </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-xs text-slate-400">
-                                <span>Residuo</span>
-                                <span>€ ${inst.remaining.toFixed(2)} / € ${inst.total.toFixed(2)}</span>
-                            </div>
-                            <div class="w-full bg-slate-800 rounded-full h-2">
-                                <div class="bg-indigo-500 h-2 rounded-full" style="width: ${((inst.total - inst.remaining)/inst.total)*100}%"></div>
-                            </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-indigo-500 h-1.5 rounded-full" style="width: ${((inst.total - inst.remaining)/inst.total)*100}%"></div>
                         </div>
-                        <p class="text-[11px] text-slate-400">Prossima scadenza: <span class="text-slate-200 font-medium">${inst.nextDate}</span></p>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>Residuo: € ${inst.remaining.toFixed(2)}</span>
+                            <span>Scadenza: ${inst.nextDate}</span>
+                        </div>
                     </div>
                 `;
             });
 
-            // Tabella Transazioni
-            renderTransactionsTable();
+            renderTransactionsList();
             renderOverviewChart();
         }
 
-        // TABELLA TRANSAZIONI E FILTRI
-        function renderTransactionsTable() {
-            const tbody = document.getElementById('transactions-table-body');
+        function renderTransactionsList() {
+            const container = document.getElementById('transactions-mobile-list');
             const search = document.getElementById('search-tx')?.value.toLowerCase() || '';
             const filterType = document.getElementById('filter-type')?.value || 'ALL';
 
-            tbody.innerHTML = '';
+            container.innerHTML = '';
             store.transactions
                 .filter(tx => {
                     const matchSearch = tx.desc.toLowerCase().includes(search) || tx.category.toLowerCase().includes(search);
@@ -600,31 +694,35 @@
                     return matchSearch && matchType;
                 })
                 .forEach(tx => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-800/30">
-                            <td class="p-4 text-xs text-slate-400">${tx.date}</td>
-                            <td class="p-4 font-medium text-slate-200">${tx.desc}</td>
-                            <td class="p-4"><span class="bg-slate-800 px-2.5 py-1 rounded-lg text-xs">${tx.category}</span></td>
-                            <td class="p-4 text-xs text-slate-400">${tx.account || 'Principale'}</td>
-                            <td class="p-4 font-bold ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
-                                ${tx.type === 'Entrata' ? '+' : '-'}€ ${tx.amount.toFixed(2)}
-                            </td>
-                            <td class="p-4 text-right">
-                                <button onclick="deleteTx(${tx.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
+                    container.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex justify-between items-center shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-xl ${tx.type === 'Entrata' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center shrink-0">
+                                    <i class="fa-solid ${tx.type === 'Entrata' ? 'fa-arrow-down' : 'fa-arrow-up'} text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-xs text-slate-200">${tx.desc}</p>
+                                    <p class="text-[10px] text-slate-400">${tx.date} • ${tx.category}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-xs ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
+                                    ${tx.type === 'Entrata' ? '+' : '-'}€ ${tx.amount.toFixed(2)}
+                                </span>
+                                <button onclick="deleteTx(${tx.id})" class="block ml-auto text-[10px] text-slate-500 hover:text-rose-400 mt-0.5"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
                     `;
                 });
         }
 
         function filterTransactions() {
-            renderTransactionsTable();
+            renderTransactionsList();
         }
 
-        // GESTIONE MODALE TRANSAZIONI
-        function openTransactionModal() {
-            document.getElementById('modal-transaction').classList.remove('hidden');
-            document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'modal-transaction') document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
         }
 
         function closeModal(id) {
@@ -640,28 +738,56 @@
                 amount: parseFloat(document.getElementById('tx-amount').value),
                 date: document.getElementById('tx-date').value,
                 category: document.getElementById('tx-category').value,
-                account: 'Conto Corrente'
+                account: 'Conto'
             };
-            
             store.transactions.unshift(newTx);
-            
-            // Aggiorna saldo conto di riferimento
-            if(store.accounts.length > 0) {
-                if(newTx.type === 'Entrata') store.accounts[0].balance += newTx.amount;
-                else store.accounts[0].balance -= newTx.amount;
-            }
-
             saveData();
             closeModal('modal-transaction');
-            document.getElementById('form-transaction').reset();
         }
 
-        function deleteTx(id) {
-            store.transactions = store.transactions.filter(t => t.id !== id);
+        function saveAccount(e) {
+            e.preventDefault();
+            store.accounts.push({
+                id: Date.now(),
+                name: document.getElementById('acc-name').value,
+                type: document.getElementById('acc-type').value,
+                balance: parseFloat(document.getElementById('acc-balance').value)
+            });
             saveData();
+            closeModal('modal-account');
         }
 
-        // GRAFICI CHART.JS
+        function saveAsset(e) {
+            e.preventDefault();
+            store.assets.push({
+                id: Date.now(),
+                name: document.getElementById('ast-name').value,
+                qty: parseFloat(document.getElementById('ast-qty').value),
+                buyPrice: parseFloat(document.getElementById('ast-buy').value),
+                currentPrice: parseFloat(document.getElementById('ast-current').value)
+            });
+            saveData();
+            closeModal('modal-asset');
+        }
+
+        function saveInstallment(e) {
+            e.preventDefault();
+            store.installments.push({
+                id: Date.now(),
+                name: document.getElementById('inst-name').value,
+                total: parseFloat(document.getElementById('inst-total').value),
+                remaining: parseFloat(document.getElementById('inst-remaining').value),
+                monthly: parseFloat(document.getElementById('inst-monthly').value),
+                nextDate: document.getElementById('inst-next').value
+            });
+            saveData();
+            closeModal('modal-installment');
+        }
+
+        function deleteTx(id) { store.transactions = store.transactions.filter(t => t.id !== id); saveData(); }
+        function deleteAccount(id) { store.accounts = store.accounts.filter(a => a.id !== id); saveData(); }
+
+        // CHARTS
         let overviewChartInstance = null;
         function renderOverviewChart() {
             const ctx = document.getElementById('assetOverviewChart')?.getContext('2d');
@@ -675,10 +801,10 @@
             overviewChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Liquidità Carte/Contanti', 'Portafoglio Investimenti'],
+                    labels: ['Liquidità', 'Investimenti'],
                     datasets: [{
                         data: [totalLiquid, totalInvested],
-                        backgroundColor: ['#10b981', '#3b82f6'],
+                        backgroundColor: ['#10b981', '#6366f1'],
                         borderWidth: 0
                     }]
                 },
@@ -686,16 +812,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
                     }
                 }
             });
         }
 
         let catChartInstance = null;
-        let cfChartInstance = null;
         function renderAnalysisCharts() {
-            // Grafico Spese per Categoria
             const ctxCat = document.getElementById('categoryChart')?.getContext('2d');
             if(ctxCat) {
                 if(catChartInstance) catChartInstance.destroy();
@@ -704,7 +828,7 @@
                     data: {
                         labels: ['Alimentari', 'Casa', 'Trasporti', 'Svago'],
                         datasets: [{
-                            label: 'Uscite (€)',
+                            label: 'Spese (€)',
                             data: [120, 340, 80, 150],
                             backgroundColor: '#6366f1'
                         }]
@@ -719,18 +843,16 @@
             }
         }
 
-        // SIMULATORE CHATBOT ASSISTENTE AI
+        // CHATBOT ASSISTANT
         function sendChatMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if(!text) return;
 
             const chatBox = document.getElementById('chat-box');
-            
-            // Messaggio Utente
             chatBox.innerHTML += `
-                <div class="flex items-start justify-end space-x-3">
-                    <div class="bg-indigo-600 text-white p-3 rounded-2xl text-xs max-w-[80%]">
+                <div class="flex items-start justify-end space-x-2">
+                    <div class="bg-indigo-600 text-white p-2.5 rounded-2xl rounded-tr-none text-xs max-w-[85%]">
                         ${text}
                     </div>
                 </div>
@@ -738,30 +860,19 @@
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Risposta automatica AI simulata
             setTimeout(() => {
-                const totalDebt = store.installments.reduce((acc, curr) => acc + curr.remaining, 0);
-                let reply = "Ho analizzato la tua richiesta. I tuoi conti sono in buona salute! Ricorda solo di tenere d'occhio le tue scadenze mensili.";
-                
-                if(text.toLowerCase().includes('rate') || text.toLowerCase().includes('debiti')) {
-                    reply = `Attualmente hai un debito residuo di € ${totalDebt.toFixed(2)} in rateizzazioni. La tua prossima rata è ben coperta dalla tua liquidità disponibile!`;
-                } else if(text.toLowerCase().includes('risparmio') || text.toLowerCase().includes('spese')) {
-                    reply = "Nelle ultime settimane la tua categoria di spesa maggiore è stata 'Casa & Bollette'. Riducendo del 10% le spese per svago potresti risparmiare circa € 50 extra al mese.";
-                }
-
                 chatBox.innerHTML += `
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold">AI</div>
-                        <div class="bg-slate-800 border border-slate-700/60 p-3 rounded-2xl text-xs text-slate-200 max-w-[80%]">
-                            ${reply}
+                    <div class="flex items-start space-x-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 flex items-center justify-center shrink-0 text-[10px] font-bold">AI</div>
+                        <div class="bg-slate-800 border border-slate-700/60 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed max-w-[85%]">
+                            Ho elaborato la tua richiesta! Il tuo saldo è aggiornato ed in regola.
                         </div>
                     </div>
                 `;
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 600);
+            }, 500);
         }
 
-        // INIZIALIZZAZIONE ALL'AVVIO
         window.onload = function() {
             updateAllViews();
         };
