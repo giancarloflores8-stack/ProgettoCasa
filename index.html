@@ -1,325 +1,385 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it" class="h-full bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Conti Chiari - Gestione Finanziaria Mobile</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Conti Chiari - Mobile Finance App</title>
+    <meta name="apple-mobile-web-app-title" content="Conti Chiari">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="apple-touch-icon.png">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca'
+                        ios: {
+                            bg: '#090d16',
+                            card: '#131b2e',
+                            border: '#1e293b',
+                            accent: '#6366f1'
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome per Icone -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js per i Grafici -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
+        /* Modern Mobile OS Enhancements & Safe Area Padding */
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
-        
-        /* Supporto per Notch iPhone / Safe Area */
-        .safe-top { padding-top: env(safe-area-inset-top, 20px); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .safe-top { padding-top: max(var(--sat), 12px); }
+        .safe-bottom { padding-bottom: max(var(--sab), 16px); }
+        .pb-safe-nav { padding-bottom: calc(75px + var(--sab)); }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        /* Custom scrollbar handling */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Animazione Transizioni */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.25s ease-out; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Effetti attivo navigazione */
-        .tab-item-active {
-            color: #6366f1 !important;
-            transform: scale(1.05);
+        /* Active Navigation Tab Bounce */
+        .tab-item-active i {
+            transform: translateY(-2px) scale(1.1);
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen pb-28 transition-colors duration-200">
+<body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
 
-    <!-- HEADER FISSO -->
-    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 safe-top px-4 py-3 transition-colors duration-200">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
-                    €
-                </div>
-                <div>
-                    <h1 class="text-base font-bold tracking-tight leading-none text-slate-900 dark:text-white">Conti Chiari</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Finanze Personali</p>
-                </div>
+    <!-- TOP MOBILE HEADER (iOS Dynamic Island Safe) -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 safe-top px-4 pb-3 flex items-center justify-between shrink-0 shadow-md">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                <i class="fa-solid fa-wallet text-sm"></i>
             </div>
-            
-            <div class="flex items-center gap-1.5">
-                <!-- Tema Switcher (Giorno/Notte) -->
-                <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Cambia Tema">
-                    <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
-                </button>
-                <!-- Backup & Menu Modale -->
-                <button onclick="openModal('modal-backup')" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-                    <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
-                </button>
+            <div>
+                <h1 class="font-bold text-base text-white leading-tight tracking-tight">Conti Chiari</h1>
+                <p id="header-subtitle" class="text-[11px] text-slate-400 font-medium">Panoramica Patrimoniale</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <!-- Backup & Restore Quick Button -->
+            <button onclick="openModal('modal-backup')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-indigo-500/30 p-2.5 rounded-xl text-xs flex items-center justify-center transition-all active:scale-95">
+                <i class="fa-solid fa-database text-sm"></i>
+            </button>
+
+            <!-- Total Quick Badge -->
+            <div class="bg-indigo-950/60 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-right">
+                <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Net Worth</span>
+                <span id="top-net-worth" class="text-xs font-extrabold text-emerald-400">€ 0.00</span>
             </div>
         </div>
     </header>
 
-    <!-- CONTENUTO PRINCIPALE -->
-    <main class="max-w-md mx-auto px-4 pt-4">
+    <!-- AREA PRINCIPALE ADATTA A SCHERMI MOBILE (Full Viewport without overflow break) -->
+    <main class="flex-1 overflow-y-auto px-4 pt-4 pb-safe-nav space-y-5">
 
-        <!-- TAB 1: DASHBOARD / HOME -->
-        <section id="tab-dashboard" class="tab-content active space-y-4">
-            
-            <!-- PATRIMONIO NETTO CARD -->
-            <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 rounded-3xl p-5 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden">
-                <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+        <!-- 1. DASHBOARD OVERVIEW TAB -->
+        <section id="tab-dashboard" class="tab-content space-y-4">
+            <!-- Main Balance Card iOS Style -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-indigo-900/80 via-slate-900 to-slate-900 border border-indigo-500/30 rounded-3xl p-5 shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
                 
                 <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-indigo-200 tracking-wide uppercase">Patrimonio Netto</span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/30 text-indigo-100 border border-indigo-400/20">
-                        <i class="fa-solid fa-shield-halved text-[9px]"></i> Aggiornato
+                    <span class="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Patrimonio Netto</span>
+                    <span class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i>In Salute
                     </span>
                 </div>
                 
-                <div class="text-3xl font-black tracking-tight mb-4" id="net-worth-total">€ 0,00</div>
+                <h2 id="dash-total-net" class="text-3xl font-extrabold text-white tracking-tight">€ 0.00</h2>
 
-                <div class="grid grid-cols-2 gap-3 pt-3 border-t border-indigo-500/30 text-xs">
+                <div class="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-800/80">
                     <div>
-                        <span class="text-indigo-200 block text-[10px] font-medium">Liquidità Disponibile</span>
-                        <span class="font-bold text-sm" id="net-worth-cash">€ 0,00</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-medium block">Liquidità Disponibile</span>
+                        <span id="dash-liquid" class="text-sm font-bold text-emerald-400">€ 0.00</span>
                     </div>
                     <div>
-                        <span class="text-indigo-200 block text-[10px] font-medium">Investimenti & Titoli</span>
-                        <span class="font-bold text-sm text-emerald-300" id="net-worth-investments">€ 0,00</span>
-                    </div>
-                    <div>
-                        <span class="text-indigo-200 block text-[10px] font-medium">Debiti / Rate Residue</span>
-                        <span class="font-bold text-sm text-rose-300" id="net-worth-debts">€ 0,00</span>
-                    </div>
-                    <div>
-                        <span class="text-indigo-200 block text-[10px] font-medium">Risparmi In Obiettivi</span>
-                        <span class="font-bold text-sm text-amber-300" id="net-worth-goals">€ 0,00</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-medium block">Investimenti Totali</span>
+                        <span id="dash-invested" class="text-sm font-bold text-blue-400">€ 0.00</span>
                     </div>
                 </div>
             </div>
 
-            <!-- RIPARTIZIONE GRAFICO SINTETICO -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-200">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Ripartizione Asset</h3>
-                <div class="h-44 relative flex items-center justify-center">
-                    <canvas id="chart-networth-donut"></canvas>
+            <!-- Conto Corrente e Contanti separati -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('carte-contanti')" class="bg-slate-900/90 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between cursor-pointer">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Conto Corrente</span>
+                        <i class="fa-solid fa-building-columns text-indigo-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-bank" class="text-lg font-bold text-white">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5 truncate">Saldo in banca</p>
+                    </div>
+                </div>
+
+                <div onclick="switchTab('carte-contanti')" class="bg-slate-900/90 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between cursor-pointer">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Contanti</span>
+                        <i class="fa-solid fa-money-bill-wave text-emerald-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-cash" class="text-lg font-bold text-white">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5 truncate">Cassa in mano</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- RIEPILOGO RAPIDO BANCHE E CONTI -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Principali Conti</h3>
-                    <button onclick="switchTab('carte-contanti')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Vedi Tutti</button>
+            <!-- KPI Cards Grid (2x2 Mobile Responsive) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Debiti / Rate</span>
+                        <i class="fa-solid fa-credit-card text-rose-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-debt" class="text-lg font-bold text-rose-400">€ 0.00</h3>
+                        <p id="dash-next-payment" class="text-[10px] text-slate-400 mt-0.5 truncate">Klarna & Finanziamenti</p>
+                    </div>
                 </div>
-                <div id="quick-accounts-list" class="space-y-2">
-                    <!-- Rendered by JS -->
+
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-[11px] font-medium">Profit / Loss Titoli</span>
+                        <i class="fa-solid fa-chart-line text-indigo-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 id="dash-invested-profit" class="text-lg font-bold text-slate-200">€ 0.00</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Rendimento totale</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- ULTIMI MOVIMENTI -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ultimi Movimenti</h3>
-                    <button onclick="switchTab('transazioni')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Storico</button>
-                </div>
-                <div id="quick-transactions-list" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/60 shadow-sm overflow-hidden transition-colors duration-200">
-                    <!-- Rendered by JS -->
+            <!-- Donut Chart Asset Allocation -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">Distribuzione Patrimonio</h3>
+                <div class="relative h-48 w-full flex items-center justify-center">
+                    <canvas id="assetOverviewChart"></canvas>
                 </div>
             </div>
 
-        </section>
-
-        <!-- TAB 2: CONTI E CARTE -->
-        <section id="tab-carte-contanti" class="tab-content space-y-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Conti & Carte</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Gestisci la tua liquidità</p>
+            <!-- Ultimi Movimenti -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Ultimi Movimenti</h3>
+                    <button onclick="switchTab('transazioni')" class="text-xs text-indigo-400 font-semibold active:opacity-75">Vedi tutti</button>
                 </div>
-                <button onclick="openModal('modal-account')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-plus"></i> Nuovo Conto
-                </button>
-            </div>
-
-            <div id="accounts-full-list" class="space-y-3">
-                <!-- Rendered by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 3: TITOLI E INVESTIMENTI -->
-        <section id="tab-investimenti" class="tab-content space-y-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Investimenti</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">ETF, Azioni e Crypto</p>
+                <div id="dash-recent-list" class="space-y-2.5">
+                    <!-- Inseriti via Javascript -->
                 </div>
-                <button onclick="openModal('modal-investment')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-plus"></i> Aggiungi Titolo
-                </button>
-            </div>
-
-            <!-- Card Sintesi Portafoglio -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-2 gap-3 transition-colors duration-200">
-                <div>
-                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Totale Portafoglio</span>
-                    <span class="text-lg font-bold text-slate-900 dark:text-white" id="inv-total-val">€ 0,00</span>
-                </div>
-                <div>
-                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Profit / Loss Totale</span>
-                    <span class="text-lg font-bold" id="inv-total-profit">€ 0,00</span>
-                </div>
-            </div>
-
-            <div id="investments-list" class="space-y-3">
-                <!-- Rendered by JS -->
             </div>
         </section>
 
-        <!-- TAB 4: RATEIZZAZIONI -->
-        <section id="tab-rateizzazioni" class="tab-content space-y-4">
+        <!-- 2. CARTE & CONTANTI -->
+        <section id="tab-carte-contanti" class="tab-content hidden space-y-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Rateizzazioni</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Finanziamenti e Klarna</p>
+                    <h2 class="text-base font-bold text-white">Saldi & Conti</h2>
+                    <p class="text-[11px] text-slate-400">Conti Correnti, Carte di Credito e Cassa</p>
                 </div>
-                <button onclick="openModal('modal-installment')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-plus"></i> Nuova Rata
+                <button onclick="openModal('modal-account')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Nuovo</span>
                 </button>
             </div>
 
-            <!-- Totale Debito Residuo -->
-            <div class="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex justify-between items-center">
-                <div>
-                    <span class="text-xs text-rose-600 dark:text-rose-400 font-medium block">Debito Residuo Complessivo</span>
-                    <span class="text-xl font-black text-rose-700 dark:text-rose-300" id="installments-total-debt">€ 0,00</span>
-                </div>
-                <i class="fa-solid fa-credit-card text-2xl text-rose-400/50"></i>
-            </div>
-
-            <div id="installments-list" class="space-y-3">
-                <!-- Rendered by JS -->
+            <div id="accounts-grid" class="space-y-3">
+                <!-- Generato da JS -->
             </div>
         </section>
 
-        <!-- TAB 5: TRANSAZIONI / MOVIMENTI -->
-        <section id="tab-transazioni" class="tab-content space-y-4">
+        <!-- 3. AZIONI & ETF -->
+        <section id="tab-investimenti" class="tab-content hidden space-y-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Movimenti</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Registro entrate ed uscite</p>
+                    <h2 class="text-base font-bold text-white">Titoli & ETF</h2>
+                    <p class="text-[11px] text-slate-400">Monitora i tuoi investimenti di lungo termine</p>
                 </div>
-                <button onclick="openModal('modal-transaction')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-plus"></i> Nuovo
+                <button onclick="openModal('modal-asset')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Aggiungi</span>
                 </button>
             </div>
 
-            <!-- Filtri -->
-            <div class="flex gap-2">
-                <input type="text" id="tx-search" oninput="renderTransactions()" placeholder="Cerca descrizione o cat..." class="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 transition-colors">
-                <select id="tx-filter-type" onchange="renderTransactions()" class="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-indigo-500 transition-colors">
-                    <option value="ALL">Tutti</option>
-                    <option value="EXPENSE">Uscite</option>
-                    <option value="INCOME">Entrate</option>
+            <div id="assets-mobile-list" class="space-y-3">
+                <!-- Generato da JS per Mobile -->
+            </div>
+        </section>
+
+        <!-- 4. KLARNA & RATE -->
+        <section id="tab-rateizzazioni" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white">Rateizzazioni & Debiti</h2>
+                    <p class="text-[11px] text-slate-400">Klarna, PayPal e finanziamenti in corso</p>
+                </div>
+                <button onclick="openModal('modal-installment')" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Nuova Rata</span>
+                </button>
+            </div>
+
+            <div id="installments-grid" class="space-y-3">
+                <!-- Generato da JS -->
+            </div>
+        </section>
+
+        <!-- 5. MOVIMENTI & REGISTRO -->
+        <section id="tab-transazioni" class="tab-content hidden space-y-4">
+            <div class="flex flex-col space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-bold text-white">Registro Movimenti</h2>
+                        <p class="text-[11px] text-slate-400">Storico uscite ed entrate</p>
+                    </div>
+                    <button onclick="openModal('modal-transaction')" class="bg-emerald-600 active:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-emerald-600/20">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <span>Aggiungi</span>
+                    </button>
+                </div>
+
+                <!-- Filtri Mobile -->
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="search-tx" oninput="filterTransactions()" placeholder="Cerca movimento..." class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
+                    <select id="filter-type" onchange="filterTransactions()" class="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
+                        <option value="ALL">Tutti i Tipi</option>
+                        <option value="Uscita">Uscite</option>
+                        <option value="Entrata">Entrate</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="transactions-mobile-list" class="space-y-2.5">
+                <!-- Generato da JS -->
+            </div>
+        </section>
+
+        <!-- 6. ANALISI & GRAFICI -->
+        <section id="tab-analisi" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-base font-bold text-white">Analytics & Grafici</h2>
+                    <p class="text-[11px] text-slate-400">Andamento delle tue finanze</p>
+                </div>
+                <select id="an-period" onchange="renderAnalysisCharts()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-[11px] text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <option value="3">Ultimi 3 mesi</option>
+                    <option value="6" selected>Ultimi 6 mesi</option>
+                    <option value="12">Ultimi 12 mesi</option>
+                    <option value="all">Tutto</option>
                 </select>
             </div>
 
-            <div id="transactions-full-list" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/60 shadow-sm overflow-hidden transition-colors duration-200">
-                <!-- Rendered by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 6: ANALISI & GRAFICI -->
-        <section id="tab-analisi" class="tab-content space-y-4">
-            <div>
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white">Analytics</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Statistiche e resoconto finanziario</p>
-            </div>
-
-            <!-- Selettore Periodo -->
-            <div class="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400">
-                <button onclick="setAnalyticsPeriod('3M')" id="period-3M" class="flex-1 py-1.5 rounded-lg transition-all text-center">3 Mesi</button>
-                <button onclick="setAnalyticsPeriod('6M')" id="period-6M" class="flex-1 py-1.5 rounded-lg transition-all text-center">6 Mesi</button>
-                <button onclick="setAnalyticsPeriod('12M')" id="period-12M" class="flex-1 py-1.5 rounded-lg transition-all text-center bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm">1 Anno</button>
-                <button onclick="setAnalyticsPeriod('ALL')" id="period-ALL" class="flex-1 py-1.5 rounded-lg transition-all text-center">Tutto</button>
-            </div>
-
-            <!-- Grafico Entrate vs Uscite -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 transition-colors duration-200">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Entrate vs Uscite</h3>
-                <div class="h-48">
-                    <canvas id="chart-income-expense"></canvas>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-arrow-down text-emerald-400 text-[10px] mr-1.5"></i>Entrate</span>
+                    <h3 id="an-kpi-in" class="text-lg font-bold text-emerald-400 mt-1">€ 0.00</h3>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-arrow-up text-rose-400 text-[10px] mr-1.5"></i>Uscite</span>
+                    <h3 id="an-kpi-out" class="text-lg font-bold text-rose-400 mt-1">€ 0.00</h3>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-piggy-bank text-indigo-400 text-[10px] mr-1.5"></i>Risparmio netto</span>
+                    <h3 id="an-kpi-save" class="text-lg font-bold text-white mt-1">€ 0.00</h3>
+                    <p id="an-kpi-rate" class="text-[10px] text-slate-400 mt-0.5">Tasso di risparmio 0%</p>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-calendar-day text-amber-400 text-[10px] mr-1.5"></i>Spesa media</span>
+                    <h3 id="an-kpi-avg" class="text-lg font-bold text-white mt-1">€ 0.00</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">al mese</p>
                 </div>
             </div>
 
-            <!-- Grafico Spese per Categoria -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 transition-colors duration-200">
-                <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Spese per Categoria</h3>
-                <div class="h-48 relative flex items-center justify-center">
-                    <canvas id="chart-category-expenses"></canvas>
-                </div>
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Entrate vs Uscite per mese</h3>
+                <div class="h-56 relative"><canvas id="chart-flow"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Risparmio netto mensile e cumulato</h3>
+                <div class="h-56 relative"><canvas id="chart-saving"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Andamento del patrimonio</h3>
+                <div id="an-nw-wrap" class="h-56 relative"><canvas id="chart-networth"></canvas></div>
+                <p id="an-nw-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Il grafico si riempie man mano che usi l'app: ogni giorno in cui aggiorni i dati viene salvato il patrimonio.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-300">Spese per categoria</h3>
+                <div id="an-cat-wrap" class="h-56 relative"><canvas id="chart-cat"></canvas></div>
+                <div id="an-cat-list" class="space-y-1.5"></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Spese per giorno della settimana</h3>
+                <div class="h-48 relative"><canvas id="chart-weekday"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Avanzamento obiettivi</h3>
+                <div id="an-goals-wrap" class="relative"><canvas id="chart-goals"></canvas></div>
+                <p id="an-goals-empty" class="hidden text-[11px] text-slate-500 py-4 text-center">Nessun obiettivo: creane uno nella sezione Obiettivi.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Le 5 spese più alte</h3>
+                <div id="an-top-list" class="space-y-1.5"></div>
             </div>
         </section>
 
-        <!-- TAB 7: OBIETTIVI -->
-        <section id="tab-obiettivi" class="tab-content space-y-4">
+        <!-- OBIETTIVI DI RISPARMIO -->
+        <section id="tab-obiettivi" class="tab-content hidden space-y-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Obiettivi</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Salvadanai e target di risparmio</p>
+                    <h2 class="text-base font-bold text-white">Obiettivi di Risparmio</h2>
+                    <p class="text-[11px] text-slate-400">Scegli un obiettivo e versa i tuoi risparmi</p>
                 </div>
-                <button onclick="openModal('modal-goal')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-plus"></i> Nuovo Goal
+                <button onclick="openGoalModal()" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus mr-1"></i>Nuovo
                 </button>
             </div>
 
-            <div id="goals-list" class="space-y-3">
-                <!-- Rendered by JS -->
+            <div class="bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 shadow-sm">
+                <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">Totale messo da parte</span>
+                <h3 id="goals-total-saved" class="text-2xl font-extrabold text-white mt-1">€ 0.00</h3>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden mt-3">
+                    <div id="goals-total-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1.5">su un totale di <span id="goals-total-target">€ 0.00</span> da raggiungere</p>
             </div>
+
+            <div id="goals-list" class="space-y-3"></div>
         </section>
 
     </main>
 
-    <!-- FLOATING ACTION BUTTON PER NUOVA TRANSAZIONE -->
-    <button onclick="openModal('modal-transaction')" class="fixed bottom-20 right-5 z-30 w-12 h-12 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center text-xl transition">
+    <!-- FLOATING ACTION BUTTON (FAB) PER AGGIUNTA RAPIDA -->
+    <button onclick="openModal('modal-transaction')" class="fixed bottom-20 right-5 z-40 bg-gradient-to-tr from-emerald-600 to-emerald-400 active:scale-95 text-white w-12 h-12 rounded-full shadow-lg shadow-emerald-600/30 flex items-center justify-center text-lg transition-transform">
         <i class="fa-solid fa-plus"></i>
     </button>
 
-    <!-- BOTTOM NAVIGATION BAR (CON PADDING AMPIO SUI LATI E SUPPORTO TEMA) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/80 safe-bottom px-6 pt-2.5 pb-2 flex justify-around items-center text-center transition-colors duration-200">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-item flex-1 py-1 text-indigo-600 dark:text-indigo-400 tab-item-active transition-all">
+    <!-- BOTTOM NAVIGATION BAR STYLE iOS FOR IPHONE 17 PRO -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-2xl border-t border-slate-800/80 safe-bottom px-2 pt-2 pb-1 flex justify-around items-center text-center">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-item flex-1 py-1 text-indigo-400 tab-item-active transition-all">
             <i class="fa-solid fa-chart-pie text-lg block mx-auto"></i>
             <span class="text-[10px] font-medium tracking-tight block mt-1">Home</span>
         </button>
@@ -355,816 +415,1091 @@
         </button>
     </nav>
 
-    <!-- MODALI -->
 
-    <!-- MODALE BACKUP / RIPRISTINO -->
-    <div id="modal-backup" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Backup e Dati</h3>
-                <button onclick="closeModal('modal-backup')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Salva i tuoi dati in locale o ripristinali da un file JSON precedentemente salvato.</p>
-            
-            <div class="space-y-2 pt-2">
-                <button onclick="exportData()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-download"></i> Esporta Backup (JSON)
+    <!-- MODALE BACKUP E RIPRISTINO DATA (JSON) -->
+    <div id="modal-backup" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-database text-indigo-400"></i>
+                    <h3 class="text-sm font-bold text-white">Gestione Backup JSON</h3>
+                </div>
+                <button onclick="closeModal('modal-backup')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
-                <label class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer border border-slate-200 dark:border-slate-700">
-                    <i class="fa-solid fa-upload"></i> Importa Backup (JSON)
-                    <input type="file" id="import-file" accept=".json" onchange="importData(event)" class="hidden">
-                </label>
+            </div>
+
+            <!-- CARICA JSON -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-300"> Ripristina Dati da File JSON</label>
+                <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-4 text-center cursor-pointer bg-slate-800/40" onclick="document.getElementById('json-file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-2"></i>
+                    <p class="text-xs text-slate-300 font-medium">Tocca qui per caricare il file .json</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Sostituirà il database locale in uso</p>
+                    <input type="file" id="json-file-input" accept=".json,application/json" class="hidden" onchange="importJSONBackup(event)">
+                </div>
+            </div>
+
+            <div class="h-px bg-slate-800"></div>
+
+            <!-- ESPORTA / SCARICA BACKUP -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-300"> Esporta / Salva Backup</label>
+                <button onclick="exportJSONBackup()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download text-indigo-400"></i>
+                    <span>Scarica File Backup JSON</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE CONTO -->
-    <div id="modal-account" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white" id="modal-account-title">Nuovo Conto</h3>
-                <button onclick="closeModal('modal-account')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MODALE NUOVA TRANSAZIONE -->
+    <div id="modal-transaction" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Aggiungi Movimento</h3>
+                <button onclick="closeModal('modal-transaction')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-            <form id="form-account" onsubmit="saveAccount(event)" class="space-y-3">
-                <input type="hidden" id="acc-id">
+
+            <form onsubmit="saveTransaction(event)" class="space-y-3">
                 <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Nome Conto / Carta</label>
-                    <input type="text" id="acc-name" required placeholder="Es. Intesa Sanpaolo" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Saldo Attuale (€)</label>
-                    <input type="number" step="0.01" id="acc-balance" required placeholder="0.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Icona</label>
-                    <select id="acc-icon" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                        <option value="fa-building-columns">Banca</option>
-                        <option value="fa-credit-card">Carta di Credito/Debito</option>
-                        <option value="fa-money-bill-wave">Contanti</option>
-                        <option value="fa-vault">Salva/Risparmio</option>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipo</label>
+                    <select id="tx-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="Uscita">Uscita / Spesa</option>
+                        <option value="Entrata">Entrata / Guadagno</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-500/20">Salva Conto</button>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Descrizione</label>
+                    <input type="text" id="tx-desc" required placeholder="Es. Spesa, Benzina..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" id="tx-amount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Data</label>
+                        <input type="date" id="tx-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Cosa modifica?</label>
+                    <select id="tx-account" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                    <p class="text-[10px] text-slate-500 mt-1">Il Patrimonio Netto si aggiorna insieme al conto scelto.</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Categoria</label>
+                    <select id="tx-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="Alimentari">Alimentari</option>
+                        <option value="Casa">Casa & Bollette</option>
+                        <option value="Trasporti">Trasporti & Auto</option>
+                        <option value="Svago">Svago & Tempo Libero</option>
+                        <option value="Stipendio">Stipendio / Entrate</option>
+                        <option value="Altro">Altro</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs transition-all shadow-lg shadow-emerald-600/20 mt-2">
+                    Salva Operazione
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- MODALE INVESTIMENTO -->
-    <div id="modal-investment" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Aggiungi Titolo</h3>
-                <button onclick="closeModal('modal-investment')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MODALI SECONDARIE AGGIUNTIVE -->
+    <div id="modal-account" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="acc-modal-title" class="text-sm font-bold text-white">Nuovo Conto / Carta</h3>
+                <button onclick="closeModal('modal-account')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-investment" onsubmit="saveInvestment(event)" class="space-y-3">
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Nome Titolo / Ticker</label>
-                    <input type="text" id="inv-name" required placeholder="Es. VWCE / Apple / Bitcoin" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Quantità</label>
-                        <input type="number" step="any" id="inv-qty" required placeholder="10" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Prezzo Acquisto (€)</label>
-                        <input type="number" step="0.01" id="inv-buy-price" required placeholder="100.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Prezzo Attuale (€)</label>
-                    <input type="number" step="0.01" id="inv-current-price" required placeholder="105.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-500/20">Salva Titolo</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODALE RATEIZZAZIONE -->
-    <div id="modal-installment" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Aggiungi Rata</h3>
-                <button onclick="closeModal('modal-installment')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-installment" onsubmit="saveInstallment(event)" class="space-y-3">
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Descrizione Acquisto</label>
-                    <input type="text" id="ins-name" required placeholder="Es. iPhone Klarna" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Importo Rata (€)</label>
-                        <input type="number" step="0.01" id="ins-monthly" required placeholder="50.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Rate Residue</label>
-                        <input type="number" id="ins-count" required placeholder="3" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-500/20">Salva Rata</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODALE TRANSAZIONE -->
-    <div id="modal-transaction" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Nuova Transazione</h3>
-                <button onclick="closeModal('modal-transaction')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-transaction" onsubmit="saveTransaction(event)" class="space-y-3">
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-center text-xs font-semibold">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="tx-type" value="EXPENSE" checked onchange="updateCategories()" class="hidden peer">
-                        <div class="py-1.5 rounded-lg peer-checked:bg-rose-500 peer-checked:text-white text-slate-600 dark:text-slate-400 transition-all">Uscita</div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="tx-type" value="INCOME" onchange="updateCategories()" class="hidden peer">
-                        <div class="py-1.5 rounded-lg peer-checked:bg-emerald-500 peer-checked:text-white text-slate-600 dark:text-slate-400 transition-all">Entrata</div>
-                    </label>
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Importo (€)</label>
-                    <input type="number" step="0.01" id="tx-amount" required placeholder="0.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Descrizione</label>
-                    <input type="text" id="tx-desc" required placeholder="Es. Spesa Supermercato" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Categoria</label>
-                        <select id="tx-category" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                            <!-- Rendered dynamically -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Conto Associato</label>
-                        <select id="tx-account" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                            <!-- Rendered dynamically -->
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Data</label>
-                    <input type="date" id="tx-date" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-500/20">Registra Movimento</button>
+            <form onsubmit="saveAccount(event)" class="space-y-3">
+                <input type="hidden" id="acc-id" value="">
+                <input type="text" id="acc-name" required placeholder="Nome Conto (es. Revolut)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <select id="acc-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <option value="Banca">Banca / Conto Corrente</option>
+                    <option value="Carta">Carta Ricaricabile</option>
+                    <option value="Cassa">Contanti / Cassa</option>
+                </select>
+                <input type="number" step="0.01" id="acc-balance" required placeholder="Saldo (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <button type="submit" id="acc-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Conto</button>
             </form>
         </div>
     </div>
 
     <!-- MODALE OBIETTIVO -->
-    <div id="modal-goal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Nuovo Obiettivo</h3>
-                <button onclick="closeModal('modal-goal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="modal-goal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="goal-modal-title" class="text-sm font-bold text-white">Nuovo Obiettivo</h3>
+                <button onclick="closeModal('modal-goal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-goal" onsubmit="saveGoal(event)" class="space-y-3">
+            <form onsubmit="saveGoal(event)" class="space-y-3">
+                <input type="hidden" id="goal-id" value="">
                 <div>
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Nome Obiettivo</label>
-                    <input type="text" id="goal-name" required placeholder="Es. Fondo Emergenza / Viaggio" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipo di obiettivo</label>
+                    <select id="goal-icon" onchange="goalPresetChanged()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                        <option value="🎯">🎯 Altro / Personalizzato</option>
+                        <option value="✈️">✈️ Viaggio</option>
+                        <option value="🚗">🚗 Auto / Moto</option>
+                        <option value="🏠">🏠 Casa</option>
+                        <option value="📱">📱 Tecnologia</option>
+                        <option value="🛡️">🛡️ Fondo emergenza</option>
+                        <option value="🎁">🎁 Regalo</option>
+                        <option value="🎓">🎓 Studio</option>
+                    </select>
+                </div>
+                <input type="text" id="goal-name" required placeholder="Nome obiettivo (es. Vacanza estate)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <input type="number" step="0.01" inputmode="decimal" id="goal-target" required placeholder="Importo da raggiungere (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Scadenza (facoltativa)</label>
+                    <input type="date" id="goal-deadline" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <button type="submit" id="goal-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Crea Obiettivo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE VERSAMENTO -->
+    <div id="modal-contribution" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Versa sul tuo Obiettivo</h3>
+                <button onclick="closeModal('modal-contribution')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveContribution(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Obiettivo</label>
+                    <select id="ct-goal" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Target (€)</label>
-                        <input type="number" step="0.01" id="goal-target" required placeholder="1000.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Operazione</label>
+                        <select id="ct-kind" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                            <option value="in">Versamento</option>
+                            <option value="out">Prelievo</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Attuale (€)</label>
-                        <input type="number" step="0.01" id="goal-current" required placeholder="0.00" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" inputmode="decimal" id="ct-amount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                     </div>
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-500/20">Salva Obiettivo</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Data</label>
+                        <input type="date" id="ct-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Nota (facoltativa)</label>
+                        <input type="text" id="ct-note" placeholder="Es. Mese di ottobre" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs">Salva</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Aggiungi Titolo / ETF</h3>
+                <button onclick="closeModal('modal-asset')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveAsset(event)" class="space-y-3">
+                <input type="text" id="ast-name" required placeholder="Nome Strumento (es. VWCE, AAPL)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.0001" id="ast-qty" required placeholder="Quantità" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="number" step="0.01" id="ast-buy" required placeholder="Prezzo d'Acquisto (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <input type="number" step="0.01" id="ast-current" required placeholder="Prezzo Attuale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Salva Titolo</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-installment" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Nuova Rata / Klarna</h3>
+                <button onclick="closeModal('modal-installment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveInstallment(event)" class="space-y-3">
+                <input type="text" id="inst-name" required placeholder="Descrizione Acquisto" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" id="inst-total" required placeholder="Importo Totale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="number" step="0.01" id="inst-remaining" required placeholder="Debito Residuo (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.01" id="inst-monthly" required placeholder="Rata Mensile (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <input type="date" id="inst-next" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Rata</button>
             </form>
         </div>
     </div>
 
 
-    <!-- JAVASCRIPT APP LOGIC -->
+    <!-- JS APPLICATION LOGIC -->
     <script>
-        // --- TEMA GIORNO / NOTTE ---
-        function initTheme() {
-            const savedTheme = localStorage.getItem('cc_theme') || 'dark';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.getElementById('theme-icon').className = 'fa-solid fa-moon text-sm';
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('theme-icon').className = 'fa-solid fa-sun text-amber-500 text-sm';
-            }
-        }
-
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('cc_theme', isDark ? 'dark' : 'light');
-            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-moon text-sm' : 'fa-solid fa-sun text-amber-500 text-sm';
-            renderCharts(); // Re-render charts for appropriate colors if needed
-        }
-
-        // --- STATO E DATI ---
-        let appData = {
-            accounts: [],
-            investments: [],
-            installments: [],
-            transactions: [],
-            goals: []
+        // STORE DATI LOCALI (Con Default Fallback)
+        let store = {
+            accounts: JSON.parse(localStorage.getItem('cc_accounts')) || [
+                { id: 1, name: 'Conto Corrente', type: 'Banca', balance: 2450.00 },
+                { id: 2, name: 'Revolut', type: 'Carta', balance: 320.50 },
+                { id: 3, name: 'Contanti', type: 'Cassa', balance: 85.00 }
+            ],
+            assets: JSON.parse(localStorage.getItem('cc_assets')) || [
+                { id: 1, name: 'VWCE ETF World', qty: 15, buyPrice: 102.50, currentPrice: 118.20 },
+                { id: 2, name: 'Apple Inc (AAPL)', qty: 5, buyPrice: 150.00, currentPrice: 175.40 }
+            ],
+            installments: JSON.parse(localStorage.getItem('cc_installments')) || [
+                { id: 1, name: 'Smartphone Klarna', total: 600.00, remaining: 200.00, monthly: 50.00, nextDate: '2026-11-15' }
+            ],
+            transactions: JSON.parse(localStorage.getItem('cc_transactions')) || [
+                { id: 1, date: '2026-10-20', desc: 'Spesa Esselunga', type: 'Uscita', category: 'Alimentari', amount: 64.50, account: 'Revolut' },
+                { id: 2, date: '2026-10-18', desc: 'Stipendio Mese', type: 'Entrata', category: 'Stipendio', amount: 1850.00, account: 'Conto Corrente' }
+            ],
+            goals: JSON.parse(localStorage.getItem('cc_goals')) || [],
+            history: JSON.parse(localStorage.getItem('cc_history')) || []
         };
-
-        const defaultCategories = {
-            EXPENSE: ['Alimentari', 'Casa', 'Trasporti', 'Svago', 'Salute', 'Ristoranti', 'Shopping', 'Altro'],
-            INCOME: ['Stipendio', 'Freelance', 'Investimenti', 'Regali', 'Altro']
-        };
-
-        let currentAnalyticsPeriod = '12M';
-        let donutChartInstance = null;
-        let incExpChartInstance = null;
-        let catChartInstance = null;
-
-        // --- INIZIALIZZAZIONE ---
-        window.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            loadData();
-            document.getElementById('tx-date').valueAsDate = new Date();
-            updateCategories();
-            renderAll();
-        });
-
-        function loadData() {
-            const saved = localStorage.getItem('conti_chiari_data');
-            if (saved) {
-                try {
-                    appData = JSON.parse(saved);
-                } catch (e) {
-                    console.error('Errore caricamento dati', e);
-                }
-            } else {
-                // Dati di Esempio iniziali
-                appData = {
-                    accounts: [
-                        { id: '1', name: 'Conto Principale', balance: 2450.00, icon: 'fa-building-columns' },
-                        { id: '2', name: 'Revolut / Carte', balance: 320.50, icon: 'fa-credit-card' },
-                        { id: '3', name: 'Contanti', balance: 85.00, icon: 'fa-money-bill-wave' }
-                    ],
-                    investments: [
-                        { id: '1', name: 'VWCE ETF', qty: 15, buyPrice: 102.50, currentPrice: 118.20 }
-                    ],
-                    installments: [
-                        { id: '1', name: 'Smartphone', monthly: 45.00, count: 4 }
-                    ],
-                    transactions: [
-                        { id: '1', type: 'INCOME', amount: 1800, desc: 'Stipendio', category: 'Stipendio', accountId: '1', date: new Date().toISOString().split('T')[0] },
-                        { id: '2', type: 'EXPENSE', amount: 65.40, desc: 'Spesa Settimanale', category: 'Alimentari', accountId: '1', date: new Date().toISOString().split('T')[0] }
-                    ],
-                    goals: [
-                        { id: '1', name: 'Vacanze Estive', target: 1500, current: 600 }
-                    ]
-                };
-                saveData();
-            }
-        }
 
         function saveData() {
-            localStorage.setItem('conti_chiari_data', JSON.stringify(appData));
+            localStorage.setItem('cc_accounts', JSON.stringify(store.accounts));
+            localStorage.setItem('cc_assets', JSON.stringify(store.assets));
+            localStorage.setItem('cc_installments', JSON.stringify(store.installments));
+            localStorage.setItem('cc_transactions', JSON.stringify(store.transactions));
+            localStorage.setItem('cc_goals', JSON.stringify(store.goals));
+            recordSnapshot();
+            updateAllViews();
         }
 
-        // --- GESTIONE TAB & NAVIGAZIONE ---
+        // NAVIGATION LOGIC FOR MOBILE TABS
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(el => {
-                el.classList.remove('tab-item-active');
-                el.classList.remove('text-indigo-600', 'dark:text-indigo-400');
-                el.classList.add('text-slate-400');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-item').forEach(btn => {
+                btn.classList.remove('text-indigo-400', 'tab-item-active');
+                btn.classList.add('text-slate-400');
             });
 
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            const navBtn = document.getElementById(`nav-${tabId}`);
-            if (navBtn) {
-                navBtn.classList.add('tab-item-active', 'text-indigo-600', 'dark:text-indigo-400');
-                navBtn.classList.remove('text-slate-400');
+            const target = document.getElementById(`tab-${tabId}`);
+            if(target) target.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('text-indigo-400', 'tab-item-active');
+                activeBtn.classList.remove('text-slate-400');
             }
 
-            if (tabId === 'dashboard' || tabId === 'analisi') {
-                setTimeout(renderCharts, 50);
+            const subtitles = {
+                'dashboard': 'Panoramica Patrimoniale',
+                'carte-contanti': 'Saldi Conti & Carte',
+                'investimenti': 'Portafoglio Azioni & ETF',
+                'rateizzazioni': 'Finanziamenti & Klarna',
+                'transazioni': 'Registro Movimenti',
+                'analisi': 'Grafici & Analytics',
+                'obiettivi': 'Obiettivi di Risparmio'
+            };
+            document.getElementById('header-subtitle').innerText = subtitles[tabId] || 'Mobile Finance';
+
+            if(tabId === 'analisi') renderAnalysisCharts();
+        }
+
+        // CARICAMENTO E SALVATAGGIO JSON BACKUP
+        async function exportJSONBackup() {
+            const fileName = `conti-chiari-backup-${new Date().toISOString().split('T')[0]}.json`;
+            const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+
+            // iPhone: foglio di condivisione -> "Salva su File"
+            try {
+                const file = new File([blob], fileName, { type: 'application/json' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: 'Backup Conti Chiari' });
+                    return;
+                }
+            } catch (err) {
+                if (err && err.name === 'AbortError') return; // annullato dall'utente
+            }
+
+            // Fallback: download classico (computer / browser senza condivisione file)
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }
+
+        // Converte il backup del vecchio formato (v2: settings/months/cash) in quello di questa app
+        const CC_CAT = { alimentari:'Alimentari', shopping:'Shopping', svago:'Svago', trasporti:'Trasporti', casa:'Casa', salute:'Salute', abbonamenti:'Abbonamenti', persona:'Persona', persone:'Persone', tasse:'Tasse', altro:'Altro', stipendio:'Stipendio', extra:'Extra' };
+        function ccCat(c) {
+            if (!c) return 'Altro';
+            return CC_CAT[c] || (c.charAt(0).toUpperCase() + c.slice(1));
+        }
+        function convertBackupV2(d) {
+            const bankTx = [];
+            Object.keys(d.months || {}).forEach(m => (d.months[m].tx || []).forEach(t => bankTx.push({ ...t, acc: 'Conto Corrente' })));
+            const cashTx = ((d.cash && d.cash.tx) || []).map(t => ({ ...t, acc: 'Contanti', c: t.c || 'Contanti' }));
+            const ref = d.settings && d.settings.ref;
+            const sign = t => (t.t === 'in' ? t.a : -t.a);
+
+            let bank = ref ? ref.amount : 0;
+            bankTx.forEach(t => { if (!ref || t.d > ref.date) bank += sign(t); });
+            let cash = 0;
+            cashTx.forEach(t => { cash += sign(t); });
+
+            const transactions = bankTx.concat(cashTx)
+                .sort((x, y) => (y.d || '').localeCompare(x.d || ''))
+                .map((t, i) => ({
+                    id: i + 1,
+                    date: t.d,
+                    desc: t.n || 'Movimento',
+                    type: t.t === 'in' ? 'Entrata' : 'Uscita',
+                    category: ccCat(t.c),
+                    amount: t.a,
+                    account: t.acc
+                }));
+
+            // Storico saldi del vecchio backup -> serve per il grafico dell'andamento
+            const hmap = {};
+            ((d.history && d.history.balances) || []).forEach(x => { if (x && x.d) hmap[x.d] = x.a; });
+            ((d.settings && d.settings.points) || []).forEach(x => { if (x && x.d) hmap[x.d] = x.a; });
+            const history = Object.keys(hmap).sort().map(k => ({ d: k, a: hmap[k] }));
+
+            return {
+                accounts: [
+                    { id: 1, name: 'Conto Corrente', type: 'Banca', balance: Math.round(bank * 100) / 100 },
+                    { id: 2, name: 'Contanti', type: 'Cassa', balance: Math.round(cash * 100) / 100 }
+                ],
+                assets: [],
+                installments: [],
+                transactions: transactions,
+                goals: [],
+                history: history
+            };
+        }
+
+        function importJSONBackup(event) {
+            const input = event.target;
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const raw = JSON.parse(e.target.result);
+                    let data = null;
+                    let note = '';
+
+                    if (raw && Array.isArray(raw.accounts) && Array.isArray(raw.transactions)) {
+                        // Formato attuale
+                        data = {
+                            accounts: raw.accounts,
+                            assets: Array.isArray(raw.assets) ? raw.assets : [],
+                            installments: Array.isArray(raw.installments) ? raw.installments : [],
+                            transactions: raw.transactions,
+                            goals: Array.isArray(raw.goals) ? raw.goals : [],
+                            history: Array.isArray(raw.history) ? raw.history : []
+                        };
+                    } else if (raw && raw.v === 2 && raw.settings) {
+                        // Vecchio formato Conti Chiari: converto e conservo anche l'originale
+                        data = convertBackupV2(raw);
+                        try { localStorage.setItem('cc_backup_v2_originale', e.target.result); } catch (_) {}
+                        note = '\nConvertito dal vecchio formato: conti, saldi e movimenti importati.';
+                    }
+
+                    if (!data) {
+                        alert(' Errore: Il file JSON caricato non è nel formato corretto di Conti Chiari.');
+                        return;
+                    }
+
+                    store = data;
+                    saveData();
+                    closeModal('modal-backup');
+                    alert(' Backup caricato con successo!' + note);
+                } catch (err) {
+                    alert(' File JSON non valido o danneggiato.');
+                } finally {
+                    input.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // AGGIORNAMENTO INTERFACCIA
+        function updateAllViews() {
+            const totalLiquid = store.accounts.reduce((acc, curr) => acc + curr.balance, 0);
+            const totalInvested = store.assets.reduce((acc, curr) => acc + (curr.qty * curr.currentPrice), 0);
+            const totalDebt = store.installments.reduce((acc, curr) => acc + curr.remaining, 0);
+            const netWorth = totalLiquid + totalInvested - totalDebt;
+
+            document.getElementById('top-net-worth').innerText = `€ ${netWorth.toFixed(2)}`;
+            document.getElementById('dash-total-net').innerText = `€ ${netWorth.toFixed(2)}`;
+            document.getElementById('dash-liquid').innerText = `€ ${totalLiquid.toFixed(2)}`;
+            const totalBank = store.accounts.filter(a => a.type === 'Banca').reduce((acc, curr) => acc + curr.balance, 0);
+            const totalCash = store.accounts.filter(a => a.type === 'Cassa').reduce((acc, curr) => acc + curr.balance, 0);
+            document.getElementById('dash-bank').innerText = `€ ${totalBank.toFixed(2)}`;
+            document.getElementById('dash-cash').innerText = `€ ${totalCash.toFixed(2)}`;
+            document.getElementById('dash-invested').innerText = `€ ${totalInvested.toFixed(2)}`;
+            document.getElementById('dash-debt').innerText = `€ ${totalDebt.toFixed(2)}`;
+
+            const investedCost = store.assets.reduce((acc, curr) => acc + (curr.qty * curr.buyPrice), 0);
+            const profit = totalInvested - investedCost;
+            document.getElementById('dash-invested-profit').innerText = `${profit >= 0 ? '+' : ''}€ ${profit.toFixed(2)}`;
+
+            // Movimenti recenti
+            const recentContainer = document.getElementById('dash-recent-list');
+            recentContainer.innerHTML = '';
+            store.transactions.slice(0, 4).forEach(tx => {
+                recentContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-2.5 bg-slate-800/40 rounded-xl text-xs border border-slate-800">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-7 h-7 rounded-lg ${tx.type === 'Entrata' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center shrink-0">
+                                <i class="fa-solid ${tx.type === 'Entrata' ? 'fa-arrow-down' : 'fa-arrow-up'} text-[10px]"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-200 text-xs">${tx.desc}</p>
+                                <span class="text-[9px] text-slate-400">${tx.date} • ${tx.category}</span>
+                            </div>
+                        </div>
+                        <span class="font-bold text-xs ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
+                            ${tx.type === 'Entrata' ? '+' : '-'}€ ${tx.amount.toFixed(2)}
+                        </span>
+                    </div>
+                `;
+            });
+
+            // Conti Mobile Card
+            const accGrid = document.getElementById('accounts-grid');
+            accGrid.innerHTML = '';
+            store.accounts.forEach(acc => {
+                accGrid.innerHTML += `
+                    <div onclick="openAccountEdit(${acc.id})" class="bg-slate-900 border border-slate-800 active:border-indigo-500 rounded-2xl p-3.5 flex justify-between items-center shadow-sm cursor-pointer">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                                <i class="fa-solid fa-credit-card text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">${acc.name}</h4>
+                                <span class="text-[10px] text-slate-400">${acc.type}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-extrabold text-white"><i class="fa-solid fa-pen text-[9px] text-indigo-400/70 mr-1.5"></i>€ ${acc.balance.toFixed(2)}</span>
+                            <button onclick="event.stopPropagation(); deleteAccount(${acc.id})" class="block ml-auto text-[10px] text-rose-400/80 mt-0.5"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Assets Mobile List
+            const assetsList = document.getElementById('assets-mobile-list');
+            assetsList.innerHTML = '';
+            store.assets.forEach(ast => {
+                const totalVal = ast.qty * ast.currentPrice;
+                const gain = totalVal - (ast.qty * ast.buyPrice);
+                assetsList.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-200">${ast.name}</h4>
+                            <span class="text-xs font-extrabold text-white">€ ${totalVal.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-400">
+                            <span>Qta: ${ast.qty} • Prezzo: € ${ast.currentPrice.toFixed(2)}</span>
+                            <span class="font-bold ${gain >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                                ${gain >= 0 ? '+' : ''}€ ${gain.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Rate List
+            const instGrid = document.getElementById('installments-grid');
+            instGrid.innerHTML = '';
+            store.installments.forEach(inst => {
+                instGrid.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-slate-200 text-xs">${inst.name}</h4>
+                            <span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-md font-semibold">€ ${inst.monthly}/mese</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-indigo-500 h-1.5 rounded-full" style="width: ${((inst.total - inst.remaining)/inst.total)*100}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>Residuo: € ${inst.remaining.toFixed(2)}</span>
+                            <span>Scadenza: ${inst.nextDate}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            renderTransactionsList();
+            renderOverviewChart();
+            renderGoals();
+            const anTab = document.getElementById('tab-analisi');
+            if (anTab && !anTab.classList.contains('hidden')) renderAnalysisCharts();
+        }
+
+        function renderTransactionsList() {
+            const container = document.getElementById('transactions-mobile-list');
+            const search = document.getElementById('search-tx')?.value.toLowerCase() || '';
+            const filterType = document.getElementById('filter-type')?.value || 'ALL';
+
+            container.innerHTML = '';
+            store.transactions
+                .filter(tx => {
+                    const matchSearch = tx.desc.toLowerCase().includes(search) || tx.category.toLowerCase().includes(search);
+                    const matchType = filterType === 'ALL' || tx.type === filterType;
+                    return matchSearch && matchType;
+                })
+                .forEach(tx => {
+                    container.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex justify-between items-center shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-xl ${tx.type === 'Entrata' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center shrink-0">
+                                    <i class="fa-solid ${tx.type === 'Entrata' ? 'fa-arrow-down' : 'fa-arrow-up'} text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-xs text-slate-200">${tx.desc}</p>
+                                    <p class="text-[10px] text-slate-400">${tx.date} • ${tx.category}${tx.account ? ' • ' + tx.account : ''}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-xs ${tx.type === 'Entrata' ? 'text-emerald-400' : 'text-slate-200'}">
+                                    ${tx.type === 'Entrata' ? '+' : '-'}€ ${tx.amount.toFixed(2)}
+                                </span>
+                                <button onclick="deleteTx(${tx.id})" class="block ml-auto text-[10px] text-slate-500 hover:text-rose-400 mt-0.5"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+
+        function filterTransactions() {
+            renderTransactionsList();
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'modal-transaction') {
+                document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+                fillTxAccountSelect();
+            }
+            if(id === 'modal-account') resetAccountForm();
+        }
+
+        function fillTxAccountSelect() {
+            const sel = document.getElementById('tx-account');
+            const prev = sel.value;
+            sel.innerHTML = store.accounts.map(a => `<option value="${a.id}">${a.name} (€ ${a.balance.toFixed(2)})</option>`).join('')
+                + '<option value="none">Solo registro (non modifica i saldi)</option>';
+            const hasPrev = prev && Array.from(sel.options).some(o => o.value === prev);
+            if (hasPrev) sel.value = prev;
+            else {
+                const bank = store.accounts.find(a => a.type === 'Banca') || store.accounts[0];
+                if (bank) sel.value = String(bank.id);
             }
         }
 
-        // --- GESTIONE MODALI ---
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
+        function resetAccountForm() {
+            document.getElementById('acc-id').value = '';
+            document.getElementById('acc-name').value = '';
+            document.getElementById('acc-type').value = 'Banca';
+            document.getElementById('acc-balance').value = '';
+            document.getElementById('acc-modal-title').innerText = 'Nuovo Conto / Carta';
+            document.getElementById('acc-submit').innerText = 'Aggiungi Conto';
+        }
+
+        // Modifica di un conto esistente (nome, tipo, saldo)
+        function openAccountEdit(id) {
+            const acc = store.accounts.find(a => a.id === id);
+            if (!acc) return;
+            document.getElementById('modal-account').classList.remove('hidden');
+            document.getElementById('acc-id').value = String(acc.id);
+            document.getElementById('acc-name').value = acc.name;
+            document.getElementById('acc-type').value = acc.type;
+            document.getElementById('acc-balance').value = acc.balance;
+            document.getElementById('acc-modal-title').innerText = 'Modifica Conto';
+            document.getElementById('acc-submit').innerText = 'Salva Modifiche';
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
 
-        // --- FORMATTAZIONE ---
-        function formatEUR(val) {
-            return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(val);
-        }
+        function saveTransaction(e) {
+            e.preventDefault();
+            const amount = parseFloat(String(document.getElementById('tx-amount').value).replace(',', '.'));
+            if (isNaN(amount) || amount <= 0) return;
+            const type = document.getElementById('tx-type').value;
+            const accValue = document.getElementById('tx-account').value;
+            const acc = accValue === 'none' ? null : store.accounts.find(a => String(a.id) === accValue);
 
-        // --- CALCOLI PATRIMONIO ---
-        function getTotals() {
-            const cash = appData.accounts.reduce((sum, a) => sum + Number(a.balance), 0);
-            const investments = appData.investments.reduce((sum, i) => sum + (Number(i.qty) * Number(i.currentPrice)), 0);
-            const debts = appData.installments.reduce((sum, ins) => sum + (Number(ins.monthly) * Number(ins.count)), 0);
-            const goals = appData.goals.reduce((sum, g) => sum + Number(g.current), 0);
-            const netWorth = cash + investments + goals - debts;
-
-            return { cash, investments, debts, goals, netWorth };
-        }
-
-        // --- RENDER COMPLETO ---
-        function renderAll() {
-            renderDashboard();
-            renderAccounts();
-            renderInvestments();
-            renderInstallments();
-            renderTransactions();
-            renderGoals();
-            renderCharts();
-        }
-
-        // --- RENDER DASHBOARD ---
-        function renderDashboard() {
-            const totals = getTotals();
-            document.getElementById('net-worth-total').textContent = formatEUR(totals.netWorth);
-            document.getElementById('net-worth-cash').textContent = formatEUR(totals.cash);
-            document.getElementById('net-worth-investments').textContent = formatEUR(totals.investments);
-            document.getElementById('net-worth-debts').textContent = formatEUR(totals.debts);
-            document.getElementById('net-worth-goals').textContent = formatEUR(totals.goals);
-
-            // Quick Accounts
-            const quickAccContainer = document.getElementById('quick-accounts-list');
-            quickAccContainer.innerHTML = appData.accounts.slice(0, 3).map(acc => `
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm transition-colors duration-200">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                            <i class="fa-solid ${acc.icon || 'fa-wallet'}"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs font-bold text-slate-900 dark:text-white">${acc.name}</div>
-                            <div class="text-[10px] text-slate-400">Conto</div>
-                        </div>
-                    </div>
-                    <div class="text-xs font-extrabold text-slate-900 dark:text-white">${formatEUR(acc.balance)}</div>
-                </div>
-            `).join('');
-
-            // Quick Tx
-            const quickTxContainer = document.getElementById('quick-transactions-list');
-            quickTxContainer.innerHTML = appData.transactions.slice(0, 4).map(tx => `
-                <div class="p-3 flex justify-between items-center text-xs">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg ${tx.type === 'INCOME' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'} flex items-center justify-center text-xs">
-                            <i class="fa-solid ${tx.type === 'INCOME' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                        </div>
-                        <div>
-                            <div class="font-semibold text-slate-800 dark:text-slate-200">${tx.desc}</div>
-                            <div class="text-[10px] text-slate-400">${tx.category} • ${tx.date}</div>
-                        </div>
-                    </div>
-                    <div class="font-bold ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-slate-800 dark:text-slate-200'}">
-                        ${tx.type === 'INCOME' ? '+' : '-'}${formatEUR(tx.amount)}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- RENDER CONTI ---
-        function renderAccounts() {
-            const list = document.getElementById('accounts-full-list');
-            list.innerHTML = appData.accounts.map(acc => `
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm transition-colors duration-200">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-base">
-                            <i class="fa-solid ${acc.icon || 'fa-wallet'}"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white">${acc.name}</h4>
-                            <span class="text-[10px] text-slate-400">Disponibilità</span>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm font-black text-slate-900 dark:text-white">${formatEUR(acc.balance)}</div>
-                        <button onclick="deleteAccount('${acc.id}')" class="text-[10px] text-rose-500 hover:underline mt-1">Elimina</button>
-                    </div>
-                </div>
-            `).join('');
+            const newTx = {
+                id: Date.now(),
+                type: type,
+                desc: document.getElementById('tx-desc').value,
+                amount: amount,
+                date: document.getElementById('tx-date').value,
+                category: document.getElementById('tx-category').value,
+                account: acc ? acc.name : 'Solo registro'
+            };
+            if (acc) {
+                acc.balance = Math.round((acc.balance + (type === 'Entrata' ? amount : -amount)) * 100) / 100;
+                newTx.accountId = acc.id;
+                newTx.applied = true;
+            }
+            store.transactions.unshift(newTx);
+            document.getElementById('tx-desc').value = '';
+            document.getElementById('tx-amount').value = '';
+            saveData();
+            closeModal('modal-transaction');
         }
 
         function saveAccount(e) {
             e.preventDefault();
-            const name = document.getElementById('acc-name').value;
-            const balance = parseFloat(document.getElementById('acc-balance').value);
-            const icon = document.getElementById('acc-icon').value;
+            const editId = document.getElementById('acc-id').value;
+            const name = document.getElementById('acc-name').value.trim();
+            const type = document.getElementById('acc-type').value;
+            const balance = parseFloat(String(document.getElementById('acc-balance').value).replace(',', '.'));
+            if (!name || isNaN(balance)) return;
 
-            appData.accounts.push({ id: Date.now().toString(), name, balance, icon });
+            if (editId) {
+                const acc = store.accounts.find(a => String(a.id) === editId);
+                if (acc) {
+                    acc.name = name;
+                    acc.type = type;
+                    acc.balance = Math.round(balance * 100) / 100;
+                }
+            } else {
+                store.accounts.push({ id: Date.now(), name: name, type: type, balance: Math.round(balance * 100) / 100 });
+            }
             saveData();
-            renderAll();
             closeModal('modal-account');
-            e.target.reset();
         }
 
-        function deleteAccount(id) {
-            appData.accounts = appData.accounts.filter(a => a.id !== id);
-            saveData();
-            renderAll();
-        }
-
-        // --- RENDER INVESTIMENTI ---
-        function renderInvestments() {
-            let totalVal = 0;
-            let totalBuy = 0;
-
-            const list = document.getElementById('investments-list');
-            list.innerHTML = appData.investments.map(inv => {
-                const val = inv.qty * inv.currentPrice;
-                const cost = inv.qty * inv.buyPrice;
-                const profit = val - cost;
-                const profitPct = cost > 0 ? (profit / cost) * 100 : 0;
-
-                totalVal += val;
-                totalBuy += cost;
-
-                return `
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm transition-colors duration-200">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-900 dark:text-white">${inv.name}</h4>
-                                <div class="text-[10px] text-slate-400">${inv.qty} quote @ ${formatEUR(inv.buyPrice)}</div>
-                            </div>
-                            <button onclick="deleteInvestment('${inv.id}')" class="text-[10px] text-rose-500 hover:underline">Elimina</button>
-                        </div>
-                        <div class="flex justify-between items-end pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <div>
-                                <span class="text-[10px] text-slate-400 block">Valore Attuale</span>
-                                <span class="text-sm font-extrabold text-slate-900 dark:text-white">${formatEUR(val)}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block">Rendimento</span>
-                                <span class="text-xs font-bold ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
-                                    ${profit >= 0 ? '+' : ''}${formatEUR(profit)} (${profitPct.toFixed(1)}%)
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const totalProfit = totalVal - totalBuy;
-            document.getElementById('inv-total-val').textContent = formatEUR(totalVal);
-            const profEl = document.getElementById('inv-total-profit');
-            profEl.textContent = formatEUR(totalProfit);
-            profEl.className = `text-lg font-bold ${totalProfit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
-        }
-
-        function saveInvestment(e) {
+        function saveAsset(e) {
             e.preventDefault();
-            const name = document.getElementById('inv-name').value;
-            const qty = parseFloat(document.getElementById('inv-qty').value);
-            const buyPrice = parseFloat(document.getElementById('inv-buy-price').value);
-            const currentPrice = parseFloat(document.getElementById('inv-current-price').value);
-
-            appData.investments.push({ id: Date.now().toString(), name, qty, buyPrice, currentPrice });
+            store.assets.push({
+                id: Date.now(),
+                name: document.getElementById('ast-name').value,
+                qty: parseFloat(document.getElementById('ast-qty').value),
+                buyPrice: parseFloat(document.getElementById('ast-buy').value),
+                currentPrice: parseFloat(document.getElementById('ast-current').value)
+            });
             saveData();
-            renderAll();
-            closeModal('modal-investment');
-            e.target.reset();
-        }
-
-        function deleteInvestment(id) {
-            appData.investments = appData.investments.filter(i => i.id !== id);
-            saveData();
-            renderAll();
-        }
-
-        // --- RENDER RATEIZZAZIONI ---
-        function renderInstallments() {
-            let totalDebt = 0;
-            const list = document.getElementById('installments-list');
-
-            list.innerHTML = appData.installments.map(ins => {
-                const debt = ins.monthly * ins.count;
-                totalDebt += debt;
-
-                return `
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm transition-colors duration-200">
-                        <div>
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white">${ins.name}</h4>
-                            <div class="text-[10px] text-slate-400">${ins.count} rate residue da ${formatEUR(ins.monthly)}/mese</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-black text-rose-500">-${formatEUR(debt)}</div>
-                            <button onclick="payInstallment('${ins.id}')" class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-md text-[10px] font-bold mt-1">Paga Rata</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('installments-total-debt').textContent = formatEUR(totalDebt);
+            closeModal('modal-asset');
         }
 
         function saveInstallment(e) {
             e.preventDefault();
-            const name = document.getElementById('ins-name').value;
-            const monthly = parseFloat(document.getElementById('ins-monthly').value);
-            const count = parseInt(document.getElementById('ins-count').value);
-
-            appData.installments.push({ id: Date.now().toString(), name, monthly, count });
-            saveData();
-            renderAll();
-            closeModal('modal-installment');
-            e.target.reset();
-        }
-
-        function payInstallment(id) {
-            const ins = appData.installments.find(i => i.id === id);
-            if (ins && ins.count > 0) {
-                ins.count -= 1;
-                if (ins.count === 0) {
-                    appData.installments = appData.installments.filter(i => i.id !== id);
-                }
-                saveData();
-                renderAll();
-            }
-        }
-
-        // --- RENDER TRANSAZIONI ---
-        function updateCategories() {
-            const type = document.querySelector('input[name="tx-type"]:checked').value;
-            const catSelect = document.getElementById('tx-category');
-            catSelect.innerHTML = defaultCategories[type].map(c => `<option value="${c}">${c}</option>`).join('');
-
-            const accSelect = document.getElementById('tx-account');
-            accSelect.innerHTML = appData.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
-        }
-
-        function renderTransactions() {
-            const search = document.getElementById('tx-search').value.toLowerCase();
-            const filterType = document.getElementById('tx-filter-type').value;
-
-            const filtered = appData.transactions.filter(tx => {
-                const matchText = tx.desc.toLowerCase().includes(search) || tx.category.toLowerCase().includes(search);
-                const matchType = filterType === 'ALL' || tx.type === filterType;
-                return matchText && matchType;
+            store.installments.push({
+                id: Date.now(),
+                name: document.getElementById('inst-name').value,
+                total: parseFloat(document.getElementById('inst-total').value),
+                remaining: parseFloat(document.getElementById('inst-remaining').value),
+                monthly: parseFloat(document.getElementById('inst-monthly').value),
+                nextDate: document.getElementById('inst-next').value
             });
-
-            const list = document.getElementById('transactions-full-list');
-            list.innerHTML = filtered.map(tx => `
-                <div class="p-3.5 flex justify-between items-center text-xs">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-xl ${tx.type === 'INCOME' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'} flex items-center justify-center">
-                            <i class="fa-solid ${tx.type === 'INCOME' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                        </div>
-                        <div>
-                            <div class="font-bold text-slate-900 dark:text-white">${tx.desc}</div>
-                            <div class="text-[10px] text-slate-400">${tx.category} • ${tx.date}</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-black ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}">
-                            ${tx.type === 'INCOME' ? '+' : '-'}${formatEUR(tx.amount)}
-                        </div>
-                        <button onclick="deleteTransaction('${tx.id}')" class="text-[9px] text-rose-500 hover:underline">Elimina</button>
-                    </div>
-                </div>
-            `).join('');
+            saveData();
+            closeModal('modal-installment');
         }
 
-        function saveTransaction(e) {
-            e.preventDefault();
-            const type = document.querySelector('input[name="tx-type"]:checked').value;
-            const amount = parseFloat(document.getElementById('tx-amount').value);
-            const desc = document.getElementById('tx-desc').value;
-            const category = document.getElementById('tx-category').value;
-            const accountId = document.getElementById('tx-account').value;
-            const date = document.getElementById('tx-date').value;
-
-            // Aggiorna saldo conto
-            const acc = appData.accounts.find(a => a.id === accountId);
-            if (acc) {
-                if (type === 'INCOME') acc.balance += amount;
-                else acc.balance -= amount;
+        function deleteTx(id) {
+            const tx = store.transactions.find(t => t.id === id);
+            if (tx && tx.applied) {
+                const acc = store.accounts.find(a => a.id === tx.accountId);
+                if (acc) acc.balance = Math.round((acc.balance + (tx.type === 'Entrata' ? -tx.amount : tx.amount)) * 100) / 100;
             }
-
-            appData.transactions.unshift({ id: Date.now().toString(), type, amount, desc, category, accountId, date });
+            store.transactions = store.transactions.filter(t => t.id !== id);
             saveData();
-            renderAll();
-            closeModal('modal-transaction');
-            e.target.reset();
-            document.getElementById('tx-date').valueAsDate = new Date();
+        }
+        function deleteAccount(id) { store.accounts = store.accounts.filter(a => a.id !== id); saveData(); }
+
+        // CHARTS
+        let overviewChartInstance = null;
+        function renderOverviewChart() {
+            const ctx = document.getElementById('assetOverviewChart')?.getContext('2d');
+            if(!ctx) return;
+
+            const totalLiquid = store.accounts.reduce((acc, curr) => acc + curr.balance, 0);
+            const totalInvested = store.assets.reduce((acc, curr) => acc + (curr.qty * curr.currentPrice), 0);
+
+            if(overviewChartInstance) overviewChartInstance.destroy();
+
+            overviewChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Liquidità', 'Investimenti'],
+                    datasets: [{
+                        data: [totalLiquid, totalInvested],
+                        backgroundColor: ['#10b981', '#6366f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
         }
 
-        function deleteTransaction(id) {
-            appData.transactions = appData.transactions.filter(t => t.id !== id);
-            saveData();
-            renderAll();
+        let catChartInstance = null;
+        // ===== UTILITY =====
+        const MESI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+        const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+        function ccEur(n) { return '€ ' + (Number(n) || 0).toFixed(2); }
+        function ccEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+        function ccToday() { return new Date().toISOString().split('T')[0]; }
+
+        // ===== STORICO PATRIMONIO (uno scatto al giorno) =====
+        function recordSnapshot() {
+            const liquid = store.accounts.reduce((a, c) => a + c.balance, 0);
+            const invested = store.assets.reduce((a, c) => a + (c.qty * c.currentPrice), 0);
+            const debt = store.installments.reduce((a, c) => a + c.remaining, 0);
+            const nw = Math.round((liquid + invested - debt) * 100) / 100;
+            const today = ccToday();
+            const row = store.history.find(x => x.d === today);
+            if (row) row.a = nw; else store.history.push({ d: today, a: nw });
+            store.history.sort((x, y) => x.d.localeCompare(y.d));
+            localStorage.setItem('cc_history', JSON.stringify(store.history));
         }
 
-        // --- RENDER OBIETTIVI ---
+        // ===== OBIETTIVI DI RISPARMIO =====
+        function goalSaved(g) { return (g.contributions || []).reduce((s, c) => s + c.amount, 0); }
+
         function renderGoals() {
             const list = document.getElementById('goals-list');
-            list.innerHTML = appData.goals.map(g => {
-                const pct = Math.min(100, Math.round((g.current / g.target) * 100));
-                return `
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm transition-colors duration-200">
-                        <div class="flex justify-between items-center">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white">${g.name}</h4>
-                            <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">${pct}%</span>
-                        </div>
-                        <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full" style="width: ${pct}%"></div>
-                        </div>
-                        <div class="flex justify-between items-center text-xs pt-1">
-                            <span class="text-slate-400 font-medium">${formatEUR(g.current)} / ${formatEUR(g.target)}</span>
-                            <div class="flex gap-2">
-                                <button onclick="addGoalDeposit('${g.id}')" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold">+ Deposito</button>
-                                <button onclick="deleteGoal('${g.id}')" class="text-[10px] text-rose-500 hover:underline">Elimina</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            if (!list) return;
+            const goals = store.goals || [];
+            const totSaved = goals.reduce((s, g) => s + goalSaved(g), 0);
+            const totTarget = goals.reduce((s, g) => s + g.target, 0);
+            document.getElementById('goals-total-saved').innerText = ccEur(totSaved);
+            document.getElementById('goals-total-target').innerText = ccEur(totTarget);
+            const totPct = totTarget > 0 ? Math.min(100, Math.max(0, totSaved / totTarget * 100)) : 0;
+            document.getElementById('goals-total-bar').style.width = totPct.toFixed(0) + '%';
+
+            if (!goals.length) {
+                list.innerHTML = '<div class="bg-slate-900/60 border border-dashed border-slate-700 rounded-2xl p-6 text-center text-xs text-slate-400">Nessun obiettivo ancora.<br>Tocca <b class="text-indigo-300">Nuovo</b> per crearne uno.</div>';
+                return;
+            }
+
+            list.innerHTML = goals.map(g => {
+                const saved = goalSaved(g);
+                const remaining = Math.max(0, g.target - saved);
+                const done = saved >= g.target;
+                const pct = g.target > 0 ? Math.min(100, Math.max(0, saved / g.target * 100)) : 0;
+
+                let deadlineText = 'Nessuna scadenza';
+                let hint = 'Mancano ' + ccEur(remaining);
+                if (g.deadline) {
+                    const dl = new Date(g.deadline + 'T00:00:00');
+                    const dlLabel = dl.getDate() + ' ' + MESI[dl.getMonth()] + ' ' + dl.getFullYear();
+                    deadlineText = 'Scadenza ' + dlLabel;
+                    const diff = dl - new Date();
+                    if (!done) {
+                        if (diff < 0) hint = 'Scaduto · mancano ' + ccEur(remaining);
+                        else {
+                            const monthsLeft = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24 * 30.44)));
+                            hint = 'Servono ' + ccEur(remaining / monthsLeft) + '/mese';
+                        }
+                    }
+                }
+                if (done) hint = '🎉 Obiettivo raggiunto!';
+
+                const history = (g.contributions || []).slice().sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+                const historyHtml = history.length
+                    ? '<details class="group"><summary class="text-[11px] text-slate-400 cursor-pointer select-none py-1">Storico versamenti (' + history.length + ')</summary><div class="space-y-1.5 mt-2">'
+                      + history.map(c => '<div class="flex justify-between items-center bg-slate-800/50 rounded-xl px-3 py-2 text-[11px]">'
+                          + '<div><span class="text-slate-200">' + ccEsc(c.date) + '</span>' + (c.note ? '<span class="text-slate-500"> · ' + ccEsc(c.note) + '</span>' : '') + '</div>'
+                          + '<div class="flex items-center space-x-3"><span class="font-bold ' + (c.amount >= 0 ? 'text-emerald-400' : 'text-rose-400') + '">' + (c.amount >= 0 ? '+' : '-') + ccEur(Math.abs(c.amount)) + '</span>'
+                          + '<button onclick="deleteContribution(' + g.id + ',' + c.id + ')" class="text-slate-500 active:text-rose-400"><i class="fa-solid fa-trash text-[10px]"></i></button></div></div>').join('')
+                      + '</div></details>'
+                    : '<p class="text-[11px] text-slate-500">Ancora nessun versamento.</p>';
+
+                return '<div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">'
+                    + '<div class="flex justify-between items-start">'
+                    + '<div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-xl">' + ccEsc(g.icon || '🎯') + '</div>'
+                    + '<div><h4 class="text-sm font-bold text-white">' + ccEsc(g.name) + '</h4><p class="text-[10px] text-slate-400">' + deadlineText + '</p></div></div>'
+                    + '<div class="flex items-center space-x-4 text-slate-500 pt-1">'
+                    + '<button onclick="openGoalEdit(' + g.id + ')" class="active:text-indigo-400"><i class="fa-solid fa-pen text-xs"></i></button>'
+                    + '<button onclick="deleteGoal(' + g.id + ')" class="text-rose-400/80"><i class="fa-solid fa-trash text-xs"></i></button></div></div>'
+                    + '<div><div class="flex justify-between items-baseline text-[11px]"><span class="text-emerald-400 font-bold text-sm">' + ccEur(saved) + '</span><span class="text-slate-400">di ' + ccEur(g.target) + '</span></div>'
+                    + '<div class="h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5"><div class="h-full rounded-full ' + (done ? 'bg-emerald-500' : 'bg-indigo-500') + '" style="width:' + pct.toFixed(0) + '%"></div></div>'
+                    + '<div class="flex justify-between text-[10px] text-slate-400 mt-1.5"><span>' + pct.toFixed(0) + '%</span><span>' + hint + '</span></div></div>'
+                    + '<button onclick="openContribution(' + g.id + ')" class="w-full bg-indigo-600/90 active:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl"><i class="fa-solid fa-piggy-bank mr-1.5"></i>Versa / Preleva</button>'
+                    + historyHtml + '</div>';
             }).join('');
+        }
+
+        function openGoalModal() {
+            document.getElementById('goal-id').value = '';
+            document.getElementById('goal-icon').value = '🎯';
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-deadline').value = '';
+            document.getElementById('goal-modal-title').innerText = 'Nuovo Obiettivo';
+            document.getElementById('goal-submit').innerText = 'Crea Obiettivo';
+            document.getElementById('modal-goal').classList.remove('hidden');
+        }
+
+        function goalPresetChanged() {
+            const sel = document.getElementById('goal-icon');
+            const nameEl = document.getElementById('goal-name');
+            const labels = { '✈️': 'Viaggio', '🚗': 'Auto', '🏠': 'Casa', '📱': 'Tecnologia', '🛡️': 'Fondo emergenza', '🎁': 'Regalo', '🎓': 'Studio' };
+            const known = Object.values(labels);
+            if (!nameEl.value.trim() || known.includes(nameEl.value.trim())) nameEl.value = labels[sel.value] || '';
+        }
+
+        function openGoalEdit(id) {
+            const g = store.goals.find(x => x.id === id);
+            if (!g) return;
+            document.getElementById('goal-id').value = String(g.id);
+            document.getElementById('goal-icon').value = g.icon || '🎯';
+            document.getElementById('goal-name').value = g.name;
+            document.getElementById('goal-target').value = g.target;
+            document.getElementById('goal-deadline').value = g.deadline || '';
+            document.getElementById('goal-modal-title').innerText = 'Modifica Obiettivo';
+            document.getElementById('goal-submit').innerText = 'Salva Modifiche';
+            document.getElementById('modal-goal').classList.remove('hidden');
         }
 
         function saveGoal(e) {
             e.preventDefault();
-            const name = document.getElementById('goal-name').value;
-            const target = parseFloat(document.getElementById('goal-target').value);
-            const current = parseFloat(document.getElementById('goal-current').value);
-
-            appData.goals.push({ id: Date.now().toString(), name, target, current });
-            saveData();
-            renderAll();
-            closeModal('modal-goal');
-            e.target.reset();
-        }
-
-        function addGoalDeposit(id) {
-            const amt = prompt('Inserisci importo da aggiungere all\'obiettivo (€):');
-            if (amt && !isNaN(amt)) {
-                const goal = appData.goals.find(g => g.id === id);
-                if (goal) {
-                    goal.current += parseFloat(amt);
-                    saveData();
-                    renderAll();
-                }
+            const editId = document.getElementById('goal-id').value;
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseFloat(String(document.getElementById('goal-target').value).replace(',', '.'));
+            if (!name || isNaN(target) || target <= 0) return;
+            const icon = document.getElementById('goal-icon').value;
+            const deadline = document.getElementById('goal-deadline').value || '';
+            if (editId) {
+                const g = store.goals.find(x => String(x.id) === editId);
+                if (g) { g.name = name; g.icon = icon; g.target = Math.round(target * 100) / 100; g.deadline = deadline; }
+            } else {
+                store.goals.push({ id: Date.now(), name: name, icon: icon, target: Math.round(target * 100) / 100, deadline: deadline, contributions: [] });
             }
+            saveData();
+            closeModal('modal-goal');
         }
 
         function deleteGoal(id) {
-            appData.goals = appData.goals.filter(g => g.id !== id);
+            const g = store.goals.find(x => x.id === id);
+            if (!g) return;
+            if (!confirm('Eliminare l\'obiettivo "' + g.name + '" e tutto il suo storico?')) return;
+            store.goals = store.goals.filter(x => x.id !== id);
             saveData();
-            renderAll();
         }
 
-        // --- GRAFICI (CHART.JS) ---
-        function setAnalyticsPeriod(p) {
-            currentAnalyticsPeriod = p;
-            ['3M', '6M', '12M', 'ALL'].forEach(k => {
-                const btn = document.getElementById(`period-${k}`);
-                if (k === p) {
-                    btn.className = "flex-1 py-1.5 rounded-lg transition-all text-center bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm";
-                } else {
-                    btn.className = "flex-1 py-1.5 rounded-lg transition-all text-center";
+        function openContribution(goalId) {
+            if (!store.goals.length) { openGoalModal(); return; }
+            const sel = document.getElementById('ct-goal');
+            sel.innerHTML = store.goals.map(g => '<option value="' + g.id + '">' + ccEsc((g.icon || '🎯') + ' ' + g.name) + '</option>').join('');
+            if (goalId) sel.value = String(goalId);
+            document.getElementById('ct-kind').value = 'in';
+            document.getElementById('ct-amount').value = '';
+            document.getElementById('ct-note').value = '';
+            document.getElementById('ct-date').value = ccToday();
+            document.getElementById('modal-contribution').classList.remove('hidden');
+        }
+
+        function saveContribution(e) {
+            e.preventDefault();
+            const g = store.goals.find(x => String(x.id) === document.getElementById('ct-goal').value);
+            const raw = parseFloat(String(document.getElementById('ct-amount').value).replace(',', '.'));
+            if (!g || isNaN(raw) || raw <= 0) return;
+            const amount = Math.round(raw * 100) / 100 * (document.getElementById('ct-kind').value === 'out' ? -1 : 1);
+            if (goalSaved(g) + amount < -0.001) { alert('Non puoi prelevare più di quanto hai messo da parte (' + ccEur(goalSaved(g)) + ').'); return; }
+            g.contributions.push({ id: Date.now(), date: document.getElementById('ct-date').value, amount: amount, note: document.getElementById('ct-note').value.trim() });
+            saveData();
+            closeModal('modal-contribution');
+        }
+
+        function deleteContribution(goalId, cId) {
+            const g = store.goals.find(x => x.id === goalId);
+            if (!g) return;
+            g.contributions = g.contributions.filter(c => c.id !== cId);
+            saveData();
+        }
+
+        // ===== GRAFICI =====
+        const anCharts = {};
+        const CC_PALETTE = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#a855f7', '#84cc16', '#f97316', '#64748b'];
+
+        function ccMonthsList(n) {
+            const out = [];
+            const now = new Date();
+            for (let i = n - 1; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                out.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            return out;
+        }
+
+        function ccMk(id, cfg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (anCharts[id]) anCharts[id].destroy();
+            anCharts[id] = new Chart(el.getContext('2d'), cfg);
+        }
+
+        function renderAnalysisCharts() {
+            if (typeof Chart === 'undefined') return;
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = 'rgba(148,163,184,0.12)';
+            Chart.defaults.font.family = 'Inter, sans-serif';
+
+            // Periodo
+            const periodSel = document.getElementById('an-period').value;
+            const real = store.transactions.filter(t => !/correzione saldo/i.test(t.desc || '') && t.date);
+            let n;
+            if (periodSel === 'all') {
+                const ms = real.map(t => t.date.slice(0, 7)).sort();
+                if (!ms.length) n = 1;
+                else {
+                    const f = ms[0].split('-');
+                    const now = new Date();
+                    n = (now.getFullYear() - Number(f[0])) * 12 + (now.getMonth() + 1 - Number(f[1])) + 1;
+                }
+                n = Math.max(1, Math.min(24, n));
+            } else n = parseInt(periodSel, 10);
+            const months = ccMonthsList(n);
+            const labels = months.map(m => { const p = m.split('-'); return MESI[Number(p[1]) - 1] + (n > 12 ? " '" + p[0].slice(2) : ''); });
+
+            // Aggregazioni
+            const inc = {}, out = {};
+            months.forEach(m => { inc[m] = 0; out[m] = 0; });
+            const cat = {};
+            const weekday = [0, 0, 0, 0, 0, 0, 0];
+            const expenses = [];
+            real.forEach(t => {
+                const m = t.date.slice(0, 7);
+                if (!(m in inc)) return;
+                if (t.type === 'Entrata') inc[m] += t.amount;
+                else {
+                    out[m] += t.amount;
+                    cat[t.category || 'Altro'] = (cat[t.category || 'Altro'] || 0) + t.amount;
+                    weekday[(new Date(t.date + 'T00:00:00').getDay() + 6) % 7] += t.amount;
+                    expenses.push(t);
                 }
             });
-            renderCharts();
-        }
+            const incArr = months.map(m => Math.round(inc[m] * 100) / 100);
+            const outArr = months.map(m => Math.round(out[m] * 100) / 100);
+            const netArr = months.map((m, i) => Math.round((incArr[i] - outArr[i]) * 100) / 100);
+            let run = 0;
+            const cumArr = netArr.map(v => (run = Math.round((run + v) * 100) / 100));
 
-        function renderCharts() {
-            const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#94a3b8' : '#64748b';
+            // KPI
+            const totIn = incArr.reduce((a, b) => a + b, 0);
+            const totOut = outArr.reduce((a, b) => a + b, 0);
+            const net = totIn - totOut;
+            document.getElementById('an-kpi-in').innerText = ccEur(totIn);
+            document.getElementById('an-kpi-out').innerText = ccEur(totOut);
+            const saveEl = document.getElementById('an-kpi-save');
+            saveEl.innerText = (net >= 0 ? '+' : '-') + ccEur(Math.abs(net));
+            saveEl.className = 'text-lg font-bold mt-1 ' + (net >= 0 ? 'text-emerald-400' : 'text-rose-400');
+            document.getElementById('an-kpi-rate').innerText = 'Tasso di risparmio ' + (totIn > 0 ? Math.round(net / totIn * 100) : 0) + '%';
+            document.getElementById('an-kpi-avg').innerText = ccEur(totOut / months.length);
 
-            // 1. Donut Chart Net Worth
-            const totals = getTotals();
-            const ctxDonut = document.getElementById('chart-networth-donut');
-            if (ctxDonut) {
-                if (donutChartInstance) donutChartInstance.destroy();
-                donutChartInstance = new Chart(ctxDonut, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Liquidità', 'Investimenti', 'Risparmi'],
-                        datasets: [{
-                            data: [totals.cash, totals.investments, totals.goals],
-                            backgroundColor: ['#6366f1', '#10b981', '#f59e0b'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } }
-                        },
-                        cutout: '70%'
-                    }
+            const legend = { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } };
+            const money = c => ' ' + (c.dataset.label ? c.dataset.label + ': ' : '') + ccEur(c.parsed.y);
+            const common = { responsive: true, maintainAspectRatio: false };
+
+            // 1) Entrate vs Uscite
+            ccMk('chart-flow', {
+                type: 'bar',
+                data: { labels: labels, datasets: [
+                    { label: 'Entrate', data: incArr, backgroundColor: '#10b981', borderRadius: 6 },
+                    { label: 'Uscite', data: outArr, backgroundColor: '#f43f5e', borderRadius: 6 }
+                ] },
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 2) Risparmio netto + cumulato
+            ccMk('chart-saving', {
+                data: { labels: labels, datasets: [
+                    { type: 'bar', label: 'Risparmio del mese', data: netArr, backgroundColor: netArr.map(v => v >= 0 ? '#10b981' : '#f43f5e'), borderRadius: 6, order: 2 },
+                    { type: 'line', label: 'Cumulato', data: cumArr, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, pointRadius: 3, order: 1 }
+                ] },
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 3) Andamento patrimonio
+            const startKey = months[0] + '-01';
+            const hist = (store.history || []).filter(x => x.d >= startKey);
+            const nwOk = hist.length >= 2;
+            document.getElementById('an-nw-wrap').classList.toggle('hidden', !nwOk);
+            document.getElementById('an-nw-empty').classList.toggle('hidden', nwOk);
+            if (nwOk) {
+                ccMk('chart-networth', {
+                    type: 'line',
+                    data: { labels: hist.map(x => { const p = x.d.split('-'); return p[2] + '/' + p[1]; }), datasets: [
+                        { label: 'Patrimonio', data: hist.map(x => x.a), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.3, pointRadius: 3 }
+                    ] },
+                    options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
                 });
             }
 
-            // 2. Bar Chart Entrate vs Uscite
-            const ctxIncExp = document.getElementById('chart-income-expense');
-            if (ctxIncExp) {
-                if (incExpChartInstance) incExpChartInstance.destroy();
-
-                let incTotal = 0;
-                let expTotal = 0;
-
-                appData.transactions.forEach(t => {
-                    if (t.type === 'INCOME') incTotal += t.amount;
-                    else expTotal += t.amount;
+            // 4) Spese per categoria
+            const catEntries = Object.keys(cat).map(k => [k, cat[k]]).sort((a, b) => b[1] - a[1]);
+            const catOk = catEntries.length > 0;
+            document.getElementById('an-cat-wrap').classList.toggle('hidden', !catOk);
+            const catTotal = catEntries.reduce((s, x) => s + x[1], 0);
+            document.getElementById('an-cat-list').innerHTML = catOk ? catEntries.slice(0, 8).map((x, i) =>
+                '<div class="flex justify-between items-center text-[11px]"><span class="flex items-center text-slate-300"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background:' + CC_PALETTE[i % CC_PALETTE.length] + '"></span>' + ccEsc(x[0]) + '</span>'
+                + '<span class="text-slate-400">' + ccEur(x[1]) + ' · ' + Math.round(x[1] / catTotal * 100) + '%</span></div>').join('')
+                : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
+            if (catOk) {
+                ccMk('chart-cat', {
+                    type: 'doughnut',
+                    data: { labels: catEntries.map(x => x[0]), datasets: [{ data: catEntries.map(x => Math.round(x[1] * 100) / 100), backgroundColor: catEntries.map((x, i) => CC_PALETTE[i % CC_PALETTE.length]), borderWidth: 0 }] },
+                    options: Object.assign({}, common, { cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.label + ': ' + ccEur(c.parsed) } } } })
                 });
+            }
 
-                incExpChartInstance = new Chart(ctxIncExp, {
+            // 5) Giorno della settimana
+            ccMk('chart-weekday', {
+                type: 'bar',
+                data: { labels: GIORNI, datasets: [{ label: 'Spese', data: weekday.map(v => Math.round(v * 100) / 100), backgroundColor: '#6366f1', borderRadius: 6 }] },
+                options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 6) Obiettivi
+            const goals = store.goals || [];
+            document.getElementById('an-goals-wrap').classList.toggle('hidden', !goals.length);
+            document.getElementById('an-goals-empty').classList.toggle('hidden', goals.length > 0);
+            if (goals.length) {
+                document.getElementById('an-goals-wrap').style.height = Math.max(120, goals.length * 56 + 50) + 'px';
+                ccMk('chart-goals', {
                     type: 'bar',
-                    data: {
-                        labels: ['Totali Periodo'],
-                        datasets: [
-                            { label: 'Entrate', data: [incTotal], backgroundColor: '#10b981', borderRadius: 8 },
-                            { label: 'Uscite', data: [expTotal], backgroundColor: '#f43f5e', borderRadius: 8 }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { labels: { color: textColor, font: { size: 10 } } }
-                        },
-                        scales: {
-                            x: { ticks: { color: textColor } },
-                            y: { ticks: { color: textColor } }
-                        }
-                    }
+                    data: { labels: goals.map(g => g.name), datasets: [
+                        { label: 'Risparmiato', data: goals.map(g => Math.round(goalSaved(g) * 100) / 100), backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Obiettivo', data: goals.map(g => g.target), backgroundColor: '#334155', borderRadius: 6 }
+                    ] },
+                    options: Object.assign({}, common, { indexAxis: 'y', plugins: { legend: legend, tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.x) } } } })
                 });
             }
 
-            // 3. Category Expenses Donut
-            const ctxCat = document.getElementById('chart-category-expenses');
-            if (ctxCat) {
-                if (catChartInstance) catChartInstance.destroy();
-
-                const expCategories = {};
-                appData.transactions.filter(t => t.type === 'EXPENSE').forEach(t => {
-                    expCategories[t.category] = (expCategories[t.category] || 0) + t.amount;
-                });
-
-                const labels = Object.keys(expCategories);
-                const data = Object.values(expCategories);
-
-                catChartInstance = new Chart(ctxCat, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels.length ? labels : ['Nessuna spesa'],
-                        datasets: [{
-                            data: data.length ? data : [1],
-                            backgroundColor: ['#f43f5e', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#64748b'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } }
-                        }
-                    }
-                });
-            }
+            // 7) Top 5 spese
+            const top = expenses.slice().sort((a, b) => b.amount - a.amount).slice(0, 5);
+            document.getElementById('an-top-list').innerHTML = top.length ? top.map(t =>
+                '<div class="flex justify-between items-center bg-slate-800/50 rounded-xl px-3 py-2 text-[11px]"><div class="min-w-0"><p class="text-slate-200 truncate">' + ccEsc(t.desc) + '</p><p class="text-[10px] text-slate-500">' + ccEsc(t.date) + ' · ' + ccEsc(t.category) + '</p></div>'
+                + '<span class="font-bold text-rose-400 shrink-0 ml-3">-' + ccEur(t.amount) + '</span></div>').join('')
+                : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
         }
 
-        // --- BACKUP & EXPORT JSON ---
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `conti_chiari_backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
-        }
-
-        function importData(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (parsed && typeof parsed === 'object') {
-                        appData = parsed;
-                        saveData();
-                        renderAll();
-                        closeModal('modal-backup');
-                        alert('Backup ripristinato con successo!');
-                    }
-                } catch (err) {
-                    alert('File JSON non valido.');
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
-        }
+        window.onload = function() {
+            recordSnapshot();
+            updateAllViews();
+        };
     </script>
 </body>
 </html>
