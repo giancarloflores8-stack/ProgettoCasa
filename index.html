@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Conti Chiari - Mobile Finance App</title>
+    <meta name="apple-mobile-web-app-title" content="Conti Chiari">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="apple-touch-icon.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -350,7 +353,7 @@
                     <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-2"></i>
                     <p class="text-xs text-slate-300 font-medium">Tocca qui per caricare il file .json</p>
                     <p class="text-[10px] text-slate-500 mt-1">Sostituirà il database locale in uso</p>
-                    <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSONBackup(event)">
+                    <input type="file" id="json-file-input" accept=".json,application/json" class="hidden" onchange="importJSONBackup(event)">
                 </div>
             </div>
 
@@ -549,24 +552,87 @@
             downloadAnchor.remove();
         }
 
+        // Converte il backup del vecchio formato (v2: settings/months/cash) in quello di questa app
+        const CC_CAT = { alimentari:'Alimentari', shopping:'Shopping', svago:'Svago', trasporti:'Trasporti', casa:'Casa', salute:'Salute', abbonamenti:'Abbonamenti', persona:'Persona', persone:'Persone', tasse:'Tasse', altro:'Altro', stipendio:'Stipendio', extra:'Extra' };
+        function ccCat(c) {
+            if (!c) return 'Altro';
+            return CC_CAT[c] || (c.charAt(0).toUpperCase() + c.slice(1));
+        }
+        function convertBackupV2(d) {
+            const bankTx = [];
+            Object.keys(d.months || {}).forEach(m => (d.months[m].tx || []).forEach(t => bankTx.push({ ...t, acc: 'Conto Corrente' })));
+            const cashTx = ((d.cash && d.cash.tx) || []).map(t => ({ ...t, acc: 'Contanti', c: t.c || 'Contanti' }));
+            const ref = d.settings && d.settings.ref;
+            const sign = t => (t.t === 'in' ? t.a : -t.a);
+
+            let bank = ref ? ref.amount : 0;
+            bankTx.forEach(t => { if (!ref || t.d > ref.date) bank += sign(t); });
+            let cash = 0;
+            cashTx.forEach(t => { cash += sign(t); });
+
+            const transactions = bankTx.concat(cashTx)
+                .sort((x, y) => (y.d || '').localeCompare(x.d || ''))
+                .map((t, i) => ({
+                    id: i + 1,
+                    date: t.d,
+                    desc: t.n || 'Movimento',
+                    type: t.t === 'in' ? 'Entrata' : 'Uscita',
+                    category: ccCat(t.c),
+                    amount: t.a,
+                    account: t.acc
+                }));
+
+            return {
+                accounts: [
+                    { id: 1, name: 'Conto Corrente', type: 'Banca', balance: Math.round(bank * 100) / 100 },
+                    { id: 2, name: 'Contanti', type: 'Cassa', balance: Math.round(cash * 100) / 100 }
+                ],
+                assets: [],
+                installments: [],
+                transactions: transactions
+            };
+        }
+
         function importJSONBackup(event) {
-            const file = event.target.files[0];
+            const input = event.target;
+            const file = input.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData.accounts && importedData.transactions) {
-                        store = importedData;
-                        saveData();
-                        closeModal('modal-backup');
-                        alert(' Backup caricato con successo!');
-                    } else {
-                        alert(' Errore: Il file JSON caricato non è nel formato corretto di Conti Chiari.');
+                    const raw = JSON.parse(e.target.result);
+                    let data = null;
+                    let note = '';
+
+                    if (raw && Array.isArray(raw.accounts) && Array.isArray(raw.transactions)) {
+                        // Formato attuale
+                        data = {
+                            accounts: raw.accounts,
+                            assets: Array.isArray(raw.assets) ? raw.assets : [],
+                            installments: Array.isArray(raw.installments) ? raw.installments : [],
+                            transactions: raw.transactions
+                        };
+                    } else if (raw && raw.v === 2 && raw.settings) {
+                        // Vecchio formato Conti Chiari: converto e conservo anche l'originale
+                        data = convertBackupV2(raw);
+                        try { localStorage.setItem('cc_backup_v2_originale', e.target.result); } catch (_) {}
+                        note = '\nConvertito dal vecchio formato: conti, saldi e movimenti importati.';
                     }
+
+                    if (!data) {
+                        alert(' Errore: Il file JSON caricato non è nel formato corretto di Conti Chiari.');
+                        return;
+                    }
+
+                    store = data;
+                    saveData();
+                    closeModal('modal-backup');
+                    alert(' Backup caricato con successo!' + note);
                 } catch (err) {
                     alert(' File JSON non valido o danneggiato.');
+                } finally {
+                    input.value = '';
                 }
             };
             reader.readAsText(file);
