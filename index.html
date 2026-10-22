@@ -273,17 +273,101 @@
 
         <!-- 6. ANALISI & GRAFICI -->
         <section id="tab-analisi" class="tab-content hidden space-y-4">
-            <div>
-                <h2 class="text-base font-bold text-white">Analytics & Grafici</h2>
-                <p class="text-[11px] text-slate-400">Analisi visiva del tuo bilancio</p>
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-base font-bold text-white">Analytics & Grafici</h2>
+                    <p class="text-[11px] text-slate-400">Andamento delle tue finanze</p>
+                </div>
+                <select id="an-period" onchange="renderAnalysisCharts()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-[11px] text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <option value="3">Ultimi 3 mesi</option>
+                    <option value="6" selected>Ultimi 6 mesi</option>
+                    <option value="12">Ultimi 12 mesi</option>
+                    <option value="all">Tutto</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-arrow-down text-emerald-400 text-[10px] mr-1.5"></i>Entrate</span>
+                    <h3 id="an-kpi-in" class="text-lg font-bold text-emerald-400 mt-1">€ 0.00</h3>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-arrow-up text-rose-400 text-[10px] mr-1.5"></i>Uscite</span>
+                    <h3 id="an-kpi-out" class="text-lg font-bold text-rose-400 mt-1">€ 0.00</h3>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-piggy-bank text-indigo-400 text-[10px] mr-1.5"></i>Risparmio netto</span>
+                    <h3 id="an-kpi-save" class="text-lg font-bold text-white mt-1">€ 0.00</h3>
+                    <p id="an-kpi-rate" class="text-[10px] text-slate-400 mt-0.5">Tasso di risparmio 0%</p>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center"><i class="fa-solid fa-calendar-day text-amber-400 text-[10px] mr-1.5"></i>Spesa media</span>
+                    <h3 id="an-kpi-avg" class="text-lg font-bold text-white mt-1">€ 0.00</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">al mese</p>
+                </div>
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
-                <h3 class="text-xs font-bold text-slate-300">Spese per Categoria</h3>
-                <div class="h-56 relative">
-                    <canvas id="categoryChart"></canvas>
-                </div>
+                <h3 class="text-xs font-bold text-slate-300">Entrate vs Uscite per mese</h3>
+                <div class="h-56 relative"><canvas id="chart-flow"></canvas></div>
             </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Risparmio netto mensile e cumulato</h3>
+                <div class="h-56 relative"><canvas id="chart-saving"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Andamento del patrimonio</h3>
+                <div id="an-nw-wrap" class="h-56 relative"><canvas id="chart-networth"></canvas></div>
+                <p id="an-nw-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Il grafico si riempie man mano che usi l'app: ogni giorno in cui aggiorni i dati viene salvato il patrimonio.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-300">Spese per categoria</h3>
+                <div id="an-cat-wrap" class="h-56 relative"><canvas id="chart-cat"></canvas></div>
+                <div id="an-cat-list" class="space-y-1.5"></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Spese per giorno della settimana</h3>
+                <div class="h-48 relative"><canvas id="chart-weekday"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Avanzamento obiettivi</h3>
+                <div id="an-goals-wrap" class="relative"><canvas id="chart-goals"></canvas></div>
+                <p id="an-goals-empty" class="hidden text-[11px] text-slate-500 py-4 text-center">Nessun obiettivo: creane uno nella sezione Obiettivi.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Le 5 spese più alte</h3>
+                <div id="an-top-list" class="space-y-1.5"></div>
+            </div>
+        </section>
+
+        <!-- OBIETTIVI DI RISPARMIO -->
+        <section id="tab-obiettivi" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-white">Obiettivi di Risparmio</h2>
+                    <p class="text-[11px] text-slate-400">Scegli un obiettivo e versa i tuoi risparmi</p>
+                </div>
+                <button onclick="openGoalModal()" class="bg-indigo-600 active:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-plus mr-1"></i>Nuovo
+                </button>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-500/30 rounded-2xl p-4 shadow-sm">
+                <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">Totale messo da parte</span>
+                <h3 id="goals-total-saved" class="text-2xl font-extrabold text-white mt-1">€ 0.00</h3>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden mt-3">
+                    <div id="goals-total-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1.5">su un totale di <span id="goals-total-target">€ 0.00</span> da raggiungere</p>
+            </div>
+
+            <div id="goals-list" class="space-y-3"></div>
         </section>
 
         <!-- 7. ASSISTENTE AI -->
@@ -328,32 +412,42 @@
     <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-2xl border-t border-slate-800/80 safe-bottom px-2 pt-2 pb-1 flex justify-around items-center text-center">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-item flex-1 py-1 text-indigo-400 tab-item-active transition-all">
             <i class="fa-solid fa-chart-pie text-lg block mx-auto"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">Home</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Home</span>
         </button>
 
         <button onclick="switchTab('carte-contanti')" id="nav-carte-contanti" class="tab-item flex-1 py-1 text-slate-400 transition-all">
             <i class="fa-solid fa-wallet text-lg block mx-auto"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">Conti</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Conti</span>
         </button>
 
         <button onclick="switchTab('investimenti')" id="nav-investimenti" class="tab-item flex-1 py-1 text-slate-400 transition-all">
             <i class="fa-solid fa-arrow-trend-up text-lg block mx-auto"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">Titoli</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Titoli</span>
         </button>
 
         <button onclick="switchTab('rateizzazioni')" id="nav-rateizzazioni" class="tab-item flex-1 py-1 text-slate-400 transition-all">
             <i class="fa-solid fa-clock-rotate-left text-lg block mx-auto"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">Rate</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Rate</span>
         </button>
 
         <button onclick="switchTab('transazioni')" id="nav-transazioni" class="tab-item flex-1 py-1 text-slate-400 transition-all">
             <i class="fa-solid fa-list-check text-lg block mx-auto"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">Movimenti</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Movimenti</span>
+        </button>
+
+        <button onclick="switchTab('analisi')" id="nav-analisi" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-chart-line text-lg block mx-auto"></i>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Grafici</span>
+        </button>
+
+        <button onclick="switchTab('obiettivi')" id="nav-obiettivi" class="tab-item flex-1 py-1 text-slate-400 transition-all">
+            <i class="fa-solid fa-bullseye text-lg block mx-auto"></i>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">Obiettivi</span>
         </button>
 
         <button onclick="switchTab('assistant')" id="nav-assistant" class="tab-item flex-1 py-1 text-slate-400 transition-all">
             <i class="fa-solid fa-robot text-lg block mx-auto text-emerald-400"></i>
-            <span class="text-[10px] font-medium tracking-tight block mt-1">AI</span>
+            <span class="text-[9px] font-medium tracking-tight block mt-1">AI</span>
         </button>
     </nav>
 
@@ -471,6 +565,79 @@
         </div>
     </div>
 
+    <!-- MODALE OBIETTIVO -->
+    <div id="modal-goal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="goal-modal-title" class="text-sm font-bold text-white">Nuovo Obiettivo</h3>
+                <button onclick="closeModal('modal-goal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveGoal(event)" class="space-y-3">
+                <input type="hidden" id="goal-id" value="">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipo di obiettivo</label>
+                    <select id="goal-icon" onchange="goalPresetChanged()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                        <option value="🎯">🎯 Altro / Personalizzato</option>
+                        <option value="✈️">✈️ Viaggio</option>
+                        <option value="🚗">🚗 Auto / Moto</option>
+                        <option value="🏠">🏠 Casa</option>
+                        <option value="📱">📱 Tecnologia</option>
+                        <option value="🛡️">🛡️ Fondo emergenza</option>
+                        <option value="🎁">🎁 Regalo</option>
+                        <option value="🎓">🎓 Studio</option>
+                    </select>
+                </div>
+                <input type="text" id="goal-name" required placeholder="Nome obiettivo (es. Vacanza estate)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <input type="number" step="0.01" inputmode="decimal" id="goal-target" required placeholder="Importo da raggiungere (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Scadenza (facoltativa)</label>
+                    <input type="date" id="goal-deadline" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <button type="submit" id="goal-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Crea Obiettivo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE VERSAMENTO -->
+    <div id="modal-contribution" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Versa sul tuo Obiettivo</h3>
+                <button onclick="closeModal('modal-contribution')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveContribution(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Obiettivo</label>
+                    <select id="ct-goal" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Operazione</label>
+                        <select id="ct-kind" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                            <option value="in">Versamento</option>
+                            <option value="out">Prelievo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" inputmode="decimal" id="ct-amount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Data</label>
+                        <input type="date" id="ct-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Nota (facoltativa)</label>
+                        <input type="text" id="ct-note" placeholder="Es. Mese di ottobre" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs">Salva</button>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -530,7 +697,9 @@
             transactions: JSON.parse(localStorage.getItem('cc_transactions')) || [
                 { id: 1, date: '2026-10-20', desc: 'Spesa Esselunga', type: 'Uscita', category: 'Alimentari', amount: 64.50, account: 'Revolut' },
                 { id: 2, date: '2026-10-18', desc: 'Stipendio Mese', type: 'Entrata', category: 'Stipendio', amount: 1850.00, account: 'Conto Corrente' }
-            ]
+            ],
+            goals: JSON.parse(localStorage.getItem('cc_goals')) || [],
+            history: JSON.parse(localStorage.getItem('cc_history')) || []
         };
 
         function saveData() {
@@ -538,6 +707,8 @@
             localStorage.setItem('cc_assets', JSON.stringify(store.assets));
             localStorage.setItem('cc_installments', JSON.stringify(store.installments));
             localStorage.setItem('cc_transactions', JSON.stringify(store.transactions));
+            localStorage.setItem('cc_goals', JSON.stringify(store.goals));
+            recordSnapshot();
             updateAllViews();
         }
 
@@ -565,6 +736,7 @@
                 'rateizzazioni': 'Finanziamenti & Klarna',
                 'transazioni': 'Registro Movimenti',
                 'analisi': 'Grafici & Analytics',
+                'obiettivi': 'Obiettivi di Risparmio',
                 'assistant': 'Assistente Finanziario AI'
             };
             document.getElementById('header-subtitle').innerText = subtitles[tabId] || 'Mobile Finance';
@@ -629,6 +801,12 @@
                     account: t.acc
                 }));
 
+            // Storico saldi del vecchio backup -> serve per il grafico dell'andamento
+            const hmap = {};
+            ((d.history && d.history.balances) || []).forEach(x => { if (x && x.d) hmap[x.d] = x.a; });
+            ((d.settings && d.settings.points) || []).forEach(x => { if (x && x.d) hmap[x.d] = x.a; });
+            const history = Object.keys(hmap).sort().map(k => ({ d: k, a: hmap[k] }));
+
             return {
                 accounts: [
                     { id: 1, name: 'Conto Corrente', type: 'Banca', balance: Math.round(bank * 100) / 100 },
@@ -636,7 +814,9 @@
                 ],
                 assets: [],
                 installments: [],
-                transactions: transactions
+                transactions: transactions,
+                goals: [],
+                history: history
             };
         }
 
@@ -658,7 +838,9 @@
                             accounts: raw.accounts,
                             assets: Array.isArray(raw.assets) ? raw.assets : [],
                             installments: Array.isArray(raw.installments) ? raw.installments : [],
-                            transactions: raw.transactions
+                            transactions: raw.transactions,
+                            goals: Array.isArray(raw.goals) ? raw.goals : [],
+                            history: Array.isArray(raw.history) ? raw.history : []
                         };
                     } else if (raw && raw.v === 2 && raw.settings) {
                         // Vecchio formato Conti Chiari: converto e conservo anche l'originale
@@ -835,6 +1017,7 @@
 
         function filterTransactions() {
             renderTransactionsList();
+            renderGoals();
         }
 
         function openModal(id) {
@@ -1006,28 +1189,346 @@
         }
 
         let catChartInstance = null;
-        function renderAnalysisCharts() {
-            const ctxCat = document.getElementById('categoryChart')?.getContext('2d');
-            if(ctxCat) {
-                if(catChartInstance) catChartInstance.destroy();
-                catChartInstance = new Chart(ctxCat, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Alimentari', 'Casa', 'Trasporti', 'Svago'],
-                        datasets: [{
-                            label: 'Spese (€)',
-                            data: [120, 340, 80, 150],
-                            backgroundColor: '#6366f1'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }
+        // ===== UTILITY =====
+        const MESI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+        const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+        function ccEur(n) { return '€ ' + (Number(n) || 0).toFixed(2); }
+        function ccEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+        function ccToday() { return new Date().toISOString().split('T')[0]; }
+
+        // ===== STORICO PATRIMONIO (uno scatto al giorno) =====
+        function recordSnapshot() {
+            const liquid = store.accounts.reduce((a, c) => a + c.balance, 0);
+            const invested = store.assets.reduce((a, c) => a + (c.qty * c.currentPrice), 0);
+            const debt = store.installments.reduce((a, c) => a + c.remaining, 0);
+            const nw = Math.round((liquid + invested - debt) * 100) / 100;
+            const today = ccToday();
+            const row = store.history.find(x => x.d === today);
+            if (row) row.a = nw; else store.history.push({ d: today, a: nw });
+            store.history.sort((x, y) => x.d.localeCompare(y.d));
+            localStorage.setItem('cc_history', JSON.stringify(store.history));
+        }
+
+        // ===== OBIETTIVI DI RISPARMIO =====
+        function goalSaved(g) { return (g.contributions || []).reduce((s, c) => s + c.amount, 0); }
+
+        function renderGoals() {
+            const list = document.getElementById('goals-list');
+            if (!list) return;
+            const goals = store.goals || [];
+            const totSaved = goals.reduce((s, g) => s + goalSaved(g), 0);
+            const totTarget = goals.reduce((s, g) => s + g.target, 0);
+            document.getElementById('goals-total-saved').innerText = ccEur(totSaved);
+            document.getElementById('goals-total-target').innerText = ccEur(totTarget);
+            const totPct = totTarget > 0 ? Math.min(100, Math.max(0, totSaved / totTarget * 100)) : 0;
+            document.getElementById('goals-total-bar').style.width = totPct.toFixed(0) + '%';
+
+            if (!goals.length) {
+                list.innerHTML = '<div class="bg-slate-900/60 border border-dashed border-slate-700 rounded-2xl p-6 text-center text-xs text-slate-400">Nessun obiettivo ancora.<br>Tocca <b class="text-indigo-300">Nuovo</b> per crearne uno.</div>';
+                return;
+            }
+
+            list.innerHTML = goals.map(g => {
+                const saved = goalSaved(g);
+                const remaining = Math.max(0, g.target - saved);
+                const done = saved >= g.target;
+                const pct = g.target > 0 ? Math.min(100, Math.max(0, saved / g.target * 100)) : 0;
+
+                let deadlineText = 'Nessuna scadenza';
+                let hint = 'Mancano ' + ccEur(remaining);
+                if (g.deadline) {
+                    const dl = new Date(g.deadline + 'T00:00:00');
+                    const dlLabel = dl.getDate() + ' ' + MESI[dl.getMonth()] + ' ' + dl.getFullYear();
+                    deadlineText = 'Scadenza ' + dlLabel;
+                    const diff = dl - new Date();
+                    if (!done) {
+                        if (diff < 0) hint = 'Scaduto · mancano ' + ccEur(remaining);
+                        else {
+                            const monthsLeft = Math.max(1, Math.ceil(diff / (1000 * 3600 * 24 * 30.44)));
+                            hint = 'Servono ' + ccEur(remaining / monthsLeft) + '/mese';
+                        }
                     }
+                }
+                if (done) hint = '🎉 Obiettivo raggiunto!';
+
+                const history = (g.contributions || []).slice().sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+                const historyHtml = history.length
+                    ? '<details class="group"><summary class="text-[11px] text-slate-400 cursor-pointer select-none py-1">Storico versamenti (' + history.length + ')</summary><div class="space-y-1.5 mt-2">'
+                      + history.map(c => '<div class="flex justify-between items-center bg-slate-800/50 rounded-xl px-3 py-2 text-[11px]">'
+                          + '<div><span class="text-slate-200">' + ccEsc(c.date) + '</span>' + (c.note ? '<span class="text-slate-500"> · ' + ccEsc(c.note) + '</span>' : '') + '</div>'
+                          + '<div class="flex items-center space-x-3"><span class="font-bold ' + (c.amount >= 0 ? 'text-emerald-400' : 'text-rose-400') + '">' + (c.amount >= 0 ? '+' : '-') + ccEur(Math.abs(c.amount)) + '</span>'
+                          + '<button onclick="deleteContribution(' + g.id + ',' + c.id + ')" class="text-slate-500 active:text-rose-400"><i class="fa-solid fa-trash text-[10px]"></i></button></div></div>').join('')
+                      + '</div></details>'
+                    : '<p class="text-[11px] text-slate-500">Ancora nessun versamento.</p>';
+
+                return '<div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">'
+                    + '<div class="flex justify-between items-start">'
+                    + '<div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-xl">' + ccEsc(g.icon || '🎯') + '</div>'
+                    + '<div><h4 class="text-sm font-bold text-white">' + ccEsc(g.name) + '</h4><p class="text-[10px] text-slate-400">' + deadlineText + '</p></div></div>'
+                    + '<div class="flex items-center space-x-4 text-slate-500 pt-1">'
+                    + '<button onclick="openGoalEdit(' + g.id + ')" class="active:text-indigo-400"><i class="fa-solid fa-pen text-xs"></i></button>'
+                    + '<button onclick="deleteGoal(' + g.id + ')" class="text-rose-400/80"><i class="fa-solid fa-trash text-xs"></i></button></div></div>'
+                    + '<div><div class="flex justify-between items-baseline text-[11px]"><span class="text-emerald-400 font-bold text-sm">' + ccEur(saved) + '</span><span class="text-slate-400">di ' + ccEur(g.target) + '</span></div>'
+                    + '<div class="h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5"><div class="h-full rounded-full ' + (done ? 'bg-emerald-500' : 'bg-indigo-500') + '" style="width:' + pct.toFixed(0) + '%"></div></div>'
+                    + '<div class="flex justify-between text-[10px] text-slate-400 mt-1.5"><span>' + pct.toFixed(0) + '%</span><span>' + hint + '</span></div></div>'
+                    + '<button onclick="openContribution(' + g.id + ')" class="w-full bg-indigo-600/90 active:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl"><i class="fa-solid fa-piggy-bank mr-1.5"></i>Versa / Preleva</button>'
+                    + historyHtml + '</div>';
+            }).join('');
+        }
+
+        function openGoalModal() {
+            document.getElementById('goal-id').value = '';
+            document.getElementById('goal-icon').value = '🎯';
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-deadline').value = '';
+            document.getElementById('goal-modal-title').innerText = 'Nuovo Obiettivo';
+            document.getElementById('goal-submit').innerText = 'Crea Obiettivo';
+            document.getElementById('modal-goal').classList.remove('hidden');
+        }
+
+        function goalPresetChanged() {
+            const sel = document.getElementById('goal-icon');
+            const nameEl = document.getElementById('goal-name');
+            const labels = { '✈️': 'Viaggio', '🚗': 'Auto', '🏠': 'Casa', '📱': 'Tecnologia', '🛡️': 'Fondo emergenza', '🎁': 'Regalo', '🎓': 'Studio' };
+            const known = Object.values(labels);
+            if (!nameEl.value.trim() || known.includes(nameEl.value.trim())) nameEl.value = labels[sel.value] || '';
+        }
+
+        function openGoalEdit(id) {
+            const g = store.goals.find(x => x.id === id);
+            if (!g) return;
+            document.getElementById('goal-id').value = String(g.id);
+            document.getElementById('goal-icon').value = g.icon || '🎯';
+            document.getElementById('goal-name').value = g.name;
+            document.getElementById('goal-target').value = g.target;
+            document.getElementById('goal-deadline').value = g.deadline || '';
+            document.getElementById('goal-modal-title').innerText = 'Modifica Obiettivo';
+            document.getElementById('goal-submit').innerText = 'Salva Modifiche';
+            document.getElementById('modal-goal').classList.remove('hidden');
+        }
+
+        function saveGoal(e) {
+            e.preventDefault();
+            const editId = document.getElementById('goal-id').value;
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseFloat(String(document.getElementById('goal-target').value).replace(',', '.'));
+            if (!name || isNaN(target) || target <= 0) return;
+            const icon = document.getElementById('goal-icon').value;
+            const deadline = document.getElementById('goal-deadline').value || '';
+            if (editId) {
+                const g = store.goals.find(x => String(x.id) === editId);
+                if (g) { g.name = name; g.icon = icon; g.target = Math.round(target * 100) / 100; g.deadline = deadline; }
+            } else {
+                store.goals.push({ id: Date.now(), name: name, icon: icon, target: Math.round(target * 100) / 100, deadline: deadline, contributions: [] });
+            }
+            saveData();
+            closeModal('modal-goal');
+        }
+
+        function deleteGoal(id) {
+            const g = store.goals.find(x => x.id === id);
+            if (!g) return;
+            if (!confirm('Eliminare l\'obiettivo "' + g.name + '" e tutto il suo storico?')) return;
+            store.goals = store.goals.filter(x => x.id !== id);
+            saveData();
+        }
+
+        function openContribution(goalId) {
+            if (!store.goals.length) { openGoalModal(); return; }
+            const sel = document.getElementById('ct-goal');
+            sel.innerHTML = store.goals.map(g => '<option value="' + g.id + '">' + ccEsc((g.icon || '🎯') + ' ' + g.name) + '</option>').join('');
+            if (goalId) sel.value = String(goalId);
+            document.getElementById('ct-kind').value = 'in';
+            document.getElementById('ct-amount').value = '';
+            document.getElementById('ct-note').value = '';
+            document.getElementById('ct-date').value = ccToday();
+            document.getElementById('modal-contribution').classList.remove('hidden');
+        }
+
+        function saveContribution(e) {
+            e.preventDefault();
+            const g = store.goals.find(x => String(x.id) === document.getElementById('ct-goal').value);
+            const raw = parseFloat(String(document.getElementById('ct-amount').value).replace(',', '.'));
+            if (!g || isNaN(raw) || raw <= 0) return;
+            const amount = Math.round(raw * 100) / 100 * (document.getElementById('ct-kind').value === 'out' ? -1 : 1);
+            if (goalSaved(g) + amount < -0.001) { alert('Non puoi prelevare più di quanto hai messo da parte (' + ccEur(goalSaved(g)) + ').'); return; }
+            g.contributions.push({ id: Date.now(), date: document.getElementById('ct-date').value, amount: amount, note: document.getElementById('ct-note').value.trim() });
+            saveData();
+            closeModal('modal-contribution');
+        }
+
+        function deleteContribution(goalId, cId) {
+            const g = store.goals.find(x => x.id === goalId);
+            if (!g) return;
+            g.contributions = g.contributions.filter(c => c.id !== cId);
+            saveData();
+        }
+
+        // ===== GRAFICI =====
+        const anCharts = {};
+        const CC_PALETTE = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#a855f7', '#84cc16', '#f97316', '#64748b'];
+
+        function ccMonthsList(n) {
+            const out = [];
+            const now = new Date();
+            for (let i = n - 1; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                out.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+            }
+            return out;
+        }
+
+        function ccMk(id, cfg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (anCharts[id]) anCharts[id].destroy();
+            anCharts[id] = new Chart(el.getContext('2d'), cfg);
+        }
+
+        function renderAnalysisCharts() {
+            if (typeof Chart === 'undefined') return;
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = 'rgba(148,163,184,0.12)';
+            Chart.defaults.font.family = 'Inter, sans-serif';
+
+            // Periodo
+            const periodSel = document.getElementById('an-period').value;
+            const real = store.transactions.filter(t => !/correzione saldo/i.test(t.desc || '') && t.date);
+            let n;
+            if (periodSel === 'all') {
+                const ms = real.map(t => t.date.slice(0, 7)).sort();
+                if (!ms.length) n = 1;
+                else {
+                    const f = ms[0].split('-');
+                    const now = new Date();
+                    n = (now.getFullYear() - Number(f[0])) * 12 + (now.getMonth() + 1 - Number(f[1])) + 1;
+                }
+                n = Math.max(1, Math.min(24, n));
+            } else n = parseInt(periodSel, 10);
+            const months = ccMonthsList(n);
+            const labels = months.map(m => { const p = m.split('-'); return MESI[Number(p[1]) - 1] + (n > 12 ? " '" + p[0].slice(2) : ''); });
+
+            // Aggregazioni
+            const inc = {}, out = {};
+            months.forEach(m => { inc[m] = 0; out[m] = 0; });
+            const cat = {};
+            const weekday = [0, 0, 0, 0, 0, 0, 0];
+            const expenses = [];
+            real.forEach(t => {
+                const m = t.date.slice(0, 7);
+                if (!(m in inc)) return;
+                if (t.type === 'Entrata') inc[m] += t.amount;
+                else {
+                    out[m] += t.amount;
+                    cat[t.category || 'Altro'] = (cat[t.category || 'Altro'] || 0) + t.amount;
+                    weekday[(new Date(t.date + 'T00:00:00').getDay() + 6) % 7] += t.amount;
+                    expenses.push(t);
+                }
+            });
+            const incArr = months.map(m => Math.round(inc[m] * 100) / 100);
+            const outArr = months.map(m => Math.round(out[m] * 100) / 100);
+            const netArr = months.map((m, i) => Math.round((incArr[i] - outArr[i]) * 100) / 100);
+            let run = 0;
+            const cumArr = netArr.map(v => (run = Math.round((run + v) * 100) / 100));
+
+            // KPI
+            const totIn = incArr.reduce((a, b) => a + b, 0);
+            const totOut = outArr.reduce((a, b) => a + b, 0);
+            const net = totIn - totOut;
+            document.getElementById('an-kpi-in').innerText = ccEur(totIn);
+            document.getElementById('an-kpi-out').innerText = ccEur(totOut);
+            const saveEl = document.getElementById('an-kpi-save');
+            saveEl.innerText = (net >= 0 ? '+' : '-') + ccEur(Math.abs(net));
+            saveEl.className = 'text-lg font-bold mt-1 ' + (net >= 0 ? 'text-emerald-400' : 'text-rose-400');
+            document.getElementById('an-kpi-rate').innerText = 'Tasso di risparmio ' + (totIn > 0 ? Math.round(net / totIn * 100) : 0) + '%';
+            document.getElementById('an-kpi-avg').innerText = ccEur(totOut / months.length);
+
+            const legend = { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } };
+            const money = c => ' ' + (c.dataset.label ? c.dataset.label + ': ' : '') + ccEur(c.parsed.y);
+            const common = { responsive: true, maintainAspectRatio: false };
+
+            // 1) Entrate vs Uscite
+            ccMk('chart-flow', {
+                type: 'bar',
+                data: { labels: labels, datasets: [
+                    { label: 'Entrate', data: incArr, backgroundColor: '#10b981', borderRadius: 6 },
+                    { label: 'Uscite', data: outArr, backgroundColor: '#f43f5e', borderRadius: 6 }
+                ] },
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 2) Risparmio netto + cumulato
+            ccMk('chart-saving', {
+                data: { labels: labels, datasets: [
+                    { type: 'bar', label: 'Risparmio del mese', data: netArr, backgroundColor: netArr.map(v => v >= 0 ? '#10b981' : '#f43f5e'), borderRadius: 6, order: 2 },
+                    { type: 'line', label: 'Cumulato', data: cumArr, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, pointRadius: 3, order: 1 }
+                ] },
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 3) Andamento patrimonio
+            const startKey = months[0] + '-01';
+            const hist = (store.history || []).filter(x => x.d >= startKey);
+            const nwOk = hist.length >= 2;
+            document.getElementById('an-nw-wrap').classList.toggle('hidden', !nwOk);
+            document.getElementById('an-nw-empty').classList.toggle('hidden', nwOk);
+            if (nwOk) {
+                ccMk('chart-networth', {
+                    type: 'line',
+                    data: { labels: hist.map(x => { const p = x.d.split('-'); return p[2] + '/' + p[1]; }), datasets: [
+                        { label: 'Patrimonio', data: hist.map(x => x.a), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.3, pointRadius: 3 }
+                    ] },
+                    options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
                 });
             }
+
+            // 4) Spese per categoria
+            const catEntries = Object.keys(cat).map(k => [k, cat[k]]).sort((a, b) => b[1] - a[1]);
+            const catOk = catEntries.length > 0;
+            document.getElementById('an-cat-wrap').classList.toggle('hidden', !catOk);
+            const catTotal = catEntries.reduce((s, x) => s + x[1], 0);
+            document.getElementById('an-cat-list').innerHTML = catOk ? catEntries.slice(0, 8).map((x, i) =>
+                '<div class="flex justify-between items-center text-[11px]"><span class="flex items-center text-slate-300"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background:' + CC_PALETTE[i % CC_PALETTE.length] + '"></span>' + ccEsc(x[0]) + '</span>'
+                + '<span class="text-slate-400">' + ccEur(x[1]) + ' · ' + Math.round(x[1] / catTotal * 100) + '%</span></div>').join('')
+                : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
+            if (catOk) {
+                ccMk('chart-cat', {
+                    type: 'doughnut',
+                    data: { labels: catEntries.map(x => x[0]), datasets: [{ data: catEntries.map(x => Math.round(x[1] * 100) / 100), backgroundColor: catEntries.map((x, i) => CC_PALETTE[i % CC_PALETTE.length]), borderWidth: 0 }] },
+                    options: Object.assign({}, common, { cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.label + ': ' + ccEur(c.parsed) } } } })
+                });
+            }
+
+            // 5) Giorno della settimana
+            ccMk('chart-weekday', {
+                type: 'bar',
+                data: { labels: GIORNI, datasets: [{ label: 'Spese', data: weekday.map(v => Math.round(v * 100) / 100), backgroundColor: '#6366f1', borderRadius: 6 }] },
+                options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
+            });
+
+            // 6) Obiettivi
+            const goals = store.goals || [];
+            document.getElementById('an-goals-wrap').classList.toggle('hidden', !goals.length);
+            document.getElementById('an-goals-empty').classList.toggle('hidden', goals.length > 0);
+            if (goals.length) {
+                document.getElementById('an-goals-wrap').style.height = Math.max(120, goals.length * 56 + 50) + 'px';
+                ccMk('chart-goals', {
+                    type: 'bar',
+                    data: { labels: goals.map(g => g.name), datasets: [
+                        { label: 'Risparmiato', data: goals.map(g => Math.round(goalSaved(g) * 100) / 100), backgroundColor: '#10b981', borderRadius: 6 },
+                        { label: 'Obiettivo', data: goals.map(g => g.target), backgroundColor: '#334155', borderRadius: 6 }
+                    ] },
+                    options: Object.assign({}, common, { indexAxis: 'y', plugins: { legend: legend, tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.x) } } } })
+                });
+            }
+
+            // 7) Top 5 spese
+            const top = expenses.slice().sort((a, b) => b.amount - a.amount).slice(0, 5);
+            document.getElementById('an-top-list').innerHTML = top.length ? top.map(t =>
+                '<div class="flex justify-between items-center bg-slate-800/50 rounded-xl px-3 py-2 text-[11px]"><div class="min-w-0"><p class="text-slate-200 truncate">' + ccEsc(t.desc) + '</p><p class="text-[10px] text-slate-500">' + ccEsc(t.date) + ' · ' + ccEsc(t.category) + '</p></div>'
+                + '<span class="font-bold text-rose-400 shrink-0 ml-3">-' + ccEur(t.amount) + '</span></div>').join('')
+                : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
         }
 
         // CHATBOT ASSISTANT
@@ -1061,6 +1562,7 @@
         }
 
         window.onload = function() {
+            recordSnapshot();
             updateAllViews();
         };
     </script>
