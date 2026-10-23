@@ -6,7 +6,7 @@
     <title>Conti Chiari - Mobile Finance App</title>
     <meta name="apple-mobile-web-app-title" content="Conti Chiari">
     <meta name="theme-color" content="#090d16">
-    <script>try { if (localStorage.getItem('cc_theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
+    <script>try { if (localStorage.getItem('cc_theme') === 'light') document.documentElement.classList.add('light'); if (localStorage.getItem('cc_privacy') === '1') document.documentElement.classList.add('privacy'); } catch (e) {}</script>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
     <!-- Tailwind CSS -->
@@ -61,6 +61,14 @@
         }
 
         /* Logo: bianco in tema scuro, nero in tema chiaro (l'immagine e' nera su sfondo trasparente) */
+        /* Modalita' privacy: sfoca patrimonio netto, conto corrente e contanti */
+        html.privacy #top-net-worth, html.privacy #dash-total-net, html.privacy #dash-liquid, html.privacy #dash-invested,
+        html.privacy #dash-bank, html.privacy #dash-cash, html.privacy .pv {
+            filter: blur(7px);
+            -webkit-user-select: none; user-select: none; pointer-events: none;
+        }
+        html.privacy #top-net-worth, html.privacy #dash-liquid, html.privacy #dash-invested, html.privacy span.pv { display: inline-block; }
+        #top-net-worth, #dash-total-net, #dash-liquid, #dash-invested, #dash-bank, #dash-cash, .pv { transition: filter 0.2s ease; }
         #app-header { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
         #app-header.hdr-hidden { transform: translateY(-115%); }
         .app-logo { filter: none; }
@@ -122,6 +130,11 @@
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
+            <!-- Privacy: sfoca gli importi -->
+            <button id="privacy-toggle" onclick="togglePrivacy()" aria-label="Nascondi importi" aria-pressed="false" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-95">
+                <i id="privacy-icon" class="fa-solid fa-eye text-xs text-slate-300"></i>
+            </button>
+
             <!-- Tema chiaro / scuro -->
             <button id="theme-toggle" onclick="toggleTheme()" aria-label="Cambia tema" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-95">
                 <i id="theme-icon" class="fa-solid fa-sun text-xs text-amber-400"></i>
@@ -951,7 +964,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-sm font-extrabold text-white"><i class="fa-solid fa-pen text-[9px] text-indigo-400/70 mr-1.5"></i>€ ${acc.balance.toFixed(2)}</span>
+                            <span class="pv text-sm font-extrabold text-white"><i class="fa-solid fa-pen text-[9px] text-indigo-400/70 mr-1.5"></i>€ ${acc.balance.toFixed(2)}</span>
                             <button onclick="event.stopPropagation(); deleteAccount(${acc.id})" class="block ml-auto text-[10px] text-rose-400/80 mt-0.5"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -1266,6 +1279,21 @@
                 if (y > anchor + 12) { setHeaderHidden(true); anchor = y; }
                 else if (y < anchor - 12) { setHeaderHidden(false); anchor = y; }
             }, { passive: true });
+        }
+
+        // ===== PRIVACY (occhio) =====
+        function syncPrivacyUI() {
+            const on = document.documentElement.classList.contains('privacy');
+            const icon = document.getElementById('privacy-icon');
+            const btn = document.getElementById('privacy-toggle');
+            if (icon) icon.className = 'fa-solid text-xs ' + (on ? 'fa-eye-slash text-indigo-400' : 'fa-eye text-slate-300');
+            if (btn) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.setAttribute('aria-label', on ? 'Mostra importi' : 'Nascondi importi'); }
+        }
+        function togglePrivacy() {
+            const on = !document.documentElement.classList.contains('privacy');
+            document.documentElement.classList.toggle('privacy', on);
+            try { localStorage.setItem('cc_privacy', on ? '1' : '0'); } catch (e) {}
+            syncPrivacyUI();
         }
 
         // ===== TEMA CHIARO / SCURO =====
@@ -1631,6 +1659,7 @@
 
         window.onload = function() {
             syncThemeUI();
+            syncPrivacyUI();
             initHeaderAutoHide();
             recordSnapshot();
             updateAllViews();
