@@ -63,12 +63,13 @@
         /* Logo: bianco in tema scuro, nero in tema chiaro (l'immagine e' nera su sfondo trasparente) */
         /* Modalita' privacy: sfoca patrimonio netto, conto corrente e contanti */
         html.privacy #top-net-worth, html.privacy #dash-total-net, html.privacy #dash-liquid, html.privacy #dash-invested,
-        html.privacy #dash-bank, html.privacy #dash-cash, html.privacy .pv {
+        html.privacy #dash-bank, html.privacy #dash-cash, html.privacy .pv,
+        html.privacy #an-kpi-in, html.privacy #an-kpi-out, html.privacy #an-kpi-save, html.privacy #an-kpi-rate, html.privacy #an-kpi-avg {
             filter: blur(7px);
             -webkit-user-select: none; user-select: none; pointer-events: none;
         }
         html.privacy #top-net-worth, html.privacy #dash-liquid, html.privacy #dash-invested, html.privacy span.pv { display: inline-block; }
-        #top-net-worth, #dash-total-net, #dash-liquid, #dash-invested, #dash-bank, #dash-cash, .pv { transition: filter 0.2s ease; }
+        #top-net-worth, #dash-total-net, #dash-liquid, #dash-invested, #dash-bank, #dash-cash, .pv, #an-kpi-in, #an-kpi-out, #an-kpi-save, #an-kpi-rate, #an-kpi-avg { transition: filter 0.2s ease; }
         #app-header { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
         #app-header.hdr-hidden { transform: translateY(-115%); }
         .app-logo { filter: none; }
@@ -373,6 +374,8 @@
                 </div>
             </div>
 
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Entrate e uscite</h3>
+
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Entrate vs Uscite per mese</h3>
                 <div class="h-56 relative"><canvas id="chart-flow"></canvas></div>
@@ -384,10 +387,24 @@
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Tasso di risparmio per mese</h3>
+                <div class="h-48 relative"><canvas id="chart-rate"></canvas></div>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Patrimonio</h3>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Andamento del patrimonio</h3>
                 <div id="an-nw-wrap" class="h-56 relative"><canvas id="chart-networth"></canvas></div>
                 <p id="an-nw-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Il grafico si riempie man mano che usi l'app: ogni giorno in cui aggiorni i dati viene salvato il patrimonio.</p>
             </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Com'è composto il patrimonio</h3>
+                <div id="an-comp-wrap" class="relative"><canvas id="chart-comp"></canvas></div>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Categorie</h3>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
                 <h3 class="text-xs font-bold text-slate-300">Spese per categoria</h3>
@@ -396,15 +413,63 @@
             </div>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Categorie di spesa mese per mese</h3>
+                <div id="an-stack-wrap" class="h-56 relative"><canvas id="chart-stack"></canvas></div>
+                <p id="an-stack-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessuna spesa nel periodo.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Da dove arrivano le entrate</h3>
+                <div id="an-incat-wrap" class="h-56 relative"><canvas id="chart-incat"></canvas></div>
+                <p id="an-incat-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessuna entrata nel periodo.</p>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Abitudini</h3>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Questo mese vs mese scorso (spesa cumulata)</h3>
+                <div class="h-56 relative"><canvas id="chart-compare"></canvas></div>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Spese per giorno della settimana</h3>
                 <div class="h-48 relative"><canvas id="chart-weekday"></canvas></div>
             </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">In quali giorni del mese spendi di più</h3>
+                <div class="h-48 relative"><canvas id="chart-dom"></canvas></div>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Titoli e debiti</h3>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Titoli: costo vs valore attuale</h3>
+                <div id="an-assets-wrap" class="h-56 relative"><canvas id="chart-assets"></canvas></div>
+                <p id="an-assets-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessun titolo inserito.</p>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Rate: già pagato vs residuo</h3>
+                <div id="an-debts-wrap" class=" relative"><canvas id="chart-debts"></canvas></div>
+                <p id="an-debts-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessuna rata inserita.</p>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Obiettivi</h3>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Avanzamento obiettivi</h3>
                 <div id="an-goals-wrap" class="relative"><canvas id="chart-goals"></canvas></div>
                 <p id="an-goals-empty" class="hidden text-[11px] text-slate-500 py-4 text-center">Nessun obiettivo: creane uno nella sezione Obiettivi.</p>
             </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-300">Quanto metti da parte ogni mese</h3>
+                <div id="an-contrib-wrap" class="h-48 relative"><canvas id="chart-contrib"></canvas></div>
+                <p id="an-contrib-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessun versamento sugli obiettivi nel periodo.</p>
+            </div>
+
+            <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Spese più grandi</h3>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Le 5 spese più alte</h3>
@@ -1367,6 +1432,8 @@
             document.documentElement.classList.toggle('privacy', on);
             try { localStorage.setItem('cc_privacy', on ? '1' : '0'); } catch (e) {}
             syncPrivacyUI();
+            const anTab = document.getElementById('tab-analisi');
+            if (anTab && !anTab.classList.contains('hidden')) renderAnalysisCharts();
         }
 
         // ===== TEMA CHIARO / SCURO =====
@@ -1645,7 +1712,9 @@
 
             const legend = { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } };
             const money = c => ' ' + (c.dataset.label ? c.dataset.label + ': ' : '') + ccEur(c.parsed.y);
-            const common = { responsive: true, maintainAspectRatio: false };
+            const priv = document.documentElement.classList.contains('privacy');
+            const tip = { enabled: !priv, callbacks: { label: money } };
+            const common = { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { display: !priv } } } };
 
             // 1) Entrate vs Uscite
             ccMk('chart-flow', {
@@ -1654,7 +1723,7 @@
                     { label: 'Entrate', data: incArr, backgroundColor: '#10b981', borderRadius: 6 },
                     { label: 'Uscite', data: outArr, backgroundColor: '#f43f5e', borderRadius: 6 }
                 ] },
-                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: tip } })
             });
 
             // 2) Risparmio netto + cumulato
@@ -1663,7 +1732,7 @@
                     { type: 'bar', label: 'Risparmio del mese', data: netArr, backgroundColor: netArr.map(v => v >= 0 ? '#10b981' : '#f43f5e'), borderRadius: 6, order: 2 },
                     { type: 'line', label: 'Cumulato', data: cumArr, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, pointRadius: 3, order: 1 }
                 ] },
-                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: { callbacks: { label: money } } } })
+                options: Object.assign({}, common, { plugins: { legend: legend, tooltip: tip } })
             });
 
             // 3) Andamento patrimonio
@@ -1678,7 +1747,7 @@
                     data: { labels: hist.map(x => { const p = x.d.split('-'); return p[2] + '/' + p[1]; }), datasets: [
                         { label: 'Patrimonio', data: hist.map(x => x.a), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.3, pointRadius: 3 }
                     ] },
-                    options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
+                    options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: tip } })
                 });
             }
 
@@ -1689,13 +1758,13 @@
             const catTotal = catEntries.reduce((s, x) => s + x[1], 0);
             document.getElementById('an-cat-list').innerHTML = catOk ? catEntries.slice(0, 8).map((x, i) =>
                 '<div class="flex justify-between items-center text-[11px]"><span class="flex items-center text-slate-300"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background:' + CC_PALETTE[i % CC_PALETTE.length] + '"></span>' + ccEsc(x[0]) + '</span>'
-                + '<span class="text-slate-400">' + ccEur(x[1]) + ' · ' + Math.round(x[1] / catTotal * 100) + '%</span></div>').join('')
+                + '<span class="pv text-slate-400">' + ccEur(x[1]) + ' · ' + Math.round(x[1] / catTotal * 100) + '%</span></div>').join('')
                 : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
             if (catOk) {
                 ccMk('chart-cat', {
                     type: 'doughnut',
                     data: { labels: catEntries.map(x => x[0]), datasets: [{ data: catEntries.map(x => Math.round(x[1] * 100) / 100), backgroundColor: catEntries.map((x, i) => CC_PALETTE[i % CC_PALETTE.length]), borderWidth: 0 }] },
-                    options: Object.assign({}, common, { cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + c.label + ': ' + ccEur(c.parsed) } } } })
+                    options: Object.assign({}, common, { cutout: '62%', plugins: { legend: { display: false }, tooltip: { enabled: !priv, callbacks: { label: c => ' ' + c.label + ': ' + ccEur(c.parsed) } } } })
                 });
             }
 
@@ -1703,7 +1772,7 @@
             ccMk('chart-weekday', {
                 type: 'bar',
                 data: { labels: GIORNI, datasets: [{ label: 'Spese', data: weekday.map(v => Math.round(v * 100) / 100), backgroundColor: '#6366f1', borderRadius: 6 }] },
-                options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: { callbacks: { label: money } } } })
+                options: Object.assign({}, common, { plugins: { legend: { display: false }, tooltip: tip } })
             });
 
             // 6) Obiettivi
@@ -1718,7 +1787,7 @@
                         { label: 'Risparmiato', data: goals.map(g => Math.round(goalSaved(g) * 100) / 100), backgroundColor: '#10b981', borderRadius: 6 },
                         { label: 'Obiettivo', data: goals.map(g => g.target), backgroundColor: ccIsLight() ? '#cbd5e1' : '#334155', borderRadius: 6 }
                     ] },
-                    options: Object.assign({}, common, { indexAxis: 'y', plugins: { legend: legend, tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.x) } } } })
+                    options: Object.assign({}, common, { indexAxis: 'y', scales: { x: { ticks: { display: !priv } }, y: { ticks: { display: true } } }, plugins: { legend: legend, tooltip: { enabled: !priv, callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.x) } } } })
                 });
             }
 
@@ -1726,8 +1795,161 @@
             const top = expenses.slice().sort((a, b) => b.amount - a.amount).slice(0, 5);
             document.getElementById('an-top-list').innerHTML = top.length ? top.map(t =>
                 '<div class="flex justify-between items-center bg-slate-800/50 rounded-xl px-3 py-2 text-[11px]"><div class="min-w-0"><p class="text-slate-200 truncate">' + ccEsc(t.desc) + '</p><p class="text-[10px] text-slate-500">' + ccEsc(t.date) + ' · ' + ccEsc(t.category) + '</p></div>'
-                + '<span class="font-bold text-rose-400 shrink-0 ml-3">-' + ccEur(t.amount) + '</span></div>').join('')
+                + '<span class="pv font-bold text-rose-400 shrink-0 ml-3">-' + ccEur(t.amount) + '</span></div>').join('')
                 : '<p class="text-[11px] text-slate-500 text-center py-4">Nessuna spesa nel periodo.</p>';
+
+            renderAnalysisExtra({ priv: priv, months: months, labels: labels, incArr: incArr, outArr: outArr, real: real, legend: legend, money: money, tip: tip });
+        }
+
+        // ===== GRAFICI AGGIUNTIVI =====
+        function renderAnalysisExtra(c) {
+            const priv = c.priv, months = c.months, labels = c.labels;
+            const money = c.money, tip = c.tip, legend = c.legend;
+            const hideTick = { ticks: { display: !priv } };
+            const baseOpt = { responsive: true, maintainAspectRatio: false };
+            const yHide = { y: hideTick };
+            const xHideH = { x: hideTick, y: { ticks: { display: true } } };
+            const setWrap = (wrapId, emptyId, ok, h) => {
+                const w = document.getElementById(wrapId), e = document.getElementById(emptyId);
+                if (w) { w.classList.toggle('hidden', !ok); if (ok && h) w.style.height = h + 'px'; }
+                if (e) e.classList.toggle('hidden', ok);
+            };
+            const real = c.real;
+            const expenses = real.filter(t => t.type !== 'Entrata');
+            const incomes = real.filter(t => t.type === 'Entrata');
+            const inPeriod = t => months.indexOf(t.date.slice(0, 7)) >= 0;
+
+            // 1) Tasso di risparmio per mese (%)
+            const rate = months.map((m, i) => (c.incArr[i] > 0 ? Math.round((c.incArr[i] - c.outArr[i]) / c.incArr[i] * 100) : (c.outArr[i] > 0 ? null : null)));
+            ccMk('chart-rate', {
+                type: 'line',
+                data: { labels: labels, datasets: [{ label: 'Tasso di risparmio', data: rate, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.15)', fill: true, tension: 0.3, pointRadius: 3, spanGaps: true }] },
+                options: Object.assign({}, baseOpt, { scales: { y: { ticks: { display: !priv, callback: v => v + '%' } } }, plugins: { legend: { display: false }, tooltip: { enabled: !priv, callbacks: { label: x => ' ' + x.parsed.y + '%' } } } })
+            });
+
+            // 2) Composizione del patrimonio (conti, titoli, debiti)
+            const compL = [], compV = [];
+            store.accounts.forEach(a => { compL.push(a.name); compV.push(Math.round(a.balance * 100) / 100); });
+            const assetsTot = store.assets.reduce((s, a) => s + a.qty * a.currentPrice, 0);
+            const debtTot = store.installments.reduce((s, i) => s + i.remaining, 0);
+            if (store.assets.length) { compL.push('Titoli & ETF'); compV.push(Math.round(assetsTot * 100) / 100); }
+            if (store.installments.length) { compL.push('Debiti / Rate'); compV.push(-Math.round(debtTot * 100) / 100); }
+            document.getElementById('an-comp-wrap').style.height = Math.max(120, compL.length * 42 + 40) + 'px';
+            ccMk('chart-comp', {
+                type: 'bar',
+                data: { labels: compL, datasets: [{ label: 'Valore', data: compV, backgroundColor: compV.map(v => v >= 0 ? '#6366f1' : '#f43f5e'), borderRadius: 6 }] },
+                options: Object.assign({}, baseOpt, { indexAxis: 'y', scales: xHideH, plugins: { legend: { display: false }, tooltip: { enabled: !priv, callbacks: { label: x => ' ' + ccEur(x.parsed.x) } } } })
+            });
+
+            // 3) Spese per categoria mese per mese (top 5 + Altro)
+            const catTot = {};
+            expenses.filter(inPeriod).forEach(t => { const k = t.category || 'Altro'; catTot[k] = (catTot[k] || 0) + t.amount; });
+            const topCats = Object.keys(catTot).sort((a, b) => catTot[b] - catTot[a]).slice(0, 5);
+            const stackOk = topCats.length > 0;
+            setWrap('an-stack-wrap', 'an-stack-empty', stackOk);
+            if (stackOk) {
+                const sets = topCats.map((k, i) => ({
+                    label: k, backgroundColor: CC_PALETTE[i % CC_PALETTE.length], borderRadius: 4,
+                    data: months.map(m => Math.round(expenses.filter(t => t.date.slice(0, 7) === m && (t.category || 'Altro') === k).reduce((s, t) => s + t.amount, 0) * 100) / 100)
+                }));
+                const others = months.map(m => Math.round(expenses.filter(t => t.date.slice(0, 7) === m && topCats.indexOf(t.category || 'Altro') < 0).reduce((s, t) => s + t.amount, 0) * 100) / 100);
+                if (others.some(v => v > 0)) sets.push({ label: 'Altre', data: others, backgroundColor: '#64748b', borderRadius: 4 });
+                ccMk('chart-stack', {
+                    type: 'bar',
+                    data: { labels: labels, datasets: sets },
+                    options: Object.assign({}, baseOpt, { scales: { x: { stacked: true }, y: { stacked: true, ticks: { display: !priv } } }, plugins: { legend: legend, tooltip: tip } })
+                });
+            }
+
+            // 4) Entrate per categoria
+            const inCat = {};
+            incomes.filter(inPeriod).forEach(t => { const k = t.category || 'Altro'; inCat[k] = (inCat[k] || 0) + t.amount; });
+            const inEntries = Object.keys(inCat).map(k => [k, inCat[k]]).sort((a, b) => b[1] - a[1]);
+            setWrap('an-incat-wrap', 'an-incat-empty', inEntries.length > 0);
+            if (inEntries.length) {
+                ccMk('chart-incat', {
+                    type: 'doughnut',
+                    data: { labels: inEntries.map(x => x[0]), datasets: [{ data: inEntries.map(x => Math.round(x[1] * 100) / 100), backgroundColor: inEntries.map((x, i) => CC_PALETTE[(i + 1) % CC_PALETTE.length]), borderWidth: 0 }] },
+                    options: Object.assign({}, baseOpt, { cutout: '62%', plugins: { legend: legend, tooltip: { enabled: !priv, callbacks: { label: x => ' ' + x.label + ': ' + ccEur(x.parsed) } } } })
+                });
+            }
+
+            // 5) Mese corrente vs mese scorso (spesa cumulata giorno per giorno)
+            const now = new Date();
+            const key = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            const curKey = key(now), prevKey = key(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+            const dim = (y, m) => new Date(y, m + 1, 0).getDate();
+            const curDays = dim(now.getFullYear(), now.getMonth());
+            const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const prevDays = dim(prevDate.getFullYear(), prevDate.getMonth());
+            const nDays = Math.max(curDays, prevDays);
+            const daily = (k) => { const a = new Array(32).fill(0); expenses.filter(t => t.date.slice(0, 7) === k).forEach(t => { a[parseInt(t.date.slice(8, 10), 10)] += t.amount; }); return a; };
+            const dCur = daily(curKey), dPrev = daily(prevKey);
+            let rc = 0, rp = 0;
+            const cumCur = [], cumPrev = [], dayLabels = [];
+            for (let d = 1; d <= nDays; d++) {
+                dayLabels.push(String(d));
+                rp += dPrev[d]; cumPrev.push(d <= prevDays ? Math.round(rp * 100) / 100 : null);
+                rc += dCur[d]; cumCur.push(d <= now.getDate() ? Math.round(rc * 100) / 100 : null);
+            }
+            ccMk('chart-compare', {
+                type: 'line',
+                data: { labels: dayLabels, datasets: [
+                    { label: 'Questo mese', data: cumCur, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.25, pointRadius: 0, borderWidth: 2.5 },
+                    { label: 'Mese scorso', data: cumPrev, borderColor: '#64748b', backgroundColor: '#64748b', tension: 0.25, pointRadius: 0, borderWidth: 2, borderDash: [5, 4] }
+                ] },
+                options: Object.assign({}, baseOpt, { scales: { y: hideTick, x: { ticks: { maxTicksLimit: 8 } } }, plugins: { legend: legend, tooltip: tip } })
+            });
+
+            // 6) In quali giorni del mese spendi di piu'
+            const dom = new Array(31).fill(0);
+            expenses.filter(inPeriod).forEach(t => { dom[parseInt(t.date.slice(8, 10), 10) - 1] += t.amount; });
+            ccMk('chart-dom', {
+                type: 'bar',
+                data: { labels: dom.map((v, i) => String(i + 1)), datasets: [{ label: 'Spese', data: dom.map(v => Math.round(v * 100) / 100), backgroundColor: '#06b6d4', borderRadius: 3 }] },
+                options: Object.assign({}, baseOpt, { scales: { y: hideTick, x: { ticks: { maxTicksLimit: 10 } } }, plugins: { legend: { display: false }, tooltip: tip } })
+            });
+
+            // 7) Titoli: costo vs valore
+            const hasA = store.assets.length > 0;
+            setWrap('an-assets-wrap', 'an-assets-empty', hasA);
+            if (hasA) {
+                ccMk('chart-assets', {
+                    type: 'bar',
+                    data: { labels: store.assets.map(a => a.name), datasets: [
+                        { label: 'Costo', data: store.assets.map(a => Math.round(a.qty * a.buyPrice * 100) / 100), backgroundColor: '#334155', borderRadius: 6 },
+                        { label: 'Valore attuale', data: store.assets.map(a => Math.round(a.qty * a.currentPrice * 100) / 100), backgroundColor: '#10b981', borderRadius: 6 }
+                    ] },
+                    options: Object.assign({}, baseOpt, { scales: yHide, plugins: { legend: legend, tooltip: tip } })
+                });
+            }
+
+            // 8) Rate: pagato vs residuo
+            const hasI = store.installments.length > 0;
+            setWrap('an-debts-wrap', 'an-debts-empty', hasI, Math.max(120, store.installments.length * 56 + 50));
+            if (hasI) {
+                ccMk('chart-debts', {
+                    type: 'bar',
+                    data: { labels: store.installments.map(i => i.name), datasets: [
+                        { label: 'Già pagato', data: store.installments.map(i => Math.round(Math.max(0, i.total - i.remaining) * 100) / 100), backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Residuo', data: store.installments.map(i => Math.round(i.remaining * 100) / 100), backgroundColor: '#f43f5e', borderRadius: 4 }
+                    ] },
+                    options: Object.assign({}, baseOpt, { indexAxis: 'y', scales: { x: { stacked: true, ticks: { display: !priv } }, y: { stacked: true, ticks: { display: true } } }, plugins: { legend: legend, tooltip: { enabled: !priv, callbacks: { label: x => ' ' + x.dataset.label + ': ' + ccEur(x.parsed.x) } } } })
+                });
+            }
+
+            // 9) Versamenti sugli obiettivi per mese
+            const contrib = months.map(m => 0);
+            (store.goals || []).forEach(g => (g.contributions || []).forEach(k => { const i = months.indexOf((k.date || '').slice(0, 7)); if (i >= 0) contrib[i] += k.amount; }));
+            const contribOk = contrib.some(v => v !== 0);
+            setWrap('an-contrib-wrap', 'an-contrib-empty', contribOk);
+            if (contribOk) {
+                ccMk('chart-contrib', {
+                    type: 'bar',
+                    data: { labels: labels, datasets: [{ label: 'Messo da parte', data: contrib.map(v => Math.round(v * 100) / 100), backgroundColor: contrib.map(v => v >= 0 ? '#f59e0b' : '#f43f5e'), borderRadius: 6 }] },
+                    options: Object.assign({}, baseOpt, { scales: yHide, plugins: { legend: { display: false }, tooltip: tip } })
+                });
+            }
         }
 
         window.onload = function() {
