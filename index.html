@@ -670,17 +670,18 @@
     <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-sm font-bold text-white">Aggiungi Titolo / ETF</h3>
+                <h3 id="ast-modal-title" class="text-sm font-bold text-white">Aggiungi Titolo / ETF</h3>
                 <button onclick="closeModal('modal-asset')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveAsset(event)" class="space-y-3">
+                <input type="hidden" id="ast-id" value="">
                 <input type="text" id="ast-name" required placeholder="Nome Strumento (es. VWCE, AAPL)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" step="0.0001" id="ast-qty" required placeholder="Quantità" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                     <input type="number" step="0.01" id="ast-buy" required placeholder="Prezzo d'Acquisto (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                 </div>
                 <input type="number" step="0.01" id="ast-current" required placeholder="Prezzo Attuale (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Salva Titolo</button>
+                <button type="submit" id="ast-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Salva Titolo</button>
             </form>
         </div>
     </div>
@@ -688,10 +689,11 @@
     <div id="modal-installment" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-sm font-bold text-white">Nuova Rata / Klarna</h3>
+                <h3 id="inst-modal-title" class="text-sm font-bold text-white">Nuova Rata / Klarna</h3>
                 <button onclick="closeModal('modal-installment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveInstallment(event)" class="space-y-3">
+                <input type="hidden" id="inst-id" value="">
                 <div>
                     <label class="block text-[11px] font-medium text-slate-400 mb-1">Con chi lo stai facendo?</label>
                     <select id="inst-provider" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
@@ -710,7 +712,7 @@
                     <input type="number" step="0.01" id="inst-monthly" required placeholder="Rata Mensile (€)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                     <input type="date" id="inst-next" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Rata</button>
+                <button type="submit" id="inst-submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl text-xs">Aggiungi Rata</button>
             </form>
         </div>
     </div>
@@ -981,7 +983,10 @@
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
                         <div class="flex justify-between items-center">
                             <h4 class="text-xs font-bold text-slate-200">${ast.name}</h4>
-                            <span class="text-xs font-extrabold text-white">€ ${totalVal.toFixed(2)}</span>
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-extrabold text-white">€ ${totalVal.toFixed(2)}</span>
+                                <button onclick="openAssetEdit(${ast.id})" aria-label="Modifica" class="text-slate-500 active:text-indigo-400 p-1.5 -my-1.5"><i class="fa-solid fa-pen text-[11px]"></i></button><button onclick="deleteAsset(${ast.id})" aria-label="Elimina" class="text-rose-400/80 active:text-rose-500 p-1.5 -my-1.5 -mr-1.5"><i class="fa-solid fa-trash text-[11px]"></i></button>
+                            </div>
                         </div>
                         <div class="flex justify-between items-center text-[10px] text-slate-400">
                             <span>Qta: ${ast.qty} • Prezzo: € ${ast.currentPrice.toFixed(2)}</span>
@@ -1004,7 +1009,10 @@
                                 <h4 class="font-bold text-slate-200 text-xs">${inst.name}</h4>
                                 ${providerChip(inst)}
                             </div>
-                            <span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-md font-semibold">€ ${inst.monthly}/mese</span>
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-md font-semibold">€ ${inst.monthly}/mese</span>
+                                <button onclick="openInstallmentEdit(${inst.id})" aria-label="Modifica" class="text-slate-500 active:text-indigo-400 p-1.5 -my-1.5"><i class="fa-solid fa-pen text-[11px]"></i></button><button onclick="deleteInstallment(${inst.id})" aria-label="Elimina" class="text-rose-400/80 active:text-rose-500 p-1.5 -my-1.5 -mr-1.5"><i class="fa-solid fa-trash text-[11px]"></i></button>
+                            </div>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                             <div class="bg-indigo-500 h-1.5 rounded-full" style="width: ${((inst.total - inst.remaining)/inst.total)*100}%"></div>
@@ -1070,7 +1078,8 @@
                 fillTxAccountSelect();
             }
             if(id === 'modal-account') resetAccountForm();
-            if(id === 'modal-installment') document.getElementById('inst-provider').value = '';
+            if(id === 'modal-installment') resetInstallmentForm();
+            if(id === 'modal-asset') resetAssetForm();
         }
 
         function fillTxAccountSelect() {
@@ -1163,17 +1172,48 @@
             closeModal('modal-account');
         }
 
+        // ----- Titoli & ETF: nuovo / modifica / elimina -----
+        function resetAssetForm() {
+            ['ast-id', 'ast-name', 'ast-qty', 'ast-buy', 'ast-current'].forEach(i => { document.getElementById(i).value = ''; });
+            document.getElementById('ast-modal-title').innerText = 'Aggiungi Titolo / ETF';
+            document.getElementById('ast-submit').innerText = 'Salva Titolo';
+        }
+        function openAssetEdit(id) {
+            const a = store.assets.find(x => x.id === id);
+            if (!a) return;
+            document.getElementById('modal-asset').classList.remove('hidden');
+            document.getElementById('ast-id').value = String(a.id);
+            document.getElementById('ast-name').value = a.name;
+            document.getElementById('ast-qty').value = a.qty;
+            document.getElementById('ast-buy').value = a.buyPrice;
+            document.getElementById('ast-current').value = a.currentPrice;
+            document.getElementById('ast-modal-title').innerText = 'Modifica Titolo / ETF';
+            document.getElementById('ast-submit').innerText = 'Salva Modifiche';
+        }
         function saveAsset(e) {
             e.preventDefault();
-            store.assets.push({
-                id: Date.now(),
+            const editId = document.getElementById('ast-id').value;
+            const data = {
                 name: document.getElementById('ast-name').value,
                 qty: parseFloat(document.getElementById('ast-qty').value),
                 buyPrice: parseFloat(document.getElementById('ast-buy').value),
                 currentPrice: parseFloat(document.getElementById('ast-current').value)
-            });
+            };
+            if (editId) {
+                const a = store.assets.find(x => String(x.id) === editId);
+                if (a) Object.assign(a, data);
+            } else {
+                store.assets.push(Object.assign({ id: Date.now() }, data));
+            }
             saveData();
             closeModal('modal-asset');
+        }
+        function deleteAsset(id) {
+            const a = store.assets.find(x => x.id === id);
+            if (!a) return;
+            if (!confirm('Eliminare "' + a.name + '" dai tuoi titoli?')) return;
+            store.assets = store.assets.filter(x => x.id !== id);
+            saveData();
         }
 
         const PROVIDER_STYLE = {
@@ -1197,19 +1237,52 @@
             saveData();
         }
 
+        // ----- Rate & finanziamenti: nuova / modifica / elimina -----
+        function resetInstallmentForm() {
+            ['inst-id', 'inst-provider', 'inst-name', 'inst-total', 'inst-remaining', 'inst-monthly', 'inst-next'].forEach(i => { document.getElementById(i).value = ''; });
+            document.getElementById('inst-modal-title').innerText = 'Nuova Rata / Klarna';
+            document.getElementById('inst-submit').innerText = 'Aggiungi Rata';
+        }
+        function openInstallmentEdit(id) {
+            const i = store.installments.find(x => x.id === id);
+            if (!i) return;
+            document.getElementById('modal-installment').classList.remove('hidden');
+            document.getElementById('inst-id').value = String(i.id);
+            document.getElementById('inst-provider').value = i.provider || '';
+            document.getElementById('inst-name').value = i.name;
+            document.getElementById('inst-total').value = i.total;
+            document.getElementById('inst-remaining').value = i.remaining;
+            document.getElementById('inst-monthly').value = i.monthly;
+            document.getElementById('inst-next').value = i.nextDate;
+            document.getElementById('inst-modal-title').innerText = 'Modifica Rata / Finanziamento';
+            document.getElementById('inst-submit').innerText = 'Salva Modifiche';
+        }
         function saveInstallment(e) {
             e.preventDefault();
-            store.installments.push({
-                id: Date.now(),
+            const editId = document.getElementById('inst-id').value;
+            const data = {
                 provider: document.getElementById('inst-provider').value,
                 name: document.getElementById('inst-name').value,
                 total: parseFloat(document.getElementById('inst-total').value),
                 remaining: parseFloat(document.getElementById('inst-remaining').value),
                 monthly: parseFloat(document.getElementById('inst-monthly').value),
                 nextDate: document.getElementById('inst-next').value
-            });
+            };
+            if (editId) {
+                const i = store.installments.find(x => String(x.id) === editId);
+                if (i) Object.assign(i, data);
+            } else {
+                store.installments.push(Object.assign({ id: Date.now() }, data));
+            }
             saveData();
             closeModal('modal-installment');
+        }
+        function deleteInstallment(id) {
+            const i = store.installments.find(x => x.id === id);
+            if (!i) return;
+            if (!confirm('Eliminare "' + i.name + '" dalle tue rate?')) return;
+            store.installments = store.installments.filter(x => x.id !== id);
+            saveData();
         }
 
         function deleteTx(id) {
