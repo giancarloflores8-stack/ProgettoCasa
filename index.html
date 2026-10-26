@@ -6,9 +6,6 @@
     <title>Conti Chiari - Mobile Finance App</title>
     <meta name="apple-mobile-web-app-title" content="Conti Chiari">
     <meta name="theme-color" content="#090d16">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.webmanifest">
     <script>try { if (localStorage.getItem('cc_theme') === 'light') document.documentElement.classList.add('light'); if (localStorage.getItem('cc_privacy') === '1') document.documentElement.classList.add('privacy'); } catch (e) {}</script>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
@@ -120,12 +117,6 @@
         html.light [class*="from-emerald-600"].text-white { color: #ffffff; }
         html.light .shadow-xl, html.light .shadow-sm, html.light .shadow-md { box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.06); }
     </style>
-
-<style id="cc-pro-css">
-:root{--cc-top:env(safe-area-inset-top,0px);--cc-bottom:env(safe-area-inset-bottom,0px)}
-#cc-lock{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#090d16,#111936 70%,#312e81);display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--cc-top)) 22px calc(24px + var(--cc-bottom))}
-#cc-lock.hidden{display:none}.cc-lock-card{width:min(100%,390px);text-align:center}.cc-pin-dots{display:flex;justify-content:center;gap:14px;margin:24px}.cc-pin-dot{width:14px;height:14px;border:2px solid #818cf8;border-radius:50%}.cc-pin-dot.on{background:#818cf8}.cc-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cc-key{min-height:58px;border-radius:18px;background:#ffffff12;border:1px solid #ffffff20;font-size:22px;font-weight:700;color:white;-webkit-tap-highlight-color:transparent}.cc-key:active{transform:scale(.96);background:#ffffff25}.cc-pro-card{background:linear-gradient(135deg,#172036,#121827);border:1px solid #334155;border-radius:18px;padding:16px}.cc-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cc-pro-btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:14px;font-size:12px;font-weight:700}.cc-ocr-box{border:1px dashed #6366f1;border-radius:16px;padding:12px;background:#4f46e510}.cc-progress{height:6px;background:#1e293b;border-radius:9px;overflow:hidden}.cc-progress>i{display:block;height:100%;width:0;background:#6366f1;transition:.2s}.cc-toast{position:fixed;z-index:100000;left:16px;right:16px;bottom:calc(90px + var(--cc-bottom));max-width:420px;margin:auto;padding:13px 16px;border-radius:14px;background:#111827;color:#fff;box-shadow:0 20px 50px #0008;font-size:13px}.cc-hide{display:none!important}@media(min-width:440px){.cc-lock-card{padding:18px}.cc-key{min-height:64px}}@media print{body>*{display:none!important}#cc-print{display:block!important;color:#111;background:white;padding:20px;font-family:Arial}#cc-print table{width:100%;border-collapse:collapse}#cc-print th,#cc-print td{border-bottom:1px solid #ddd;padding:8px;text-align:left}}
-</style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
 
@@ -165,12 +156,6 @@
 
     <!-- AREA PRINCIPALE ADATTA A SCHERMI MOBILE (Full Viewport without overflow break) -->
     <main id="app-main" class="flex-1 overflow-y-auto px-4 pt-28 pb-safe-nav space-y-5">
-<section id="cc-pro-panel" class="px-4 pt-3 space-y-3">
- <div class="cc-pro-card"><div class="flex items-start justify-between"><div><div class="text-[10px] uppercase tracking-widest text-indigo-300 font-bold">Previsione fine mese</div><div id="cc-forecast" class="text-xl font-extrabold mt-1">Calcolo...</div><div id="cc-forecast-note" class="text-[10px] text-slate-400 mt-1"></div></div><i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i></div></div>
- <div class="cc-actions"><button onclick="CCPro.exportPDF()" class="cc-pro-btn bg-rose-600 text-white"><i class="fa-solid fa-file-pdf"></i> PDF mensile</button><button onclick="CCPro.exportExcel()" class="cc-pro-btn bg-emerald-600 text-white"><i class="fa-solid fa-file-excel"></i> Excel mensile</button></div>
- <div class="flex justify-end"><button onclick="CCPro.changePin()" class="text-[10px] text-slate-400"><i class="fa-solid fa-lock mr-1"></i>Cambia PIN</button></div>
-</section>
-
 
         <!-- 1. DASHBOARD OVERVIEW TAB -->
         <section id="tab-dashboard" class="tab-content space-y-4">
@@ -646,13 +631,6 @@
                         <option value="Altro">Altro</option>
                     </select>
                 </div>
-                <div id="cc-ocr-area" class="cc-ocr-box">
-                    <label class="block text-[11px] font-semibold text-indigo-300 mb-2"><i class="fa-solid fa-camera mr-1"></i> Leggi importo da screenshot</label>
-                    <input id="cc-receipt" type="file" accept="image/*" class="block w-full text-[11px] text-slate-400 file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-white">
-                    <div id="cc-ocr-status" class="text-[10px] text-slate-400 mt-2">Seleziona uno screenshot. L'importo verrà solo proposto: sarai tu a confermarlo.</div>
-                    <div id="cc-ocr-progress" class="cc-progress mt-2 cc-hide"><i></i></div>
-                    <div id="cc-ocr-candidates" class="mt-2 space-y-1"></div>
-                </div>
                 <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs transition-all shadow-lg shadow-emerald-600/20 mt-2">
                     Salva Operazione
                 </button>
@@ -749,13 +727,6 @@
                         <input type="text" id="ct-note" placeholder="Es. Mese di ottobre" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
                     </div>
                 </div>
-                <div id="cc-ocr-area" class="cc-ocr-box">
-                    <label class="block text-[11px] font-semibold text-indigo-300 mb-2"><i class="fa-solid fa-camera mr-1"></i> Leggi importo da screenshot</label>
-                    <input id="cc-receipt" type="file" accept="image/*" class="block w-full text-[11px] text-slate-400 file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-white">
-                    <div id="cc-ocr-status" class="text-[10px] text-slate-400 mt-2">Seleziona uno screenshot. L'importo verrà solo proposto: sarai tu a confermarlo.</div>
-                    <div id="cc-ocr-progress" class="cc-progress mt-2 cc-hide"><i></i></div>
-                    <div id="cc-ocr-candidates" class="mt-2 space-y-1"></div>
-                </div>
                 <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs">Salva</button>
             </form>
         </div>
@@ -811,14 +782,6 @@
         </div>
     </div>
 
-
-
-<div id="cc-lock" class="hidden" aria-modal="true" role="dialog">
- <div class="cc-lock-card"><div class="w-16 h-16 rounded-2xl bg-indigo-500 mx-auto flex items-center justify-center text-2xl shadow-xl"><i class="fa-solid fa-wallet"></i></div>
- <h1 class="text-2xl font-extrabold mt-5">Conti Chiari</h1><p id="cc-pin-title" class="text-sm text-slate-300 mt-2">Inserisci il PIN</p><div id="cc-pin-dots" class="cc-pin-dots"></div>
- <div id="cc-keypad" class="cc-keypad"></div><p id="cc-pin-error" class="text-xs text-rose-400 h-5 mt-3"></p><button id="cc-pin-reset" class="text-xs text-slate-400 underline mt-2">PIN dimenticato? Reimposta app</button></div>
-</div>
-<div id="cc-print" style="display:none"></div>
 
     <!-- JS APPLICATION LOGIC -->
     <script>
@@ -1997,35 +1960,5 @@
             updateAllViews();
         };
     </script>
-
-<script id="cc-pro-js">
-const CCPro=(()=>{
- const PINKEY='cc_pin_v1'; let entry='',mode='unlock',first='',fails=0;
- const $=id=>document.getElementById(id), eur=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0);
- function toast(t){const e=document.createElement('div');e.className='cc-toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
- async function hash(pin,salt){const data=new TextEncoder().encode(salt+pin);const b=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
- function pinCfg(){try{return JSON.parse(localStorage.getItem(PINKEY))}catch(e){return null}}
- function draw(){ $('cc-pin-dots').innerHTML=[0,1,2,3].map(i=>`<i class="cc-pin-dot ${i<entry.length?'on':''}"></i>`).join(''); }
- function title(t){$('cc-pin-title').textContent=t;$('cc-pin-error').textContent=''}
- function showLock(m='unlock'){mode=m;entry='';draw();$('cc-lock').classList.remove('hidden');title(m==='setup'?'Crea un PIN di 4 cifre':m==='confirm'?'Conferma il nuovo PIN':'Inserisci il PIN')}
- function hideLock(){$('cc-lock').classList.add('hidden');fails=0}
- async function digit(d){if(entry.length>=4)return;entry+=d;draw();if(entry.length===4){await verify();entry='';setTimeout(draw,150)}}
- async function verify(){if(mode==='setup'){first=entry;showLock('confirm');return} if(mode==='confirm'){if(entry!==first){$('cc-pin-error').textContent='I PIN non coincidono';setTimeout(()=>showLock('setup'),700);return}const salt=crypto.getRandomValues(new Uint32Array(4)).join('-');localStorage.setItem(PINKEY,JSON.stringify({salt,hash:await hash(entry,salt)}));hideLock();toast('PIN attivato')}else{const c=pinCfg();if(!c||await hash(entry,c.salt)===c.hash)hideLock();else{fails++;$('cc-pin-error').textContent=fails>=5?'Troppi tentativi. Riprova tra 30 secondi.':'PIN errato';if(fails>=5){$('cc-keypad').style.pointerEvents='none';setTimeout(()=>{$('cc-keypad').style.pointerEvents='';fails=0},30000)}}}}
- function initPin(){ $('cc-keypad').innerHTML=[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(x=>x===''?'<span></span>':`<button class="cc-key" type="button" data-k="${x}">${x}</button>`).join('');$('cc-keypad').onclick=e=>{const k=e.target.dataset.k;if(k==='⌫'){entry=entry.slice(0,-1);draw()}else if(k!==undefined)digit(k)};$('cc-pin-reset').onclick=()=>{if(confirm('Questa operazione cancella PIN e dati locali. Continuare?')){localStorage.clear();location.reload()}};showLock(pinCfg()?'unlock':'setup');document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(pinCfg())showLock('unlock')})}
- function monthTx(){const ym=new Date().toISOString().slice(0,7);return (store.transactions||[]).filter(t=>(t.date||'').slice(0,7)===ym)}
- function forecast(){if(typeof store==='undefined')return;const now=new Date(),tx=monthTx(),out=tx.filter(t=>t.type==='Uscita').reduce((a,t)=>a+Number(t.amount||0),0),income=tx.filter(t=>t.type==='Entrata').reduce((a,t)=>a+Number(t.amount||0),0),days=now.getDate(),max=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),daily=out/Math.max(days,1),remaining=daily*(max-days),liquid=(store.accounts||[]).reduce((a,x)=>a+Number(x.balance||0),0),due=(store.installments||[]).filter(i=>(i.nextDate||'').slice(0,7)===now.toISOString().slice(0,7)&&new Date(i.nextDate)>now).reduce((a,i)=>a+Number(i.monthly||0),0),pred=liquid-remaining-due;$('cc-forecast').textContent=eur(pred);$('cc-forecast-note').textContent=tx.length<3?'Stima preliminare: servono più movimenti.':`Ritmo: ${eur(daily)}/giorno · ${max-days} giorni rimasti${due?' · rate previste '+eur(due):''}`}
- function report(){const tx=monthTx(),inc=tx.filter(t=>t.type==='Entrata').reduce((a,t)=>a+Number(t.amount),0),out=tx.filter(t=>t.type==='Uscita').reduce((a,t)=>a+Number(t.amount),0),label=new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(new Date());return{tx,inc,out,label}}
- function exportPDF(){const r=report(),rows=r.tx.map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.desc)}</td><td>${esc(t.category)}</td><td>${esc(t.type)}</td><td>${eur(t.amount)}</td></tr>`).join('');$('cc-print').innerHTML=`<h1>Conti Chiari</h1><h2>Resoconto ${esc(r.label)}</h2><p>Entrate: <b>${eur(r.inc)}</b> · Uscite: <b>${eur(r.out)}</b> · Risparmio netto: <b>${eur(r.inc-r.out)}</b></p><table><thead><tr><th>Data</th><th>Descrizione</th><th>Categoria</th><th>Tipo</th><th>Importo</th></tr></thead><tbody>${rows}</tbody></table><p>Generato il ${new Date().toLocaleString('it-IT')}</p>`;window.print()}
- function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
- function exportExcel(){const r=report(),lines=[['Data','Descrizione','Categoria','Tipo','Conto','Importo'],...r.tx.map(t=>[t.date,t.desc,t.category,t.type,t.account,t.amount])],csv='\ufeff'+lines.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n'),blob=new Blob([csv],{type:'application/vnd.ms-excel;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`conti-chiari-${new Date().toISOString().slice(0,7)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
- function changePin(){first='';showLock('setup')}
- function parseAmounts(text){const re=/(?:€|eur)?\s*(-?\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})|-?\d+[.,]\d{2})\s*(?:€|eur)?/gi,neg=/saldo|disponibile|limite|cashback|residuo/i,pos=/pagamento|pagato|totale|importo|addebitato|acquisto|amount|paid/i,a=[];let m;while((m=re.exec(text))){let raw=m[1].replace(/\s/g,''),value=raw.includes(',')?Number(raw.replace(/\./g,'').replace(',','.')):Number(raw);let ctx=text.slice(Math.max(0,m.index-45),m.index+m[0].length+45),score=50+(pos.test(ctx)?35:0)-(neg.test(ctx)?40:0);if(value>0)a.push({value,score,ctx})}return a.sort((x,y)=>y.score-x.score).filter((x,i,z)=>z.findIndex(q=>q.value===x.value)===i).slice(0,4)}
- async function ocr(file){const status=$('cc-ocr-status'),bar=$('cc-ocr-progress');if(!file)return;bar.classList.remove('cc-hide');status.textContent='Preparazione OCR...';try{if(!window.Tesseract){await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}const result=await Tesseract.recognize(file,'ita+eng',{logger:m=>{if(m.progress){bar.firstElementChild.style.width=Math.round(m.progress*100)+'%';status.textContent='Lettura screenshot: '+Math.round(m.progress*100)+'%'}}}),vals=parseAmounts(result.data.text),box=$('cc-ocr-candidates');box.innerHTML=vals.length?'<div class="text-[10px] text-slate-300 mb-1">Importi rilevati, tocca quello corretto:</div>'+vals.map((v,i)=>`<button type="button" class="w-full text-left rounded-xl px-3 py-2 ${i===0?'bg-indigo-600':'bg-slate-800'} text-xs" data-amt="${v.value}">${eur(v.value)} <span class="float-right opacity-70">${v.score>=80?'probabile':'verifica'}</span></button>`).join(''):'<p class="text-[10px] text-amber-400">Nessun importo affidabile. Inseriscilo manualmente.</p>';box.onclick=e=>{const b=e.target.closest('[data-amt]');if(b){$('tx-amount').value=b.dataset.amt;toast('Importo proposto: '+eur(b.dataset.amt)+'. Verificalo prima di salvare.')}};status.textContent='Analisi completata. Verifica sempre il valore.'}catch(e){status.textContent='OCR non disponibile. Controlla la connessione al primo utilizzo.'}finally{setTimeout(()=>bar.classList.add('cc-hide'),500)}}
- function init(){initPin();$('cc-receipt')?.addEventListener('change',e=>ocr(e.target.files[0]));$('tx-type')?.addEventListener('change',e=>$('cc-ocr-area')?.classList.toggle('cc-hide',e.target.value!=='Uscita'));setTimeout(forecast,300);setInterval(forecast,15000);if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
- return{init,forecast,exportPDF,exportExcel,changePin}
-})();
-window.addEventListener('load',CCPro.init);
-</script>
-
 </body>
 </html>
