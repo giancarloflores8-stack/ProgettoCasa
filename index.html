@@ -461,6 +461,13 @@
                 <p id="an-stack-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessuna spesa nel periodo.</p>
             </div>
 
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-300">Acquisti: Shopping, Amazon e online</h3>
+                <div id="an-shop-wrap" class="h-56 relative"><canvas id="chart-shop"></canvas></div>
+                <p id="an-shop-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Nessuna spesa in queste categorie nel periodo.</p>
+                <div id="an-shop-list" class="grid grid-cols-3 gap-2"></div>
+            </div>
+
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
                 <h3 class="text-xs font-bold text-slate-300">Da dove arrivano le entrate</h3>
                 <div id="an-incat-wrap" class="h-56 relative"><canvas id="chart-incat"></canvas></div>
@@ -629,6 +636,10 @@
             <!-- STRUMENTI -->
             <div class="space-y-2">
                 <label class="block text-xs font-semibold text-slate-300">Strumenti</label>
+                <button onclick="ccOpenAp()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-between">
+                    <span class="flex items-center space-x-2"><i class="fa-brands fa-apple-pay text-indigo-400 text-base"></i><span>Pagamenti Apple Pay</span></span>
+                    <span id="ap-state" class="text-[10px] font-semibold text-slate-400">Non collegato</span>
+                </button>
                 <button onclick="ccOpenReport()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-between">
                     <span class="flex items-center space-x-2"><i class="fa-solid fa-file-pdf text-indigo-400"></i><span>Resoconto mensile (PDF / Excel)</span></span>
                     <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
@@ -698,6 +709,9 @@
                         <option value="Casa">Casa & Bollette</option>
                         <option value="Trasporti">Trasporti & Auto</option>
                         <option value="Svago">Svago & Tempo Libero</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Spese Amazon">Spese Amazon</option>
+                        <option value="Spese online">Spese online (in generale)</option>
                         <option value="Stipendio">Stipendio / Entrate</option>
                         <option value="Altro">Altro</option>
                     </select>
@@ -821,6 +835,42 @@
                 </div>
                 <p id="rep-msg" class="text-[11px] text-slate-400 min-h-[16px]"></p>
                 <p class="text-[10px] text-slate-500 leading-snug">Dal foglio di condivisione scegli "Salva su File". Il resoconto contiene riepilogo, spese per categoria, movimenti del mese e patrimonio attuale.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE PAGAMENTI APPLE PAY -->
+    <div id="modal-applepay" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Pagamenti Apple Pay</h3>
+                <button onclick="closeModal('modal-applepay')" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <p class="text-[11px] text-slate-400 leading-snug">Ogni pagamento con Apple Pay arriva da solo nelle tue uscite. Segui la guida PDF per creare lo script Google e l'automazione in Comandi, poi incolla qui i due dati.</p>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Indirizzo dello script (termina con /exec)</label>
+                    <input type="url" id="ap-url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Codice segreto (lo stesso dello script)</label>
+                    <input type="password" id="ap-token" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="Il tuo codice segreto" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Da quale conto scalare i pagamenti</label>
+                    <select id="ap-account" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                </div>
+                <label id="ap-history-wrap" class="flex items-start gap-2.5 text-[11px] text-slate-300 leading-snug">
+                    <input type="checkbox" id="ap-history" class="mt-0.5 accent-indigo-500">
+                    <span>Importa anche i pagamenti già presenti nel foglio. Se non lo spunti, parte solo da adesso.</span>
+                </label>
+                <p id="ap-msg" class="text-[11px] text-slate-400 min-h-[16px]"></p>
+                <button type="button" onclick="ccApSave()" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs">Salva e verifica</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="ccApSync(true)" class="bg-slate-800 border border-slate-700 text-slate-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-rotate text-indigo-400"></i>Sincronizza ora</button>
+                    <button type="button" onclick="ccApDisconnect()" class="bg-slate-800 border border-slate-700 text-rose-400 font-semibold py-3 rounded-xl text-xs">Scollega</button>
+                </div>
+                <p id="ap-last" class="text-[10px] text-slate-500"></p>
             </div>
         </div>
     </div>
@@ -2614,6 +2664,379 @@
             }).catch(() => ccOfflineStatus('Uso offline non attivo: manca il file sw.js accanto a index.html.', false));
         }
 
+        // ---------- PAGAMENTI APPLE PAY (arrivano da Comandi -> script Google -> qui) ----------
+        const CC_AP = { url: 'cc_ap_url', token: 'cc_ap_token', acc: 'cc_ap_acc', since: 'cc_ap_since', ids: 'cc_ap_ids', last: 'cc_ap_last' };
+        let ccApBusy = false, ccApRun = 0;
+        const CC_AP_RULES = [
+            ['Spese Amazon', /amazon|\bamzn\b/i],
+            ['Spese online', /zalando|aliexpress|vinted|shein|temu|ebay|subito|apple\.com|app\s?store|itunes|google\s?play|paypal|wish\.com|etsy|booking|airbnb|ryanair|easyjet/i],
+            ['Alimentari', /esselunga|conad|\bcoop\b|lidl|aspiag|despar|interspar|carrefour|eurospin|supermerc|\bmd\b|\bpam\b|penny|famila|iper\b|tigros|bennet|panetteria|macelleria|alimentar/i],
+            ['Trasporti', /\beni\b|\bq8\b|esso|\bip\b|tamoil|benzin|carburant|trenitalia|italo|uber|telepass|autostrad|\batm\b|parcheggio|parking|flixbus|taxi|\bbolt\b|autolinee/i],
+            ['Svago', /netflix|spotify|disney|dazn|cinema|steam|playstation|nintendo|xbox|mcdonald|burger|pizz|ristorant|trattoria|\bbar\b|caff|pub\b|sushi|gelat|birrer|kebab|osteria|twitch/i],
+            ['Casa', /enel|\beni\s?plenitude|\ba2a\b|hera|iren|bolletta|leroy|brico|ikea|affitto|condomin|vodafone|tim\b|wind\s?tre|iliad|fastweb/i],
+            ['Shopping', /decathlon|mediaworld|unieuro|h&m|zara|nike|adidas|foot\s?locker|sephora|douglas|euronics|trony|primark|oviesse|kiabi|zara/i]
+        ];
+        function ccApCategory(merchant) {
+            for (const r of CC_AP_RULES) if (r[1].test(merchant || '')) return r[0];
+            return 'Altro';
+        }
+        function ccApNiceName(m) {
+            m = String(m || '').replace(/\s+/g, ' ').trim();
+            if (!m) return 'Pagamento Apple Pay';
+            if (m === m.toUpperCase() && /[A-Z]/.test(m)) m = m.toLowerCase().replace(/(^|\s|[-*'])([a-zà-ÿ])/g, (x, a, b) => a + b.toUpperCase());
+            return m;
+        }
+        function ccApCfg() { try { return { url: localStorage.getItem(CC_AP.url) || '', token: localStorage.getItem(CC_AP.token) || '' }; } catch (e) { return { url: '', token: '' }; } }
+        function ccApConfigured() { const c = ccApCfg(); return !!(c.url && c.token); }
+        function ccApIds() { try { return JSON.parse(localStorage.getItem(CC_AP.ids)) || []; } catch (e) { return []; } }
+        function ccApUrl(action, extra) {
+            const c = ccApCfg();
+            return c.url + (c.url.indexOf('?') >= 0 ? '&' : '?') + 'action=' + action + '&token=' + encodeURIComponent(c.token) + (extra || '');
+        }
+        function ccToast(msg) {
+            let t = document.getElementById('cc-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'cc-toast';
+                t.className = 'fixed left-1/2 z-[60] bg-slate-900 border border-indigo-500/40 text-slate-100 text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl transition-all duration-300 opacity-0 pointer-events-none';
+                t.style.transform = 'translateX(-50%)';
+                t.style.bottom = 'calc(env(safe-area-inset-bottom) + 92px)';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = '1';
+            clearTimeout(ccToast._t);
+            ccToast._t = setTimeout(() => { t.style.opacity = '0'; }, 4200);
+        }
+        function ccApStatus(text, kind) {
+            const m = document.getElementById('ap-msg');
+            if (!m) return;
+            m.textContent = text;
+            m.className = 'text-[11px] min-h-[16px] ' + (kind === 'ok' ? 'text-emerald-400' : kind === 'err' ? 'text-rose-400' : 'text-slate-400');
+        }
+        function ccApRefreshUI() {
+            const on = ccApConfigured();
+            const st = document.getElementById('ap-state');
+            if (st) { st.textContent = on ? 'Collegato' : 'Non collegato'; st.className = 'text-[10px] font-semibold ' + (on ? 'text-emerald-400' : 'text-slate-400'); }
+            const last = document.getElementById('ap-last');
+            if (last) {
+                let l = null; try { l = JSON.parse(localStorage.getItem(CC_AP.last)); } catch (e) {}
+                last.textContent = l ? ('Ultimo controllo: ' + new Date(l.ts).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + (l.err ? ' · ' + l.err : ' · nuovi pagamenti: ' + l.n)) : '';
+            }
+        }
+        function ccOpenAp() {
+            const c = ccApCfg();
+            document.getElementById('ap-url').value = c.url;
+            document.getElementById('ap-token').value = c.token;
+            const sel = document.getElementById('ap-account');
+            sel.innerHTML = store.accounts.map(a => '<option value="' + a.id + '">' + ccEsc(a.name) + '</option>').join('');
+            const saved = localStorage.getItem(CC_AP.acc);
+            const bank = store.accounts.find(a => a.type === 'Banca') || store.accounts[0];
+            sel.value = (saved && store.accounts.some(a => String(a.id) === saved)) ? saved : (bank ? String(bank.id) : '');
+            document.getElementById('ap-history-wrap').classList.toggle('hidden', ccApConfigured());
+            document.getElementById('ap-history').checked = false;
+            ccApStatus('');
+            ccApRefreshUI();
+            document.getElementById('modal-applepay').classList.remove('hidden');
+        }
+        async function ccApSave() {
+            const url = document.getElementById('ap-url').value.trim();
+            const token = document.getElementById('ap-token').value.trim();
+            if (!/^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(url)) { ccApStatus('L\'indirizzo non sembra giusto: deve iniziare con https://script.google.com/macros/s/ e finire con /exec', 'err'); return; }
+            if (token.length < 6) { ccApStatus('Il codice segreto è troppo corto.', 'err'); return; }
+            const wasOn = ccApConfigured();
+            localStorage.setItem(CC_AP.url, url);
+            localStorage.setItem(CC_AP.token, token);
+            localStorage.setItem(CC_AP.acc, document.getElementById('ap-account').value);
+            if (!wasOn) localStorage.setItem(CC_AP.since, document.getElementById('ap-history').checked ? '0' : String(Date.now()));
+            ccApStatus('Verifico il collegamento...');
+            try {
+                const r = await fetch(ccApUrl('ping'), { cache: 'no-store' });
+                const j = await r.json();
+                if (!j.ok) { ccApStatus(j.error === 'token' ? 'Il codice segreto non coincide con quello dello script.' : 'Lo script ha risposto con un errore.', 'err'); ccApRefreshUI(); return; }
+                ccApStatus('Collegato. I pagamenti con Apple Pay arriveranno da soli.', 'ok');
+                ccApRefreshUI();
+                ccApSync(true);
+            } catch (e) {
+                ccApStatus('Non riesco a raggiungere lo script. Controlla l\'indirizzo e che la distribuzione sia per "Chiunque".', 'err');
+            }
+        }
+        function ccApDisconnect() {
+            if (!confirm('Scollegare i pagamenti Apple Pay da questa app? I movimenti già importati restano.')) return;
+            [CC_AP.url, CC_AP.token, CC_AP.since, CC_AP.last].forEach(k => localStorage.removeItem(k));
+            ccApStatus('Scollegato.');
+            ccApRefreshUI();
+            document.getElementById('ap-url').value = '';
+            document.getElementById('ap-token').value = '';
+            document.getElementById('ap-history-wrap').classList.remove('hidden');
+        }
+        // Importa le righe nuove come uscite sul conto scelto. Restituisce quante ne ha importate.
+        function ccApImport(rows) {
+            const ids = ccApIds();
+            const seen = new Set(ids);
+            const accId = localStorage.getItem(CC_AP.acc);
+            const acc = store.accounts.find(a => String(a.id) === accId) || store.accounts.find(a => a.type === 'Banca') || store.accounts[0];
+            let n = 0, i = 0;
+            rows.forEach(r => {
+                if (!r || !r.id || seen.has(r.id)) return;
+                const amount = Math.round(Number(r.amount) * 100) / 100;
+                if (!(amount > 0)) return;
+                seen.add(r.id); ids.push(r.id);
+                const tx = {
+                    id: Date.now() + (i++),
+                    type: 'Uscita',
+                    desc: ccApNiceName(r.merchant),
+                    amount: amount,
+                    date: ccDateStr(new Date(Number(r.ts) || Date.now())),
+                    category: ccApCategory(r.merchant),
+                    account: acc ? acc.name : 'Apple Pay',
+                    source: 'applepay',
+                    apId: r.id
+                };
+                if (acc) { acc.balance = Math.round((acc.balance - amount) * 100) / 100; tx.accountId = acc.id; tx.applied = true; }
+                store.transactions.unshift(tx);
+                n++;
+            });
+            localStorage.setItem(CC_AP.ids, JSON.stringify(ids.slice(-500)));
+            if (n) saveData();
+            return n;
+        }
+        async function ccApSync(manual) {
+            if (!ccApConfigured()) { if (manual) ccApStatus('Prima inserisci indirizzo e codice segreto.', 'err'); return 0; }
+            if (ccApBusy) return 0;
+            if (!manual && Date.now() - ccApRun < 20000) return 0;
+            ccApBusy = true; ccApRun = Date.now();
+            if (manual) ccApStatus('Controllo i nuovi pagamenti...');
+            let n = 0;
+            try {
+                const since = Number(localStorage.getItem(CC_AP.since) || '0') || 0;
+                const r = await fetch(ccApUrl('list', '&since=' + since), { cache: 'no-store' });
+                const j = await r.json();
+                if (!j.ok) throw new Error(j.error === 'token' ? 'codice segreto non valido' : 'errore dello script');
+                n = ccApImport(j.rows || []);
+                const maxTs = (j.rows || []).reduce((m, x) => Math.max(m, Number(x.ts) || 0), since);
+                localStorage.setItem(CC_AP.since, String(maxTs));
+                localStorage.setItem(CC_AP.last, JSON.stringify({ ts: Date.now(), n: n }));
+                if (n) ccToast(n === 1 ? '1 pagamento Apple Pay aggiunto' : n + ' pagamenti Apple Pay aggiunti');
+                if (manual) ccApStatus(n ? ('Importati ' + n + ' pagamenti.') : 'Nessun pagamento nuovo.', 'ok');
+            } catch (e) {
+                const msg = /codice|errore/.test(e.message) ? e.message : 'nessuna connessione';
+                localStorage.setItem(CC_AP.last, JSON.stringify({ ts: Date.now(), n: 0, err: msg }));
+                if (manual) ccApStatus('Non sono riuscito a controllare: ' + msg + '.', 'err');
+            } finally {
+                ccApBusy = false;
+                ccApRefreshUI();
+            }
+            return n;
+        }
+        function ccInitAp() {
+            ccApRefreshUI();
+            ccApSync(false);
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ccApSync(false); });
+            window.addEventListener('online', () => ccApSync(false));
+        }
+
+        // ---------- MODIFICA DEI MOVIMENTI + NUOVE CATEGORIE NEI GRAFICI ----------
+        let ccTxEditing = false;
+        function ccTxEls() {
+            const m = document.getElementById('modal-transaction');
+            return { title: m.querySelector('h3'), submit: m.querySelector('button[type="submit"]'), ocr: document.getElementById('tx-ocr-box'),
+                     accSel: document.getElementById('tx-account'), accWrap: document.getElementById('tx-account').parentElement, note: document.getElementById('tx-edit-note'),
+                     id: document.getElementById('tx-edit-id') };
+        }
+        function ccTxInitEdit() {
+            const m = document.getElementById('modal-transaction');
+            const form = m.querySelector('form');
+            if (!form || document.getElementById('tx-edit-id')) return;
+            const h = document.createElement('input'); h.type = 'hidden'; h.id = 'tx-edit-id'; h.value = '';
+            form.insertBefore(h, form.firstChild);
+            const e = ccTxEls();
+            e.submit.dataset.addLabel = e.submit.textContent.trim();
+            e.title.dataset.addLabel = e.title.textContent.trim();
+            const n = document.createElement('p'); n.id = 'tx-edit-note'; n.className = 'hidden text-[10px] text-slate-500 leading-snug';
+            e.accWrap.parentNode.insertBefore(n, e.accWrap.nextSibling);
+        }
+        function ccTxResetEdit() {
+            const e = ccTxEls();
+            if (!e.id) return;
+            e.id.value = '';
+            e.title.textContent = e.title.dataset.addLabel || 'Aggiungi Movimento';
+            e.submit.textContent = e.submit.dataset.addLabel || 'Salva';
+            if (e.ocr) e.ocr.style.display = '';
+            e.accWrap.style.display = '';
+            e.note.classList.add('hidden');
+        }
+        function ccOpenTxEdit(id) {
+            const tx = store.transactions.find(t => t.id === id);
+            if (!tx) return;
+            ccTxEditing = true;
+            try { openModal('modal-transaction'); } finally { ccTxEditing = false; }
+            const e = ccTxEls();
+            e.id.value = String(tx.id);
+            document.getElementById('tx-type').value = tx.type;
+            document.getElementById('tx-desc').value = tx.desc;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-date').value = tx.date;
+            const cs = document.getElementById('tx-category');
+            if (!Array.from(cs.options).some(o => o.value === tx.category)) cs.appendChild(new Option(tx.category, tx.category));
+            cs.value = tx.category;
+            if (tx.applied) {
+                const has = store.accounts.some(a => a.id === tx.accountId);
+                e.accSel.value = has ? String(tx.accountId) : 'none';
+                e.accWrap.style.display = '';
+                e.note.textContent = 'Se cambi importo, tipo o conto, il saldo si riallinea da solo.';
+            } else {
+                e.accWrap.style.display = 'none';
+                e.note.textContent = 'Questo movimento non cambia i saldi dei conti: modificandolo i saldi restano come sono.';
+            }
+            e.note.classList.remove('hidden');
+            e.title.textContent = 'Modifica Movimento';
+            e.submit.textContent = 'Salva Modifiche';
+            if (e.ocr) e.ocr.style.display = 'none';
+        }
+        function ccTxSaveEdit(ev) {
+            ev.preventDefault();
+            const e = ccTxEls();
+            const tx = store.transactions.find(t => String(t.id) === e.id.value);
+            if (!tx) { closeModal('modal-transaction'); return; }
+            const amount = parseFloat(String(document.getElementById('tx-amount').value).replace(',', '.'));
+            if (isNaN(amount) || amount <= 0) return;
+            const type = document.getElementById('tx-type').value;
+            const rnd = v => Math.round(v * 100) / 100;
+            if (tx.applied) {
+                const old = store.accounts.find(a => a.id === tx.accountId);
+                if (old) old.balance = rnd(old.balance + (tx.type === 'Entrata' ? -tx.amount : tx.amount));
+                const v = e.accSel.value;
+                const acc = v === 'none' ? null : store.accounts.find(a => String(a.id) === v);
+                if (acc) {
+                    acc.balance = rnd(acc.balance + (type === 'Entrata' ? amount : -amount));
+                    tx.accountId = acc.id; tx.account = acc.name; tx.applied = true;
+                } else {
+                    delete tx.accountId; tx.applied = false; tx.account = 'Solo registro';
+                }
+            }
+            tx.type = type;
+            tx.amount = rnd(amount);
+            tx.desc = document.getElementById('tx-desc').value.trim() || tx.desc;
+            tx.date = document.getElementById('tx-date').value || tx.date;
+            tx.category = document.getElementById('tx-category').value;
+            saveData();
+            closeModal('modal-transaction');
+        }
+        // rende cliccabili le righe (Movimenti e Ultimi movimenti) e aggiunge la matita
+        function ccEnhanceTxLists() {
+            const cont = document.getElementById('transactions-mobile-list');
+            if (cont) Array.prototype.forEach.call(cont.children, row => {
+                if (row.dataset.ccEnh === '1') return;
+                const del = row.querySelector('button[onclick^="deleteTx("]');
+                if (!del) return;
+                row.dataset.ccEnh = '1';
+                const m = del.getAttribute('onclick').match(/deleteTx\((\d+)\)/);
+                if (!m) return;
+                const id = Number(m[1]);
+                row.style.cursor = 'pointer';
+                row.onclick = () => ccOpenTxEdit(id);
+                const wrap = document.createElement('div');
+                wrap.className = 'flex items-center justify-end -mr-2 -mb-2';
+                wrap.addEventListener('click', ev => ev.stopPropagation());
+                const pen = document.createElement('button');
+                pen.type = 'button'; pen.setAttribute('aria-label', 'Modifica');
+                pen.className = 'p-2.5 text-slate-500 active:text-indigo-400';
+                pen.innerHTML = '<i class="fa-solid fa-pen text-[11px]"></i>';
+                pen.addEventListener('click', ev => { ev.stopPropagation(); ccOpenTxEdit(id); });
+                del.className = 'p-2.5 text-slate-500 hover:text-rose-400 active:text-rose-400 text-[11px]';
+                del.parentNode.insertBefore(wrap, del);
+                wrap.appendChild(pen); wrap.appendChild(del);
+            });
+            const rc = document.getElementById('dash-recent-list');
+            if (rc) Array.prototype.forEach.call(rc.children, (row, i) => {
+                const tx = store.transactions[i];
+                if (!tx) return;
+                row.style.cursor = 'pointer';
+                row.onclick = () => ccOpenTxEdit(tx.id);
+            });
+        }
+
+        // ---------- colori fissi per categoria + grafico degli acquisti ----------
+        const CC_CAT_COLORS = { 'Alimentari': '#10b981', 'Casa': '#f59e0b', 'Trasporti': '#06b6d4', 'Svago': '#f43f5e', 'Shopping': '#6366f1', 'Spese Amazon': '#f97316', 'Spese online': '#a855f7',
+                                'Persone': '#84cc16', 'Contanti': '#14b8a6', 'Salute': '#ec4899', 'Abbonamenti': '#0ea5e9', 'Altro': '#64748b', 'Extra': '#eab308', 'Stipendio': '#22c55e' };
+        const CC_CAT_FALLBACK = ['#38bdf8', '#fb7185', '#a3e635', '#fbbf24', '#c084fc', '#2dd4bf'];
+        function ccCatColor(name, i) { return CC_CAT_COLORS[name] || CC_CAT_FALLBACK[(i || 0) % CC_CAT_FALLBACK.length]; }
+        const CC_SHOP_CATS = ['Shopping', 'Spese Amazon', 'Spese online'];
+
+        function ccRecolorCategoryCharts() {
+            const cat = anCharts['chart-cat'];
+            if (cat && cat.data && cat.data.labels && cat.data.datasets[0]) {
+                cat.data.datasets[0].backgroundColor = cat.data.labels.map((n, i) => ccCatColor(n, i));
+                if (cat.update) cat.update();
+            }
+            const st = anCharts['chart-stack'];
+            if (st && st.data && st.data.datasets) {
+                st.data.datasets.forEach((ds, i) => { ds.backgroundColor = ds.label === 'Altre' ? '#94a3b8' : ccCatColor(ds.label, i); });
+                if (st.update) st.update();
+            }
+            const list = document.getElementById('an-cat-list');
+            if (list) Array.prototype.forEach.call(list.children, (row, i) => {
+                const dot = row.querySelector('span[style]');
+                const nameEl = row.firstElementChild;
+                if (dot && nameEl) dot.style.background = ccCatColor(nameEl.textContent.trim(), i);
+            });
+        }
+        function ccRenderShopChart() {
+            const priv = document.documentElement.classList.contains('privacy');
+            const real = store.transactions.filter(t => t.date && t.type === 'Uscita' && !ccIsAdjust(t));
+            const sel = document.getElementById('an-period').value;
+            let n;
+            if (sel === 'all') {
+                const ms = real.map(t => t.date.slice(0, 7)).sort();
+                if (!ms.length) n = 1;
+                else { const f = ms[0].split('-'), now = new Date(); n = (now.getFullYear() - Number(f[0])) * 12 + (now.getMonth() + 1 - Number(f[1])) + 1; }
+                n = Math.max(1, Math.min(24, n));
+            } else n = parseInt(sel, 10);
+            const months = ccMonthsList(n);
+            const labels = months.map(m => { const p = m.split('-'); return MESI[Number(p[1]) - 1] + (n > 12 ? " '" + p[0].slice(2) : ''); });
+            const totals = {};
+            const sets = CC_SHOP_CATS.map(c => {
+                const data = months.map(m => Math.round(real.filter(t => t.category === c && t.date.slice(0, 7) === m).reduce((s, t) => s + t.amount, 0) * 100) / 100);
+                totals[c] = data.reduce((s, v) => s + v, 0);
+                return { label: c, data: data, backgroundColor: CC_CAT_COLORS[c], borderRadius: 4 };
+            });
+            const ok = CC_SHOP_CATS.some(c => totals[c] > 0);
+            const wrap = document.getElementById('an-shop-wrap'), empty = document.getElementById('an-shop-empty'), list = document.getElementById('an-shop-list');
+            if (!wrap) return;
+            wrap.classList.toggle('hidden', !ok); empty.classList.toggle('hidden', ok);
+            list.innerHTML = CC_SHOP_CATS.map(c => '<div class="bg-slate-800/50 rounded-xl p-2.5"><p class="text-[10px] text-slate-400 flex items-center"><span class="w-2 h-2 rounded-full mr-1.5 shrink-0" style="background:' + CC_CAT_COLORS[c] + '"></span>' + c + '</p><p class="pv text-xs font-bold text-white mt-0.5">' + ccEur(totals[c]) + '</p></div>').join('');
+            if (!ok) return;
+            ccMk('chart-shop', {
+                type: 'bar',
+                data: { labels: labels, datasets: sets },
+                options: { responsive: true, maintainAspectRatio: false,
+                    scales: { x: { stacked: true }, y: { stacked: true, ticks: { display: !priv } } },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { enabled: !priv, callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.y) } } } }
+            });
+        }
+
+        // ---------- collegamenti (senza modificare il codice esistente) ----------
+        (function ccWireEdit() {
+            const baseSave = saveTransaction;
+            saveTransaction = function (e) {
+                const idEl = document.getElementById('tx-edit-id');
+                if (idEl && idEl.value) return ccTxSaveEdit(e);
+                return baseSave.apply(this, arguments);
+            };
+            const baseOpen = openModal;
+            openModal = function (id) { baseOpen.apply(this, arguments); if (id === 'modal-transaction' && !ccTxEditing) ccTxResetEdit(); };
+            const baseList = renderTransactionsList;
+            renderTransactionsList = function () { baseList.apply(this, arguments); try { ccEnhanceTxLists(); } catch (e) {} };
+            const baseUpdate = updateAllViews;
+            updateAllViews = function () { baseUpdate.apply(this, arguments); try { ccEnhanceTxLists(); } catch (e) {} };
+            const baseCharts = renderAnalysisCharts;
+            renderAnalysisCharts = function () { baseCharts.apply(this, arguments); try { ccRecolorCategoryCharts(); ccRenderShopChart(); } catch (e) {} };
+            const start = function () { try { ccTxInitEdit(); ccEnhanceTxLists(); } catch (e) {} };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+        })();
+
+
         // ---------- COLLEGAMENTI CON IL CODICE ESISTENTE (senza modificarlo) ----------
         (function ccWire() {
             // la previsione si ridisegna a ogni aggiornamento generale dell'app
@@ -2624,6 +3047,7 @@
             openModal = function (id) { baseOpen.apply(this, arguments); if (id === 'modal-transaction') ccOcrReset(); };
             const start = function () {
                 try { ccInitOcr(); } catch (e) {}
+                try { ccInitAp(); } catch (e) {}
                 try { renderForecast(); } catch (e) {}
                 try { ccInitOffline(); } catch (e) {}
             };
