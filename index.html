@@ -875,6 +875,33 @@
         </div>
     </div>
 
+    <!-- SPIEGAZIONE DEI GRAFICI -->
+    <div id="modal-chart-info" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4" onclick="if (event.target === this) closeModal('modal-chart-info')">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[88vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 20px);">
+            <div class="flex justify-between items-start gap-3 border-b border-slate-800 pb-3">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0"><i class="fa-solid fa-lightbulb text-amber-400 text-sm"></i></div>
+                    <div class="min-w-0">
+                        <h3 id="ci-title" class="text-sm font-bold text-white leading-tight"></h3>
+                        <p id="ci-period" class="text-[10px] text-slate-400 mt-0.5"></p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-chart-info')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1 -mr-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p id="ci-short" class="text-[13px] text-slate-200 leading-snug font-medium"></p>
+            <div>
+                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">Come si legge</p>
+                <ul id="ci-how" class="space-y-2"></ul>
+            </div>
+            <div id="ci-legend" class="flex flex-wrap gap-x-4 gap-y-1.5"></div>
+            <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-xl p-3.5">
+                <p class="text-[10px] uppercase tracking-wider text-indigo-300 font-semibold mb-1.5">Cosa dicono i tuoi dati</p>
+                <div id="ci-insight" class="text-[12.5px] text-slate-200 leading-relaxed space-y-2"></div>
+            </div>
+            <button type="button" onclick="closeModal('modal-chart-info')" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs">Ho capito</button>
+        </div>
+    </div>
+
     <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4">
         <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -3033,6 +3060,303 @@
             const baseCharts = renderAnalysisCharts;
             renderAnalysisCharts = function () { baseCharts.apply(this, arguments); try { ccRecolorCategoryCharts(); ccRenderShopChart(); } catch (e) {} };
             const start = function () { try { ccTxInitEdit(); ccEnhanceTxLists(); } catch (e) {} };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+        })();
+
+
+        // ---------- SPIEGAZIONE DEI GRAFICI (tocca il titolo o il "?" accanto) ----------
+        function ccAnCtx() {
+            const sel = document.getElementById('an-period');
+            const real = store.transactions.filter(t => t.date && !ccIsAdjust(t));
+            let n;
+            if (sel.value === 'all') {
+                const ms = real.map(t => t.date.slice(0, 7)).sort();
+                if (!ms.length) n = 1;
+                else { const f = ms[0].split('-'), now = new Date(); n = (now.getFullYear() - Number(f[0])) * 12 + (now.getMonth() + 1 - Number(f[1])) + 1; }
+                n = Math.max(1, Math.min(24, n));
+            } else n = parseInt(sel.value, 10);
+            const months = ccMonthsList(n);
+            const c = { n: n, months: months, real: real, inc: months.map(() => 0), out: months.map(() => 0), cat: {}, incCat: {}, weekday: [0, 0, 0, 0, 0, 0, 0], dom: new Array(31).fill(0), exp: [],
+                        label: sel.options[sel.selectedIndex].text };
+            real.forEach(t => {
+                const i = months.indexOf(t.date.slice(0, 7));
+                if (i < 0) return;
+                const k = t.category || 'Altro';
+                if (t.type === 'Entrata') { c.inc[i] += t.amount; c.incCat[k] = (c.incCat[k] || 0) + t.amount; }
+                else {
+                    c.out[i] += t.amount; c.cat[k] = (c.cat[k] || 0) + t.amount;
+                    c.weekday[(new Date(t.date + 'T00:00:00').getDay() + 6) % 7] += t.amount;
+                    c.dom[parseInt(t.date.slice(8, 10), 10) - 1] += t.amount;
+                    c.exp.push(t);
+                }
+            });
+            c.totIn = c.inc.reduce((a, b) => a + b, 0);
+            c.totOut = c.out.reduce((a, b) => a + b, 0);
+            return c;
+        }
+        const ccE = v => '<span class="pv font-semibold text-white">' + ccEur(v) + '</span>';
+        const ccP = v => '<span class="pv font-semibold text-white">' + Math.round(v) + '%</span>';
+        const ccB = t => '<b class="text-white">' + ccEsc(t) + '</b>';
+        const ccPer = c => c.label === 'Tutto' ? 'In tutto il periodo registrato' : 'Negli ' + c.label.toLowerCase();
+        const ccMName = (c, i) => { const p = c.months[i].split('-'); return CC_MESI_FULL[Number(p[1]) - 1] + (c.n > 12 ? ' ' + p[0] : ''); };
+        const ccArgMax = a => a.reduce((b, v, i) => (v > a[b] ? i : b), 0);
+        const ccNoData = 'Non ci sono ancora dati per questo periodo: registra qualche movimento e qui compariranno i tuoi numeri.';
+        const ccSortedObj = o => Object.keys(o).map(k => [k, o[k]]).sort((a, b) => b[1] - a[1]);
+
+        const CC_HELP = {
+            kpi: { title: 'Riepilogo del periodo', short: 'I numeri chiave del periodo scelto in alto a destra.',
+                how: ['<b>Entrate</b>: tutti i soldi arrivati. <b>Uscite</b>: tutti i soldi spesi.', '<b>Risparmio netto</b> = entrate meno uscite. Verde: sei in positivo. Rosso: hai speso più di quanto è entrato.', '<b>Tasso di risparmio</b>: quanta parte di ciò che incassi riesci a tenere. Sopra il 20% è ottimo, tra 10% e 20% è buono, sotto il 10% è basso.', '<b>Spesa media</b>: quanto spendi in media ogni mese.'],
+                legend: [],
+                insight: c => {
+                    if (!c.real.length) return [ccNoData];
+                    const net = c.totIn - c.totOut, rate = c.totIn > 0 ? net / c.totIn * 100 : 0;
+                    const s = [ccPer(c) + ' sono entrati ' + ccE(c.totIn) + ' e usciti ' + ccE(c.totOut) + '.'];
+                    s.push(net >= 0 ? 'Ti restano ' + ccE(net) + ': stai tenendo il ' + ccP(rate) + ' di ciò che incassi.' : 'Hai speso ' + ccE(-net) + ' più di quanto è entrato.');
+                    s.push('Il tuo tasso di risparmio è ' + (net < 0 ? ccB('in negativo') + ': guarda le categorie dove spendi di più.' : rate >= 20 ? ccB('ottimo') + '.' : rate >= 10 ? ccB('buono') + '.' : ccB('basso') + ': c\'è margine per spendere meno.'));
+                    return s;
+                } },
+            'chart-flow': { title: 'Entrate vs Uscite per mese', short: 'Quanto entra e quanto esce, mese per mese.',
+                how: ['Ogni mese ha due barre affiancate.', 'Se la barra rossa (uscite) supera quella verde (entrate), quel mese hai speso più di quanto hai incassato.', 'Il mese in corso è ancora a metà: le sue barre crescono giorno dopo giorno.'],
+                legend: [['#10b981', 'Entrate'], ['#f43f5e', 'Uscite']],
+                insight: c => {
+                    if (!c.totIn && !c.totOut) return [ccNoData];
+                    const s = [ccPer(c) + ': entrate ' + ccE(c.totIn) + ', uscite ' + ccE(c.totOut) + '.'];
+                    const w = ccArgMax(c.out);
+                    if (c.out[w] > 0) s.push('Il mese con più uscite è ' + ccB(ccMName(c, w)) + ' (' + ccE(c.out[w]) + ').');
+                    const over = c.months.filter((m, i) => c.out[i] > c.inc[i]).length;
+                    s.push(over ? 'In ' + over + (over === 1 ? ' mese' : ' mesi') + ' hai speso più di quanto è entrato.' : 'In nessun mese hai speso più di quanto è entrato: ottimo.');
+                    return s;
+                } },
+            'chart-saving': { title: 'Risparmio netto mensile e cumulato', short: 'Quanto ti resta ogni mese e quanto hai messo da parte in totale.',
+                how: ['Le <b>barre</b> sono il risparmio di ogni mese (entrate meno uscite): verde se positivo, rosso se hai speso più di quanto è entrato.', 'La <b>linea viola</b> somma i mesi uno dopo l\'altro: se sale, stai accumulando; se scende, stai consumando.'],
+                legend: [['#10b981', 'Mese in positivo'], ['#f43f5e', 'Mese in negativo'], ['#6366f1', 'Totale accumulato']],
+                insight: c => {
+                    if (!c.totIn && !c.totOut) return [ccNoData];
+                    const net = c.months.map((m, i) => c.inc[i] - c.out[i]), active = c.months.filter((m, i) => c.inc[i] + c.out[i] > 0).length;
+                    const pos = net.filter((v, i) => v > 0 && c.inc[i] + c.out[i] > 0).length, cum = net.reduce((a, b) => a + b, 0);
+                    return [ccPer(c) + ' hai accumulato ' + ccE(cum) + (cum >= 0 ? '.' : ' (in negativo).'), 'Il risparmio è positivo in ' + ccB(pos + ' mesi su ' + active) + '.'];
+                } },
+            'chart-rate': { title: 'Tasso di risparmio per mese', short: 'Che percentuale di ciò che incassi riesci a tenere.',
+                how: ['Il valore è <b>risparmio ÷ entrate</b>: 20% significa che su 100 € incassati ne tieni 20.', 'Sopra il 20% è ottimo, tra 10% e 20% è buono, sotto il 10% è basso, sotto lo 0% hai speso più di quanto è entrato.', 'Un mese senza entrate non ha un punto: la percentuale non si può calcolare.'],
+                legend: [['#a855f7', 'Tasso di risparmio']],
+                insight: c => {
+                    const r = c.months.map((m, i) => (c.inc[i] > 0 ? (c.inc[i] - c.out[i]) / c.inc[i] * 100 : null)), ok = r.filter(v => v !== null);
+                    if (!ok.length) return [ccNoData];
+                    const avg = ok.reduce((a, b) => a + b, 0) / ok.length, best = r.indexOf(Math.max.apply(null, ok));
+                    return ['Il tuo tasso medio è ' + ccP(avg) + ': ' + (avg < 0 ? ccB('in negativo') : avg >= 20 ? ccB('ottimo') : avg >= 10 ? ccB('buono') : ccB('basso')) + '.', 'Il mese migliore è ' + ccB(ccMName(c, best)) + ' con ' + ccP(r[best]) + '.'];
+                } },
+            'chart-networth': { title: 'Andamento del patrimonio', short: 'Come cambia nel tempo quanto vale tutto ciò che hai.',
+                how: ['Ogni punto è il tuo <b>patrimonio netto</b> in un giorno: conti, contanti e titoli, meno i debiti.', 'Linea che sale: il patrimonio cresce. Linea che scende: sta calando.', 'Il grafico si riempie con l\'uso: l\'app salva un punto ogni giorno in cui aggiorni i dati.'],
+                legend: [['#10b981', 'Patrimonio netto']],
+                insight: c => {
+                    const start = c.months[0] + '-01', h = (store.history || []).filter(x => x.d >= start);
+                    if (h.length < 2) return ['Hai ancora pochi punti (' + h.length + '): tra qualche giorno vedrai l\'andamento.'];
+                    const a = h[0], b = h[h.length - 1], d = b.a - a.a;
+                    return ['Dal ' + ccB(a.d.slice(8, 10) + '/' + a.d.slice(5, 7)) + ' a oggi il patrimonio è passato da ' + ccE(a.a) + ' a ' + ccE(b.a) + '.', d >= 0 ? 'È cresciuto di ' + ccE(d) + '.' : 'È sceso di ' + ccE(-d) + '.'];
+                } },
+            'chart-comp': { title: 'Com\'è composto il patrimonio', short: 'Quanto vale ciascuna voce del tuo patrimonio.',
+                how: ['Ogni barra è una voce: un conto, i titoli o i debiti.', 'Le barre blu sono soldi che hai. La barra rossa (debiti e rate) è ciò che devi ancora pagare e viene sottratto dal totale.', 'Serve a capire dove sono i tuoi soldi e quanto pesano i debiti.'],
+                legend: [['#6366f1', 'Soldi e titoli'], ['#f43f5e', 'Debiti / Rate']],
+                insight: c => {
+                    const liquid = store.accounts.reduce((s, a) => s + a.balance, 0), inv = store.assets.reduce((s, a) => s + a.qty * a.currentPrice, 0), debt = store.installments.reduce((s, i) => s + i.remaining, 0), tot = liquid + inv - debt;
+                    const s = ['Il tuo patrimonio netto è ' + ccE(tot) + ': liquidità ' + ccE(liquid) + (inv ? ', titoli ' + ccE(inv) : '') + (debt ? ', debiti ' + ccE(debt) : '') + '.'];
+                    if (liquid + inv > 0) s.push('Il ' + ccP(liquid / (liquid + inv) * 100) + ' di ciò che possiedi è subito disponibile.');
+                    if (debt > 0) s.push('I debiti pesano il ' + ccP(debt / Math.max(1, liquid + inv) * 100) + ' di ciò che possiedi.');
+                    return s;
+                } },
+            'chart-cat': { title: 'Spese per categoria', short: 'Come si divide la tua spesa: in cosa finiscono i soldi.',
+                how: ['Ogni spicchio è una categoria: più è grande, più soldi ci sono finiti.', 'Sotto trovi l\'elenco con importi e percentuali.', 'I colori sono sempre gli stessi per ogni categoria, in tutti i grafici.'],
+                legend: [],
+                insight: c => {
+                    const e = ccSortedObj(c.cat);
+                    if (!e.length) return ['Nessuna spesa in questo periodo.'];
+                    const t = c.totOut, s = ['La categoria più pesante è ' + ccB(e[0][0]) + ': ' + ccE(e[0][1]) + ' (' + ccP(e[0][1] / t * 100) + ' di tutta la spesa).'];
+                    if (e[1]) s.push('Al secondo posto ' + ccB(e[1][0]) + ' con ' + ccE(e[1][1]) + ' (' + ccP(e[1][1] / t * 100) + ').');
+                    if (e[2]) s.push('Le prime tre categorie insieme valgono il ' + ccP((e[0][1] + e[1][1] + e[2][1]) / t * 100) + ' della tua spesa.');
+                    return s;
+                } },
+            'chart-stack': { title: 'Categorie di spesa mese per mese', short: 'Come cambia, mese dopo mese, il modo in cui spendi.',
+                how: ['Ogni colonna è un mese, divisa a strati: ogni colore è una categoria.', 'Uno strato che si allarga da un mese all\'altro significa che in quella categoria stai spendendo di più.', 'Si vedono le 5 categorie più pesanti; il resto è raggruppato in "Altre".'],
+                legend: [],
+                insight: c => {
+                    const e = ccSortedObj(c.cat);
+                    if (!e.length) return ['Nessuna spesa in questo periodo.'];
+                    const top = e[0][0], cur = ccToday().slice(0, 7), perM = c.months.map((m, i) => c.real.filter(t => t.type !== 'Entrata' && (t.category || 'Altro') === top && t.date.slice(0, 7) === m).reduce((s, t) => s + t.amount, 0));
+                    const done = c.months.map((m, i) => i).filter(i => c.months[i] !== cur);
+                    const s = ['La categoria che pesa di più è ' + ccB(top) + ' (' + ccE(e[0][1]) + ' nel periodo).'];
+                    if (done.length >= 2) {
+                        const a = done[done.length - 2], b = done[done.length - 1];
+                        if (perM[a] > 0) { const ch = (perM[b] - perM[a]) / perM[a] * 100; s.push('Da ' + ccB(ccMName(c, a)) + ' a ' + ccB(ccMName(c, b)) + ' è ' + (ch >= 0 ? 'salita' : 'scesa') + ' del ' + ccP(Math.abs(ch)) + '.'); }
+                    }
+                    return s;
+                } },
+            'chart-shop': { title: 'Acquisti: Shopping, Amazon e online', short: 'Quanto spendi in acquisti, e dove li fai.',
+                how: ['Raggruppa le tre voci d\'acquisto: Shopping (negozi), Spese Amazon e Spese online in generale.', 'Ogni colonna è un mese; i colori dicono in quale delle tre voci hai speso.', 'Sotto i totali del periodo, per confrontarle.'],
+                legend: [['#6366f1', 'Shopping'], ['#f97316', 'Spese Amazon'], ['#a855f7', 'Spese online']],
+                insight: c => {
+                    const names = ['Shopping', 'Spese Amazon', 'Spese online'], tot = names.map(n => c.cat[n] || 0), sum = tot.reduce((a, b) => a + b, 0);
+                    if (!sum) return ['Nessuna spesa in queste categorie nel periodo. Quando registri un acquisto scegli una di queste voci.'];
+                    const k = ccArgMax(tot);
+                    return ['Negli acquisti hai speso ' + ccE(sum) + ', cioè il ' + ccP(c.totOut > 0 ? sum / c.totOut * 100 : 0) + ' di tutte le tue uscite.', 'La voce più alta è ' + ccB(names[k]) + ' con ' + ccE(tot[k]) + '.'];
+                } },
+            'chart-incat': { title: 'Da dove arrivano le entrate', short: 'Le fonti dei tuoi soldi: stipendio, extra e altro.',
+                how: ['Ogni spicchio è una fonte di entrata: più è grande, più soldi arrivano da lì.', 'Se uno spicchio domina, dipendi molto da quella fonte.'],
+                legend: [],
+                insight: c => {
+                    const e = ccSortedObj(c.incCat);
+                    if (!e.length) return ['Nessuna entrata in questo periodo.'];
+                    return ['La fonte principale è ' + ccB(e[0][0]) + ': ' + ccE(e[0][1]) + ' (' + ccP(e[0][1] / c.totIn * 100) + ' delle entrate).', e.length > 1 ? 'Hai ' + e.length + ' fonti di entrata.' : 'Hai una sola fonte di entrata.'];
+                } },
+            'chart-compare': { title: 'Questo mese vs mese scorso', short: 'A che punto sei con le spese rispetto allo stesso giorno del mese scorso.',
+                how: ['La <b>linea verde</b> è quanto hai speso finora questo mese, giorno dopo giorno.', 'La <b>linea tratteggiata</b> è il mese scorso: serve da confronto.', 'Se la verde è sopra la tratteggiata, stai spendendo più dell\'altro mese alla stessa data.'],
+                legend: [['#10b981', 'Questo mese'], ['#64748b', 'Mese scorso']],
+                insight: c => {
+                    const now = new Date(), day = now.getDate(), key = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                    const ck = key(now), pk = key(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+                    const sumTo = k => c.real.filter(t => t.type !== 'Entrata' && t.date.slice(0, 7) === k && parseInt(t.date.slice(8, 10), 10) <= day).reduce((s, t) => s + t.amount, 0);
+                    const cur = sumTo(ck), prev = sumTo(pk);
+                    if (!cur && !prev) return ['Non ci sono spese in questi due mesi.'];
+                    const s = ['Al giorno ' + ccB(String(day)) + ' hai speso ' + ccE(cur) + ', il mese scorso alla stessa data ' + ccE(prev) + '.'];
+                    if (prev > 0) { const ch = (cur - prev) / prev * 100; s.push(ch >= 0 ? 'Stai spendendo il ' + ccP(ch) + ' in più.' : 'Stai spendendo il ' + ccP(-ch) + ' in meno.'); }
+                    return s;
+                } },
+            'chart-weekday': { title: 'Spese per giorno della settimana', short: 'In quali giorni della settimana spendi di più.',
+                how: ['Ogni barra è un giorno della settimana, da lunedì a domenica.', 'Più è alta, più hai speso in quel giorno (sommando tutte le settimane del periodo).', 'Aiuta a scoprire abitudini, per esempio il weekend.'],
+                legend: [],
+                insight: c => {
+                    const tot = c.weekday.reduce((a, b) => a + b, 0), N = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
+                    if (!tot) return ['Nessuna spesa in questo periodo.'];
+                    const k = ccArgMax(c.weekday), we = c.weekday[5] + c.weekday[6];
+                    return ['Il giorno in cui spendi di più è ' + ccB(N[k]) + ': ' + ccE(c.weekday[k]) + ' (' + ccP(c.weekday[k] / tot * 100) + ').', 'Nel weekend spendi il ' + ccP(we / tot * 100) + ' del totale.'];
+                } },
+            'chart-dom': { title: 'In quali giorni del mese spendi di più', short: 'Quando, durante il mese, escono più soldi.',
+                how: ['Ogni barra è un giorno del mese, da 1 a 31, sommando tutti i mesi del periodo.', 'Barre alte all\'inizio: spese fisse e rate. Barre alte alla fine: spese a fine mese.', 'Aiuta a capire quando conviene tenere più soldi sul conto.'],
+                legend: [],
+                insight: c => {
+                    const tot = c.dom.reduce((a, b) => a + b, 0);
+                    if (!tot) return ['Nessuna spesa in questo periodo.'];
+                    const a = c.dom.slice(0, 10).reduce((x, y) => x + y, 0), b = c.dom.slice(10, 20).reduce((x, y) => x + y, 0), d = c.dom.slice(20).reduce((x, y) => x + y, 0), k = ccArgMax(c.dom);
+                    return ['Il giorno con più spese è il ' + ccB(String(k + 1)) + ' del mese (' + ccE(c.dom[k]) + ').', 'Nei primi 10 giorni spendi il ' + ccP(a / tot * 100) + ', dall\'11 al 20 il ' + ccP(b / tot * 100) + ', dal 21 in poi il ' + ccP(d / tot * 100) + '.'];
+                } },
+            'chart-assets': { title: 'Titoli: costo vs valore attuale', short: 'Se i tuoi titoli valgono più o meno di quanto li hai pagati.',
+                how: ['Per ogni titolo ci sono due barre: quanto hai pagato (grigia) e quanto vale oggi (verde).', 'Verde più alta della grigia: sei in guadagno. Più bassa: sei in perdita.', 'Il valore si aggiorna quando modifichi il prezzo attuale nella sezione Titoli.'],
+                legend: [['#334155', 'Costo'], ['#10b981', 'Valore attuale']],
+                insight: c => {
+                    if (!store.assets.length) return ['Non hai titoli inseriti.'];
+                    const cost = store.assets.reduce((s, a) => s + a.qty * a.buyPrice, 0), val = store.assets.reduce((s, a) => s + a.qty * a.currentPrice, 0), d = val - cost;
+                    const pct = a => (a.buyPrice > 0 ? (a.currentPrice - a.buyPrice) / a.buyPrice * 100 : 0), sorted = store.assets.slice().sort((x, y) => pct(y) - pct(x));
+                    const s = ['Hai investito ' + ccE(cost) + ' e oggi valgono ' + ccE(val) + ': ' + (d >= 0 ? 'guadagno di ' : 'perdita di ') + ccE(Math.abs(d)) + ' (' + ccP(Math.abs(cost > 0 ? d / cost * 100 : 0)) + ').'];
+                    if (sorted.length > 1) s.push('Il migliore è ' + ccB(sorted[0].name) + ' (' + ccP(pct(sorted[0])) + '), il peggiore ' + ccB(sorted[sorted.length - 1].name) + ' (' + ccP(pct(sorted[sorted.length - 1])) + ').');
+                    return s;
+                } },
+            'chart-debts': { title: 'Rate: già pagato vs residuo', short: 'Quanto hai già restituito e quanto manca per ogni rata.',
+                how: ['Ogni barra è una rata o un finanziamento.', 'La parte verde è già pagata, quella rossa è ciò che devi ancora restituire.', 'Quando tutta la barra è verde, il debito è chiuso.'],
+                legend: [['#10b981', 'Già pagato'], ['#f43f5e', 'Residuo']],
+                insight: c => {
+                    if (!store.installments.length) return ['Non hai rate inserite.'];
+                    const rem = store.installments.reduce((s, i) => s + i.remaining, 0), mon = store.installments.reduce((s, i) => s + i.monthly, 0);
+                    const left = store.installments.map(i => (i.monthly > 0 ? Math.ceil(i.remaining / i.monthly) : 0)), k = ccArgMax(left);
+                    return ['Ti restano da pagare ' + ccE(rem) + ', con rate da ' + ccE(mon) + ' al mese.', 'La più lunga è ' + ccB(store.installments[k].name) + ': circa ' + ccB(left[k] + (left[k] === 1 ? ' mese' : ' mesi')) + ' alla fine.'];
+                } },
+            'chart-goals': { title: 'Avanzamento obiettivi', short: 'A che punto sei con ognuno dei tuoi obiettivi di risparmio.',
+                how: ['Per ogni obiettivo ci sono due barre: quanto hai messo da parte (verde) e quanto serve (grigia).', 'Quando la verde raggiunge la grigia, l\'obiettivo è completato.'],
+                legend: [['#10b981', 'Risparmiato'], ['#334155', 'Obiettivo']],
+                insight: c => {
+                    const g = store.goals || [];
+                    if (!g.length) return ['Non hai ancora obiettivi: creane uno nella sezione Obiettivi.'];
+                    const saved = g.map(x => (x.contributions || []).reduce((s, k) => s + k.amount, 0)), tot = g.reduce((s, x) => s + x.target, 0), sv = saved.reduce((a, b) => a + b, 0);
+                    const pct = g.map((x, i) => (x.target > 0 ? saved[i] / x.target * 100 : 0)), k = ccArgMax(pct);
+                    return ['Hai messo da parte ' + ccE(sv) + ' su ' + ccE(tot) + ' (' + ccP(tot > 0 ? sv / tot * 100 : 0) + ').', 'Il più avanti è ' + ccB(g[k].name) + ' al ' + ccP(pct[k]) + '.'];
+                } },
+            'chart-contrib': { title: 'Quanto metti da parte ogni mese', short: 'I versamenti sui tuoi obiettivi, mese per mese.',
+                how: ['Ogni barra è la somma dei versamenti di quel mese su tutti gli obiettivi.', 'Barre arancioni: hai messo da parte. Una barra rossa significa che quel mese hai prelevato più di quanto hai versato.'],
+                legend: [['#f59e0b', 'Messo da parte']],
+                insight: c => {
+                    const per = c.months.map(() => 0);
+                    (store.goals || []).forEach(g => (g.contributions || []).forEach(k => { const i = c.months.indexOf((k.date || '').slice(0, 7)); if (i >= 0) per[i] += k.amount; }));
+                    const tot = per.reduce((a, b) => a + b, 0);
+                    if (!per.some(v => v !== 0)) return ['Nessun versamento in questo periodo.'];
+                    const k = ccArgMax(per);
+                    return [ccPer(c) + ' hai messo da parte ' + ccE(tot) + ', in media ' + ccE(tot / c.months.length) + ' al mese.', 'Il mese migliore è ' + ccB(ccMName(c, k)) + ' con ' + ccE(per[k]) + '.'];
+                } },
+            'an-top-list': { title: 'Le 5 spese più alte', short: 'Le singole spese che hanno pesato di più nel periodo.',
+                how: ['Sono i singoli movimenti più grandi, non le categorie.', 'Servono a capire se un mese è stato "pesante" per una spesa sola.'],
+                legend: [],
+                insight: c => {
+                    const top = c.exp.slice().sort((a, b) => b.amount - a.amount);
+                    if (!top.length) return ['Nessuna spesa in questo periodo.'];
+                    return ['La spesa più alta è ' + ccB(top[0].desc) + ': ' + ccE(top[0].amount) + ', il ' + ccP(top[0].amount / c.totOut * 100) + ' di tutte le tue uscite.', 'Le prime 5 valgono insieme il ' + ccP(top.slice(0, 5).reduce((s, t) => s + t.amount, 0) / c.totOut * 100) + ' della spesa.'];
+                } }
+        };
+
+        function ccOpenChartHelp(key) {
+            const h = CC_HELP[key];
+            if (!h) return;
+            let c = null, lines;
+            try { c = ccAnCtx(); lines = h.insight(c); } catch (e) { lines = ['Non riesco a calcolare questi dati adesso.']; }
+            document.getElementById('ci-title').textContent = h.title;
+            const NOW = ['chart-assets', 'chart-debts', 'chart-comp', 'chart-goals'];
+            document.getElementById('ci-period').textContent = NOW.indexOf(key) >= 0 ? 'Situazione di oggi' : (key === 'chart-compare' ? 'Questo mese e il mese scorso' : (c ? 'Periodo: ' + c.label.toLowerCase() : ''));
+            document.getElementById('ci-short').textContent = h.short;
+            document.getElementById('ci-how').innerHTML = h.how.map(t => '<li class="flex gap-2.5 text-[12.5px] text-slate-300 leading-snug"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></span><span>' + t + '</span></li>').join('');
+            document.getElementById('ci-legend').innerHTML = h.legend.map(l => '<span class="flex items-center text-[11px] text-slate-300"><span class="w-2.5 h-2.5 rounded-full mr-1.5 shrink-0" style="background:' + l[0] + '"></span>' + l[1] + '</span>').join('');
+            document.getElementById('ci-insight').innerHTML = lines.map(t => '<p>' + t + '</p>').join('');
+            document.getElementById('modal-chart-info').classList.remove('hidden');
+        }
+        function ccAnTipClose() {
+            const t = document.getElementById('an-tip');
+            if (t) t.remove();
+            try { localStorage.setItem('cc_an_tip', '1'); } catch (e) {}
+        }
+        const CC_AN_TIP_HTML = "            <div id=\"an-tip\" class=\"flex items-start gap-3 bg-indigo-950/60 border border-indigo-500/30 rounded-2xl p-3.5\">\n                <i class=\"fa-solid fa-lightbulb text-amber-400 mt-0.5\"></i>\n                <p class=\"text-[12px] text-slate-200 leading-snug flex-1\">Non capisci cosa dice un grafico? Tocca il titolo o il <i class=\"fa-regular fa-circle-question text-indigo-400\"></i> accanto: ti spiego come si legge e cosa dicono i <b class=\"text-white\">tuoi</b> numeri.</p>\n                <button type=\"button\" aria-label=\"Chiudi suggerimento\" onclick=\"ccAnTipClose()\" class=\"text-slate-400 p-1.5 -mr-1.5 -mt-1.5\"><i class=\"fa-solid fa-xmark\"></i></button>\n            </div>";
+        function ccEnhanceChartCards() {
+            const sec = document.getElementById('tab-analisi');
+            if (!sec) return;
+            const infoBtn = (key) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.setAttribute('aria-label', 'Spiegazione: ' + CC_HELP[key].title);
+                b.className = 'shrink-0 w-9 h-9 -mr-2 -mt-2 rounded-full flex items-center justify-center text-indigo-400 active:bg-indigo-500/20';
+                b.innerHTML = '<i class="fa-regular fa-circle-question text-lg"></i>';
+                return b;
+            };
+            Object.keys(CC_HELP).forEach(key => {
+                if (key === 'kpi') return;
+                const anchor = document.getElementById(key);
+                if (!anchor) return;
+                const card = anchor.closest('.rounded-2xl');
+                const title = card && card.querySelector('h3');
+                if (!card || !title || card.dataset.ccHelp) return;
+                card.dataset.ccHelp = '1';
+                const row = document.createElement('div');
+                row.className = 'flex items-start justify-between gap-2 cursor-pointer';
+                title.parentNode.insertBefore(row, title);
+                row.appendChild(title);
+                row.appendChild(infoBtn(key));
+                row.addEventListener('click', () => ccOpenChartHelp(key));
+                const sub = document.createElement('p');
+                sub.className = 'text-[11px] text-slate-400 leading-snug';
+                sub.style.marginTop = '-2px';
+                sub.textContent = CC_HELP[key].short;
+                row.parentNode.insertBefore(sub, row.nextSibling);
+            });
+            // riquadri in alto: "?" accanto al titolo della pagina
+            const h2 = sec.querySelector('h2');
+            if (h2 && !h2.dataset.ccHelp) {
+                h2.dataset.ccHelp = '1';
+                const b = document.createElement('button');
+                b.type = 'button'; b.setAttribute('aria-label', 'Spiegazione dei riquadri');
+                b.className = 'inline-flex align-middle ml-1 w-7 h-7 rounded-full items-center justify-center text-indigo-400 active:bg-indigo-500/20';
+                b.innerHTML = '<i class="fa-regular fa-circle-question text-base"></i>';
+                b.addEventListener('click', () => ccOpenChartHelp('kpi'));
+                h2.appendChild(b);
+            }
+            let seen = false; try { seen = localStorage.getItem('cc_an_tip') === '1'; } catch (e) {}
+            const header = sec.firstElementChild;
+            if (!seen && header && !document.getElementById('an-tip')) header.insertAdjacentHTML('afterend', CC_AN_TIP_HTML);
+        }
+
+        (function ccWireHelp() {
+            const start = function () { try { ccEnhanceChartCards(); } catch (e) {} };
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
         })();
 
