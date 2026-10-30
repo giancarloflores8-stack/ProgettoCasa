@@ -248,6 +248,16 @@
                 </div>
             </div>
 
+            <!-- Movimenti ricorrenti da confermare -->
+            <div id="rec-pending-card" class="hidden flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0"><i class="fa-solid fa-bell text-amber-400 text-sm"></i></div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12.5px] font-semibold text-white leading-tight">Hai movimenti da confermare</p>
+                    <p id="rec-pending-text" class="text-[11px] text-slate-400 mt-0.5 truncate"></p>
+                </div>
+                <button type="button" onclick="ccRecOpenConfirm()" class="bg-amber-500 active:bg-amber-400 text-slate-900 font-bold text-xs px-3.5 py-2 rounded-xl shrink-0">Apri</button>
+            </div>
+
             <!-- Previsione di fine mese -->
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
                 <div class="flex justify-between items-center">
@@ -636,6 +646,14 @@
             <!-- STRUMENTI -->
             <div class="space-y-2">
                 <label class="block text-xs font-semibold text-slate-300">Strumenti</label>
+                <button onclick="ccOpenCats(false)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-between">
+                    <span class="flex items-center space-x-2"><i class="fa-solid fa-tags text-indigo-400"></i><span>Categorie</span></span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+                </button>
+                <button onclick="ccRecOpenList()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-between">
+                    <span class="flex items-center space-x-2"><i class="fa-solid fa-repeat text-indigo-400"></i><span>Movimenti ricorrenti</span></span>
+                    <span id="rec-badge" class="hidden text-[10px] font-bold bg-amber-500 text-slate-900 rounded-full px-2 py-0.5"></span>
+                </button>
                 <button onclick="ccOpenAp()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-between">
                     <span class="flex items-center space-x-2"><i class="fa-brands fa-apple-pay text-indigo-400 text-base"></i><span>Pagamenti Apple Pay</span></span>
                     <span id="ap-state" class="text-[10px] font-semibold text-slate-400">Non collegato</span>
@@ -899,6 +917,122 @@
                 <div id="ci-insight" class="text-[12.5px] text-slate-200 leading-relaxed space-y-2"></div>
             </div>
             <button type="button" onclick="closeModal('modal-chart-info')" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs">Ho capito</button>
+        </div>
+    </div>
+
+    <!-- CATEGORIE -->
+    <div id="modal-categories" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-[55] hidden p-0 sm:p-4" onclick="if (event.target === this) closeModal('modal-categories')">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 20px);">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Categorie</h3>
+                <button onclick="closeModal('modal-categories')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-2.5 bg-slate-800/40 border border-slate-800 rounded-2xl p-3.5">
+                <label class="block text-[11px] font-semibold text-slate-300">Nuova categoria</label>
+                <input type="text" id="cat-name" maxlength="24" autocomplete="off" autocapitalize="sentences" placeholder="Es. Palestra, Regali, Animali..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <div>
+                    <p class="text-[10px] text-slate-400 mb-1.5">Colore nei grafici</p>
+                    <div id="cat-colors" class="flex flex-wrap gap-2.5"></div>
+                </div>
+                <button type="button" onclick="ccCatAdd()" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs"><i class="fa-solid fa-plus mr-1.5"></i>Aggiungi categoria</button>
+                <p id="cat-msg" class="text-[11px] min-h-[16px] text-slate-400"></p>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Le tue categorie</p>
+                <div id="cat-list" class="space-y-2"></div>
+            </div>
+            <div id="cat-orphans-wrap" class="hidden">
+                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Usate nei movimenti ma non in lista</p>
+                <p class="text-[10px] text-slate-500 mb-2">Toccane una per aggiungerla e poterla scegliere.</p>
+                <div id="cat-orphans" class="flex flex-wrap gap-2"></div>
+            </div>
+            <p class="text-[10px] text-slate-500 leading-snug">Le categorie valgono per movimenti, grafici e regole ricorrenti. Rinominandone una, cambia anche nei movimenti già salvati. "Altro" non si può eliminare.</p>
+        </div>
+    </div>
+
+    <!-- MOVIMENTI RICORRENTI: ELENCO -->
+    <div id="modal-recurring" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 hidden p-0 sm:p-4" onclick="if (event.target === this) closeModal('modal-recurring')">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 20px);">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Movimenti ricorrenti</h3>
+                <button onclick="closeModal('modal-recurring')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Stipendio, rate e abbonamenti. Quando apri l'app registra ciò che è maturato, con la data giusta anche se non l'hai aperta per qualche giorno.</p>
+            <div id="rec-list" class="space-y-2.5"></div>
+            <button type="button" onclick="ccRecOpenForm(null)" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs"><i class="fa-solid fa-plus mr-1.5"></i>Nuovo movimento ricorrente</button>
+        </div>
+    </div>
+
+    <!-- MOVIMENTI RICORRENTI: MODULO -->
+    <div id="modal-rec-form" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-[56] hidden p-0 sm:p-4" onclick="if (event.target === this) closeModal('modal-rec-form')">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-3.5 shadow-2xl max-h-[92vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 20px);">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="rf-title" class="text-sm font-bold text-white">Nuovo ricorrente</h3>
+                <button onclick="closeModal('modal-rec-form')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="rf-id" value="">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipo</label>
+                    <select id="rf-type" onchange="ccRecFormType()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"><option value="Uscita">Uscita</option><option value="Entrata">Entrata</option></select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Importo (€)</label>
+                    <input type="number" step="0.01" inputmode="decimal" id="rf-amount" placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-medium text-slate-400 mb-1">Nome (come comparirà nei movimenti)</label>
+                <input type="text" id="rf-name" maxlength="40" placeholder="Es. Stipendio, Rata macchina, Netflix" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Categoria</label>
+                    <select id="rf-cat" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Conto</label>
+                    <select id="rf-acc" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Quando</label>
+                    <select id="rf-sched" onchange="ccRecFormType()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"><option value="lastbiz">Ultimo giorno lavorativo</option><option value="day">Giorno fisso del mese</option></select>
+                </div>
+                <div id="rf-day-wrap" class="hidden">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Giorno (1-31)</label>
+                    <input type="number" inputmode="numeric" min="1" max="31" id="rf-day" placeholder="5" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Come si registra</label>
+                    <select id="rf-mode" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"><option value="auto">Automatico</option><option value="confirm">Con conferma</option></select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Parte da</label>
+                    <input type="month" id="rf-from" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+            </div>
+            <div id="rf-remaining-wrap">
+                <label class="block text-[11px] font-medium text-slate-400 mb-1">Rate rimaste (facoltativo: lascia vuoto se non finisce)</label>
+                <input type="number" inputmode="numeric" min="1" id="rf-remaining" placeholder="Es. 24" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+            </div>
+            <p id="rf-msg" class="text-[11px] text-rose-400 min-h-[16px]"></p>
+            <button type="button" onclick="ccRecSaveForm()" class="w-full bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs">Salva</button>
+        </div>
+    </div>
+
+    <!-- MOVIMENTI RICORRENTI: DA CONFERMARE -->
+    <div id="modal-rec-confirm" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center z-[55] hidden p-0 sm:p-4" onclick="if (event.target === this) closeModal('modal-rec-confirm')">
+        <div class="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style="padding-bottom: max(env(safe-area-inset-bottom), 20px);">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white">Da confermare</h3>
+                <button onclick="closeModal('modal-rec-confirm')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">Controlla l'importo e premi Registra. Con "Salta" questo mese non viene registrato.</p>
+            <div id="rec-confirm-list" class="space-y-3"></div>
         </div>
     </div>
 
@@ -3360,6 +3494,513 @@
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
         })();
 
+
+        // ---------- CATEGORIE PERSONALIZZATE ----------
+        const CC_CAT_KEY = 'cc_categories';
+        const CC_SWATCHES = ['#10b981', '#6366f1', '#f59e0b', '#f43f5e', '#06b6d4', '#a855f7', '#f97316', '#84cc16', '#ec4899', '#0ea5e9', '#14b8a6', '#eab308'];
+        let ccCats = [], ccCatUI = { mode: null, name: null }, ccCatPick = null, ccCatFromSelect = false, ccImportExtra = null;
+        const ccRnd = v => Math.round(v * 100) / 100;
+
+        function ccCatLoad() {
+            let l = null;
+            try { l = JSON.parse(localStorage.getItem(CC_CAT_KEY)); } catch (e) {}
+            if (!Array.isArray(l) || !l.length) {
+                const sel = document.getElementById('tx-category');
+                l = Array.from(sel.options).filter(o => o.value && o.value !== '__new__').map(o => ({ name: o.value, label: o.textContent.trim(), color: CC_CAT_COLORS[o.value] || null }));
+            }
+            ccCats = l.filter(c => c && c.name).map(c => ({ name: String(c.name), label: String(c.label || c.name), color: c.color || CC_CAT_COLORS[c.name] || null }));
+            ccCatColors();
+        }
+        function ccCatColors() {
+            ccCats.forEach((c, i) => { if (!c.color) c.color = CC_SWATCHES[i % CC_SWATCHES.length]; CC_CAT_COLORS[c.name] = c.color; });
+        }
+        function ccCatSave() {
+            try { localStorage.setItem(CC_CAT_KEY, JSON.stringify(ccCats)); } catch (e) {}
+            store.categories = ccCats;
+        }
+        function ccCatExists(name) { return ccCats.some(c => c.name === name); }
+        function ccCatEnsure(name, color) {
+            if (ccCatExists(name)) return;
+            ccCats.push({ name: name, label: name, color: color || CC_CAT_COLORS[name] || CC_SWATCHES[ccCats.length % CC_SWATCHES.length] });
+            ccCatColors(); ccCatSave();
+        }
+        function ccCatSyncSelect() {
+            const sel = document.getElementById('tx-category');
+            if (!sel) return;
+            const cur = sel.value;
+            sel.innerHTML = ccCats.map(c => '<option value="' + ccEsc(c.name) + '">' + ccEsc(c.label) + '</option>').join('') + '<option value="__new__">＋ Nuova categoria…</option>';
+            sel.value = ccCatExists(cur) ? cur : (ccCats[0] ? ccCats[0].name : '');
+            sel.dataset.prev = sel.value;
+        }
+        function ccCatCounts() { const m = {}; store.transactions.forEach(t => { m[t.category] = (m[t.category] || 0) + 1; }); return m; }
+        function ccCatMsg(text, kind) {
+            const m = document.getElementById('cat-msg');
+            m.textContent = text;
+            m.className = 'text-[11px] min-h-[16px] ' + (kind === 'err' ? 'text-rose-400' : kind === 'ok' ? 'text-emerald-400' : 'text-slate-400');
+        }
+        function ccCatSwatches(containerId, selected, onPick) {
+            const el = document.getElementById(containerId);
+            el.innerHTML = CC_SWATCHES.map(c => '<button type="button" data-color="' + c + '" aria-label="Colore" class="w-8 h-8 rounded-full" style="background:' + c + ';' + (c === selected ? 'outline:2px solid #94a3b8;outline-offset:2px;' : '') + '"></button>').join('');
+            Array.prototype.forEach.call(el.querySelectorAll('button'), b => b.addEventListener('click', () => onPick(b.dataset.color)));
+        }
+        function ccOpenCats(fromSelect) {
+            ccCatFromSelect = !!fromSelect;
+            ccCatUI = { mode: null, name: null };
+            ccCatPick = CC_SWATCHES.find(c => !ccCats.some(x => x.color === c)) || CC_SWATCHES[ccCats.length % CC_SWATCHES.length];
+            document.getElementById('cat-name').value = '';
+            ccCatMsg('');
+            ccCatRender();
+            document.getElementById('modal-categories').classList.remove('hidden');
+            if (fromSelect) setTimeout(() => { try { document.getElementById('cat-name').focus(); } catch (e) {} }, 250);
+        }
+        function ccCatRender() {
+            ccCatSwatches('cat-colors', ccCatPick, c => { ccCatPick = c; ccCatRender(); });
+            const counts = ccCatCounts();
+            const list = document.getElementById('cat-list');
+            list.innerHTML = ccCats.map(c => {
+                const n = counts[c.name] || 0, dot = '<span class="w-4 h-4 rounded-full shrink-0" style="background:' + c.color + '"></span>';
+                if (ccCatUI.mode === 'rename' && ccCatUI.name === c.name) {
+                    return '<div class="bg-slate-800/60 border border-indigo-500/30 rounded-xl p-3 space-y-2.5"><input type="text" id="cat-rename" maxlength="24" value="' + ccEsc(ccCatUI.draft != null ? ccCatUI.draft : c.label) + '" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">'
+                        + '<div id="cat-rename-colors" class="flex flex-wrap gap-2.5"></div>'
+                        + '<div class="grid grid-cols-2 gap-2"><button type="button" data-act="rename-ok" data-n="' + ccEsc(c.name) + '" class="bg-indigo-600 text-white text-xs font-semibold py-2.5 rounded-xl">Salva</button><button type="button" data-act="cancel" class="bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl">Annulla</button></div></div>';
+                }
+                if (ccCatUI.mode === 'delete' && ccCatUI.name === c.name) {
+                    const opts = ccCats.filter(x => x.name !== c.name).map(x => '<option value="' + ccEsc(x.name) + '"' + (x.name === 'Altro' ? ' selected' : '') + '>' + ccEsc(x.label) + '</option>').join('');
+                    return '<div class="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 space-y-2.5"><p class="text-[12px] text-slate-200 leading-snug">Eliminare <b class="text-white">' + ccEsc(c.label) + '</b>?'
+                        + (n ? ' Ci sono <b class="text-white">' + n + '</b> movimenti con questa categoria.' : '') + '</p>'
+                        + (n ? '<div><label class="block text-[10px] text-slate-400 mb-1">Cosa faccio con quei movimenti?</label><select id="cat-move" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"><option value="__keep__">Lasciali così come sono</option>' + opts + '</select></div>' : '')
+                        + '<div class="grid grid-cols-2 gap-2"><button type="button" data-act="delete-ok" data-n="' + ccEsc(c.name) + '" class="bg-rose-600 text-white text-xs font-semibold py-2.5 rounded-xl">Elimina</button><button type="button" data-act="cancel" class="bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl">Annulla</button></div></div>';
+                }
+                return '<div class="flex items-center gap-3 bg-slate-800/50 rounded-xl pl-3 pr-1 py-1.5">' + dot
+                    + '<div class="flex-1 min-w-0 py-1"><p class="text-[13px] text-slate-200 truncate">' + ccEsc(c.label) + '</p><p class="text-[10px] text-slate-500">' + n + (n === 1 ? ' movimento' : ' movimenti') + '</p></div>'
+                    + '<button type="button" data-act="rename" data-n="' + ccEsc(c.name) + '" aria-label="Rinomina" class="p-3 text-slate-500 active:text-indigo-400"><i class="fa-solid fa-pen text-[12px]"></i></button>'
+                    + (c.name === 'Altro' ? '<span class="w-10"></span>' : '<button type="button" data-act="delete" data-n="' + ccEsc(c.name) + '" aria-label="Elimina" class="p-3 text-rose-400/80 active:text-rose-500"><i class="fa-solid fa-trash text-[12px]"></i></button>') + '</div>';
+            }).join('');
+            if (ccCatUI.mode === 'rename') ccCatSwatches('cat-rename-colors', (ccCats.find(c => c.name === ccCatUI.name) || {}).color, c => { const x = ccCats.find(y => y.name === ccCatUI.name); const inp = document.getElementById('cat-rename'); if (inp) ccCatUI.draft = inp.value; if (x) { x.color = c; ccCatColors(); ccCatSave(); ccCatRefreshCharts(); ccCatRender(); } });
+            const orphans = Object.keys(counts).filter(n => n && !ccCatExists(n));
+            document.getElementById('cat-orphans-wrap').classList.toggle('hidden', !orphans.length);
+            document.getElementById('cat-orphans').innerHTML = orphans.map(n => '<button type="button" data-act="orphan" data-n="' + ccEsc(n) + '" class="px-3 py-2 rounded-xl text-[12px] font-semibold border border-slate-700 bg-slate-800 text-slate-200">＋ ' + ccEsc(n) + ' <span class="text-slate-500 font-normal">(' + counts[n] + ')</span></button>').join('');
+        }
+        function ccCatValidName(name, except) {
+            name = String(name || '').replace(/\s+/g, ' ').trim();
+            if (!name) return 'Scrivi un nome per la categoria.';
+            if (name === '__new__' || name === '__keep__') return 'Nome non valido.';
+            if (ccCats.some(c => c.name !== except && (c.name.toLowerCase() === name.toLowerCase() || c.label.toLowerCase() === name.toLowerCase()))) return 'Esiste già una categoria con questo nome.';
+            return '';
+        }
+        function ccCatRefreshCharts() {
+            const t = document.getElementById('tab-analisi');
+            if (t && !t.classList.contains('hidden')) renderAnalysisCharts();
+        }
+        function ccCatAdd() {
+            const name = document.getElementById('cat-name').value.replace(/\s+/g, ' ').trim();
+            const err = ccCatValidName(name, null);
+            if (err) { ccCatMsg(err, 'err'); return; }
+            ccCats.push({ name: name, label: name, color: ccCatPick });
+            ccCatColors(); ccCatSave(); ccCatSyncSelect();
+            if (ccCatFromSelect) {
+                const sel = document.getElementById('tx-category');
+                sel.value = name; sel.dataset.prev = name;
+                ccCatFromSelect = false;
+                closeModal('modal-categories');
+                ccToast('Categoria "' + name + '" aggiunta');
+                return;
+            }
+            document.getElementById('cat-name').value = '';
+            ccCatPick = CC_SWATCHES.find(c => !ccCats.some(x => x.color === c)) || CC_SWATCHES[ccCats.length % CC_SWATCHES.length];
+            ccCatMsg('Aggiunta: ora la trovi nel menu dei movimenti.', 'ok');
+            ccCatRender();
+        }
+        function ccCatRename(oldName) {
+            const input = document.getElementById('cat-rename');
+            const name = input.value.replace(/\s+/g, ' ').trim();
+            const err = ccCatValidName(name, oldName);
+            if (err) { ccCatMsg(err, 'err'); return; }
+            const c = ccCats.find(x => x.name === oldName);
+            if (!c) return;
+            if (name !== oldName) {
+                store.transactions.forEach(t => { if (t.category === oldName) t.category = name; });
+                ccRec.forEach(r => { if (r.category === oldName) r.category = name; });
+                CC_CAT_COLORS[name] = c.color;
+                c.name = name;
+            }
+            c.label = name;
+            ccCatColors();
+            ccCatUI = { mode: null, name: null };
+            ccCatMsg('Rinominata: i movimenti sono stati aggiornati.', 'ok');
+            ccCatSave(); ccRecSave(); ccCatSyncSelect();
+            saveData();
+            ccCatRender();
+        }
+        function ccCatDelete(name) {
+            if (name === 'Altro') return;
+            const mv = document.getElementById('cat-move');
+            const target = mv ? mv.value : '__keep__';
+            if (target !== '__keep__') {
+                store.transactions.forEach(t => { if (t.category === name) t.category = target; });
+            }
+            ccRec.forEach(r => { if (r.category === name) r.category = ccCatExists('Altro') ? 'Altro' : (ccCats[0] ? ccCats[0].name : 'Altro'); });
+            ccCats = ccCats.filter(c => c.name !== name);
+            ccCatUI = { mode: null, name: null };
+            ccCatSave(); ccRecSave(); ccCatSyncSelect();
+            ccCatMsg('Categoria eliminata.', 'ok');
+            saveData();
+            ccCatRender();
+        }
+        function ccInitCatUI() {
+            const list = document.getElementById('cat-list');
+            list.addEventListener('click', e => {
+                const b = e.target.closest('button[data-act]');
+                if (!b) return;
+                const act = b.dataset.act, n = b.dataset.n;
+                if (act === 'rename' || act === 'delete') { ccCatUI = { mode: act, name: n, draft: null }; ccCatMsg(''); ccCatRender(); }
+                else if (act === 'cancel') { ccCatUI = { mode: null, name: null }; ccCatMsg(''); ccCatRender(); }
+                else if (act === 'rename-ok') ccCatRename(n);
+                else if (act === 'delete-ok') ccCatDelete(n);
+            });
+            document.getElementById('cat-orphans').addEventListener('click', e => {
+                const b = e.target.closest('button[data-act="orphan"]');
+                if (!b) return;
+                ccCatEnsure(b.dataset.n); ccCatSyncSelect(); ccCatMsg('Aggiunta alla lista.', 'ok'); ccCatRender(); ccCatRefreshCharts();
+            });
+            document.getElementById('cat-name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ccCatAdd(); } });
+            // nel modulo del movimento: voce "＋ Nuova categoria…" e scorciatoia "Gestisci"
+            const sel = document.getElementById('tx-category');
+            sel.addEventListener('change', () => {
+                if (sel.value === '__new__') { sel.value = sel.dataset.prev || (ccCats[0] ? ccCats[0].name : ''); ccOpenCats(true); }
+                else sel.dataset.prev = sel.value;
+            });
+            const wrap = sel.parentElement;
+            wrap.style.position = 'relative';
+            const g = document.createElement('button');
+            g.type = 'button'; g.textContent = 'Gestisci';
+            g.className = 'absolute right-0 top-0 text-[11px] font-semibold text-indigo-400 py-1 pl-3';
+            g.addEventListener('click', () => ccOpenCats(false));
+            wrap.appendChild(g);
+        }
+
+        // ---------- MOVIMENTI RICORRENTI ----------
+        const CC_REC_KEY = 'cc_recurring', CC_REC_SEED = 'cc_rec_seeded';
+        const CC_GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+        let ccRec = [], ccRecBusy = false, ccRecSeq = 0, ccRecPending = [], ccRecPrompted = false;
+
+        function ccRecLoad() { try { ccRec = JSON.parse(localStorage.getItem(CC_REC_KEY)) || []; } catch (e) { ccRec = []; } if (!Array.isArray(ccRec)) ccRec = []; }
+        function ccRecSave() { try { localStorage.setItem(CC_REC_KEY, JSON.stringify(ccRec)); } catch (e) {} store.recurring = ccRec; }
+        function ccMonthKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+        function ccRecDue(rule, y, m) {
+            const last = new Date(y, m + 1, 0).getDate();
+            let d;
+            if (rule.schedule === 'day') d = Math.min(Math.max(1, parseInt(rule.day, 10) || 1), last);
+            else { d = last; while (new Date(y, m, d).getDay() === 0 || new Date(y, m, d).getDay() === 6) d--; }
+            return new Date(y, m, d);
+        }
+        function ccRecDefaultAcc() { const a = store.accounts.find(x => x.type === 'Banca') || store.accounts[0]; return a ? a.id : null; }
+        function ccRecSeed() {
+            if (localStorage.getItem(CC_REC_SEED)) return;
+            if (ccRec.length) { localStorage.setItem(CC_REC_SEED, '1'); return; }
+            const from = ccMonthKey(new Date());
+            ccCatEnsure('Persone');
+            const acc = ccRecDefaultAcc();
+            ccRec.push(
+                { id: 'stipendio', name: 'Stipendio', type: 'Entrata', amount: 1650, category: 'Stipendio', accountId: acc, mode: 'confirm', schedule: 'lastbiz', day: null, remaining: null, active: true, from: from, done: {} },
+                { id: 'rata-macchina', name: 'Rata macchina', type: 'Uscita', amount: 310, category: 'Persone', accountId: acc, mode: 'auto', schedule: 'lastbiz', day: null, remaining: null, active: true, from: from, done: {} }
+            );
+            localStorage.setItem(CC_REC_SEED, '1');
+            ccRecSave();
+        }
+        function ccRecExists(rule, key) {
+            const n = String(rule.name).toLowerCase();
+            return store.transactions.some(t => t.type === rule.type && t.date && t.date.slice(0, 7) === key && String(t.desc).toLowerCase() === n);
+        }
+        function ccRecMakeTx(rule, key, due, amount) {
+            const acc = store.accounts.find(a => a.id === rule.accountId) || store.accounts.find(a => a.type === 'Banca') || store.accounts[0];
+            const tx = { id: Date.now() + (ccRecSeq++), type: rule.type, desc: rule.name, amount: ccRnd(amount), date: ccDateStr(due), category: rule.category || 'Altro', account: acc ? acc.name : 'Ricorrente', source: 'recurring', recId: rule.id, recMonth: key };
+            if (acc) { acc.balance = ccRnd(acc.balance + (rule.type === 'Entrata' ? tx.amount : -tx.amount)); tx.accountId = acc.id; tx.applied = true; }
+            store.transactions.unshift(tx);
+            rule.done = rule.done || {};
+            rule.done[key] = tx.id;
+            if (rule.remaining !== null && rule.remaining !== undefined && rule.remaining !== '') {
+                rule.remaining = Math.max(0, parseInt(rule.remaining, 10) - 1);
+                if (rule.remaining === 0) { rule.active = false; rule.finished = true; ccToast('Ultima rata registrata: "' + rule.name + '" è finita'); }
+            }
+            return tx;
+        }
+        function ccRecRun() {
+            if (ccRecBusy) return;
+            ccRecBusy = true;
+            try {
+                const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const cap = new Date(today.getFullYear(), today.getMonth() - 24, 1);
+                let created = 0, changed = false;
+                const autoNames = [];
+                ccRecPending = [];
+                ccRec.forEach(rule => {
+                    if (!rule.active) return;
+                    rule.done = rule.done || {};
+                    const p = String(rule.from || ccMonthKey(today)).split('-');
+                    let start = new Date(Number(p[0]), Number(p[1]) - 1, 1);
+                    if (start < cap) start = cap;
+                    for (let d = new Date(start); d <= today; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+                        const key = ccMonthKey(d), due = ccRecDue(rule, d.getFullYear(), d.getMonth());
+                        if (due > today) break;
+                        if (rule.done[key]) continue;
+                        if (rule.remaining !== null && rule.remaining !== undefined && rule.remaining !== '' && parseInt(rule.remaining, 10) <= 0) { rule.active = false; changed = true; break; }
+                        if (ccRecExists(rule, key)) { rule.done[key] = 'existing'; changed = true; continue; }
+                        if (rule.mode === 'auto') { ccRecMakeTx(rule, key, due, rule.amount); created++; changed = true; autoNames.push(rule.name); if (!rule.active) break; }
+                        else ccRecPending.push({ rule: rule, key: key, due: due });
+                    }
+                });
+                if (changed) { ccRecSave(); }
+                if (created) { saveData(); ccToast(created === 1 ? 'Registrato: ' + autoNames[0] : created + ' movimenti ricorrenti registrati'); }
+            } finally { ccRecBusy = false; }
+            ccRecRenderPending();
+            if (ccRecPending.length && !ccRecPrompted) { ccRecPrompted = true; ccRecOpenConfirm(); }
+        }
+        function ccRecDateText(d) { return CC_GIORNI[d.getDay()] + ' ' + d.getDate() + ' ' + CC_MESI_FULL[d.getMonth()].toLowerCase() + ' ' + d.getFullYear(); }
+        function ccRecRenderPending() {
+            const n = ccRecPending.length;
+            const card = document.getElementById('rec-pending-card'), badge = document.getElementById('rec-badge');
+            if (card) {
+                card.classList.toggle('hidden', !n);
+                document.getElementById('rec-pending-text').textContent = n ? ccRecPending.map(x => x.rule.name).join(', ') : '';
+            }
+            if (badge) { badge.classList.toggle('hidden', !n); badge.textContent = n; }
+        }
+        function ccRecOpenConfirm() {
+            if (!ccRecPending.length) { closeModal('modal-rec-confirm'); return; }
+            ccRecRenderConfirm();
+            document.getElementById('modal-rec-confirm').classList.remove('hidden');
+        }
+        function ccRecRenderConfirm() {
+            const el = document.getElementById('rec-confirm-list');
+            el.innerHTML = ccRecPending.map((x, i) => {
+                const income = x.rule.type === 'Entrata';
+                return '<div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">'
+                    + '<div class="flex justify-between items-start gap-2"><div class="min-w-0"><p class="text-[13px] font-bold text-white truncate">' + ccEsc(x.rule.name) + '</p><p class="text-[11px] text-slate-400 mt-0.5">' + ccEsc(ccRecDateText(x.due)) + '</p></div>'
+                    + '<span class="text-[10px] font-semibold ' + (income ? 'text-emerald-400' : 'text-rose-400') + '">' + (income ? 'Entrata' : 'Uscita') + '</span></div>'
+                    + '<div class="flex items-center gap-2"><label class="text-[11px] text-slate-400 shrink-0">Importo €</label><input type="number" step="0.01" inputmode="decimal" id="rc-amt-' + i + '" value="' + x.rule.amount + '" class="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></div>'
+                    + '<div class="grid grid-cols-2 gap-2"><button type="button" data-i="' + i + '" data-act="ok" class="bg-emerald-600 active:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl">Registra</button><button type="button" data-i="' + i + '" data-act="skip" class="bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold py-3 rounded-xl">Salta</button></div></div>';
+            }).join('');
+        }
+        function ccRecConfirmAct(i, act) {
+            const x = ccRecPending[i];
+            if (!x) return;
+            if (act === 'ok' && x.rule.finished) { act = 'skip'; }
+            if (act === 'ok') {
+                const amt = parseFloat(String(document.getElementById('rc-amt-' + i).value).replace(',', '.'));
+                if (isNaN(amt) || amt <= 0) return;
+                ccRecMakeTx(x.rule, x.key, x.due, amt);
+                saveData();
+            } else { x.rule.done[x.key] = 'skipped'; }
+            ccRecSave();
+            ccRecPending.splice(i, 1);
+            ccRecRenderPending();
+            if (ccRecPending.length) ccRecRenderConfirm();
+            else { closeModal('modal-rec-confirm'); if (act === 'ok') ccToast('Registrato'); }
+            ccRecRefreshList();
+        }
+
+        // ---- elenco e modulo delle regole ----
+        function ccRecNextText(rule) {
+            if (!rule.active) return rule.finished ? 'Finita' : 'In pausa';
+            const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            for (let k = 0; k < 14; k++) {
+                const d = new Date(today.getFullYear(), today.getMonth() + k, 1), key = ccMonthKey(d), due = ccRecDue(rule, d.getFullYear(), d.getMonth());
+                if (key < String(rule.from || '')) continue;
+                if (rule.done && rule.done[key]) continue;
+                if (due <= today) return rule.mode === 'confirm' ? 'Da confermare' : 'Da registrare';
+                return 'Prossimo: ' + CC_GIORNI[due.getDay()].slice(0, 3) + ' ' + due.getDate() + ' ' + CC_MESI_FULL[due.getMonth()].slice(0, 3).toLowerCase();
+            }
+            return '';
+        }
+        function ccRecOpenList() { ccRecRefreshList(); document.getElementById('modal-recurring').classList.remove('hidden'); }
+        function ccRecRefreshList() {
+            const el = document.getElementById('rec-list');
+            if (!el) return;
+            if (!ccRec.length) { el.innerHTML = '<p class="text-[12px] text-slate-500 text-center py-4">Nessun movimento ricorrente.</p>'; return; }
+            el.innerHTML = ccRec.map(r => {
+                const acc = store.accounts.find(a => a.id === r.accountId), income = r.type === 'Entrata';
+                const when = r.schedule === 'day' ? 'Il giorno ' + r.day + ' di ogni mese' : 'Ultimo giorno lavorativo';
+                const tags = [r.mode === 'auto' ? 'Automatico' : 'Con conferma'];
+                if (r.remaining !== null && r.remaining !== undefined && r.remaining !== '') tags.push(r.remaining + (Number(r.remaining) === 1 ? ' rata rimasta' : ' rate rimaste'));
+                return '<div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-3.5 space-y-2' + (r.active ? '' : ' opacity-60') + '">'
+                    + '<div class="flex justify-between items-start gap-2"><div class="min-w-0"><p class="text-[13px] font-bold text-white truncate">' + ccEsc(r.name) + '</p><p class="text-[11px] text-slate-400 mt-0.5">' + when + ' · ' + ccEsc(acc ? acc.name : 'Conto') + ' · ' + ccEsc(r.category) + '</p></div>'
+                    + '<span class="pv text-sm font-extrabold ' + (income ? 'text-emerald-400' : 'text-white') + ' shrink-0">' + (income ? '+' : '-') + ccEur(r.amount) + '</span></div>'
+                    + '<div class="flex flex-wrap gap-1.5">' + tags.map(t => '<span class="text-[10px] font-semibold bg-indigo-500/10 text-indigo-300 rounded-md px-2 py-0.5">' + t + '</span>').join('') + '<span class="text-[10px] font-semibold bg-slate-700/40 text-slate-300 rounded-md px-2 py-0.5">' + ccRecNextText(r) + '</span></div>'
+                    + '<div class="grid grid-cols-3 gap-2 pt-0.5"><button type="button" data-act="edit" data-id="' + ccEsc(r.id) + '" class="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-semibold py-2.5 rounded-xl">Modifica</button>'
+                    + '<button type="button" data-act="toggle" data-id="' + ccEsc(r.id) + '" class="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-semibold py-2.5 rounded-xl">' + (r.active ? 'Pausa' : 'Riprendi') + '</button>'
+                    + '<button type="button" data-act="del" data-id="' + ccEsc(r.id) + '" class="bg-slate-800 border border-slate-700 text-rose-400 text-[11px] font-semibold py-2.5 rounded-xl">Elimina</button></div></div>';
+            }).join('');
+        }
+        // proposta: parte dal mese in corso se la data non e' ancora passata, altrimenti dal prossimo
+        function ccRecDefaultFrom() {
+            const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const sched = document.getElementById('rf-sched').value, day = parseInt(document.getElementById('rf-day').value, 10);
+            if (sched === 'day' && !(day >= 1 && day <= 31)) return ccMonthKey(today);
+            const due = ccRecDue({ schedule: sched, day: day }, today.getFullYear(), today.getMonth());
+            return ccMonthKey(due >= today ? today : new Date(today.getFullYear(), today.getMonth() + 1, 1));
+        }
+        function ccRecFormType() {
+            const fr = document.getElementById('rf-from');
+            if (fr && !fr.dataset.touched) fr.value = ccRecDefaultFrom();
+            document.getElementById('rf-day-wrap').classList.toggle('hidden', document.getElementById('rf-sched').value !== 'day');
+            document.getElementById('rf-remaining-wrap').classList.toggle('hidden', document.getElementById('rf-type').value !== 'Uscita');
+        }
+        function ccRecOpenForm(id) {
+            const r = id ? ccRec.find(x => x.id === id) : null;
+            document.getElementById('rf-cat').innerHTML = ccCats.map(c => '<option value="' + ccEsc(c.name) + '">' + ccEsc(c.label) + '</option>').join('');
+            document.getElementById('rf-acc').innerHTML = store.accounts.map(a => '<option value="' + a.id + '">' + ccEsc(a.name) + '</option>').join('');
+            document.getElementById('rf-id').value = r ? r.id : '';
+            document.getElementById('rf-title').textContent = r ? 'Modifica ricorrente' : 'Nuovo ricorrente';
+            document.getElementById('rf-type').value = r ? r.type : 'Uscita';
+            document.getElementById('rf-name').value = r ? r.name : '';
+            document.getElementById('rf-amount').value = r ? r.amount : '';
+            if (r && !ccCatExists(r.category)) document.getElementById('rf-cat').appendChild(new Option(r.category, r.category));
+            document.getElementById('rf-cat').value = r ? r.category : (ccCatExists('Altro') ? 'Altro' : (ccCats[0] ? ccCats[0].name : ''));
+            document.getElementById('rf-acc').value = String(r ? r.accountId : ccRecDefaultAcc());
+            document.getElementById('rf-sched').value = r ? r.schedule : 'day';
+            document.getElementById('rf-day').value = r && r.day ? r.day : '';
+            document.getElementById('rf-mode').value = r ? r.mode : 'auto';
+            document.getElementById('rf-remaining').value = r && r.remaining !== null && r.remaining !== undefined ? r.remaining : '';
+            document.getElementById('rf-from').dataset.touched = r ? '1' : '';
+            document.getElementById('rf-from').value = r ? r.from : ccRecDefaultFrom();
+            document.getElementById('rf-msg').textContent = '';
+            ccRecFormType();
+            document.getElementById('modal-rec-form').classList.remove('hidden');
+        }
+        function ccRecSaveForm() {
+            const msg = document.getElementById('rf-msg');
+            const id = document.getElementById('rf-id').value;
+            const name = document.getElementById('rf-name').value.replace(/\s+/g, ' ').trim();
+            const amount = parseFloat(String(document.getElementById('rf-amount').value).replace(',', '.'));
+            const sched = document.getElementById('rf-sched').value, day = parseInt(document.getElementById('rf-day').value, 10);
+            const type = document.getElementById('rf-type').value;
+            const remRaw = String(document.getElementById('rf-remaining').value).trim();
+            if (!name) { msg.textContent = 'Scrivi un nome.'; return; }
+            if (isNaN(amount) || amount <= 0) { msg.textContent = 'Inserisci un importo valido.'; return; }
+            if (sched === 'day' && !(day >= 1 && day <= 31)) { msg.textContent = 'Scegli un giorno tra 1 e 31.'; return; }
+            const data = { name: name, type: type, amount: ccRnd(amount), category: document.getElementById('rf-cat').value, accountId: Number(document.getElementById('rf-acc').value) || ccRecDefaultAcc(),
+                           schedule: sched, day: sched === 'day' ? day : null, mode: document.getElementById('rf-mode').value, remaining: (type === 'Uscita' && remRaw && parseInt(remRaw, 10) > 0) ? parseInt(remRaw, 10) : null,
+                           from: document.getElementById('rf-from').value || ccMonthKey(new Date()) };
+            if (id) {
+                const r = ccRec.find(x => x.id === id);
+                if (r) { Object.assign(r, data); if (r.finished && (r.remaining === null || r.remaining > 0)) { r.finished = false; r.active = true; r.from = ccMonthKey(new Date()); } }
+            }
+            else ccRec.push(Object.assign({ id: 'r' + Date.now().toString(36), active: true, done: {} }, data));
+            ccRecSave();
+            closeModal('modal-rec-form');
+            ccRecRefreshList();
+            ccRecRun();
+        }
+        function ccInitRecUI() {
+            document.getElementById('rec-list').addEventListener('click', e => {
+                const b = e.target.closest('button[data-act]');
+                if (!b) return;
+                const r = ccRec.find(x => x.id === b.dataset.id);
+                if (!r) return;
+                if (b.dataset.act === 'edit') ccRecOpenForm(r.id);
+                else if (b.dataset.act === 'toggle') {
+                    if (!r.active && r.finished) { ccRecOpenForm(r.id); return; } // rata finita: per riattivarla si imposta un nuovo numero di rate
+                    r.active = !r.active;
+                    if (r.active) r.from = ccMonthKey(new Date()); // riprendendo non si recuperano i mesi in pausa
+                    ccRecSave(); ccRecRefreshList(); ccRecRun();
+                } else if (b.dataset.act === 'del') {
+                    if (!confirm('Eliminare "' + r.name + '"? I movimenti già registrati restano.')) return;
+                    ccRec = ccRec.filter(x => x.id !== r.id); ccRecSave(); ccRecRun(); ccRecRefreshList();
+                }
+            });
+            document.getElementById('rf-day').addEventListener('input', ccRecFormType);
+            document.getElementById('rf-from').addEventListener('change', e => { e.target.dataset.touched = '1'; });
+            document.getElementById('rec-confirm-list').addEventListener('click', e => {
+                const b = e.target.closest('button[data-act]');
+                if (b) ccRecConfirmAct(Number(b.dataset.i), b.dataset.act);
+            });
+        }
+
+        // ---------- previsione: tiene conto dello stipendio e delle rate attese ----------
+        function ccRecExpectedThisMonth() {
+            const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate()), key = ccMonthKey(today);
+            let inc = 0, out = 0; const items = [];
+            ccRec.forEach(r => {
+                if (!r.active || (r.done && r.done[key]) || key < String(r.from || '')) return;
+                if (ccRecExists(r, key)) return;
+                if (r.remaining !== null && r.remaining !== undefined && r.remaining !== '' && parseInt(r.remaining, 10) <= 0) return;
+                if (r.type === 'Entrata') inc += r.amount; else out += r.amount;
+                items.push(r.name);
+            });
+            return { inc: inc, out: out, items: items };
+        }
+        (function ccWireForecast() {
+            const baseF = ccForecast;
+            ccForecast = function () {
+                const f = baseF.apply(this, arguments);
+                try {
+                    const names = ccRec.map(r => String(r.name).toLowerCase());
+                    const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const start = new Date(today); start.setDate(start.getDate() - 29);
+                    const sStr = ccDateStr(start), tStr = ccDateStr(today);
+                    // le spese ricorrenti non devono contare due volte: tolgo dal ritmo quelle gia' note
+                    const recSpent = store.transactions.filter(t => t.type === 'Uscita' && t.date >= sStr && t.date <= tStr && !ccIsAdjust(t) && (t.source === 'recurring' || names.indexOf(String(t.desc).toLowerCase()) >= 0)).reduce((s, t) => s + t.amount, 0);
+                    const total30 = f.daily * f.days, newDaily = Math.max(0, (total30 - recSpent) / f.days);
+                    const ex = ccRecExpectedThisMonth();
+                    f.end = f.end + (f.daily - newDaily) * f.left + ex.inc - ex.out;
+                    f.projSpend = f.monthSpent + newDaily * f.left + ex.out;
+                    f.daily = newDaily; f.recIn = ex.inc; f.recOut = ex.out; f.recItems = ex.items;
+                } catch (e) {}
+                return f;
+            };
+            const baseR = renderForecast;
+            renderForecast = function () {
+                baseR.apply(this, arguments);
+                try {
+                    const f = ccForecast();
+                    if ((f.recIn || f.recOut) && document.getElementById('fc-sub')) {
+                        const sub = document.getElementById('fc-sub');
+                        sub.textContent = sub.textContent.replace(/ Include.*$/, '') + ' Include ' + (f.recIn ? 'entrate attese (' + ccEur(f.recIn) + ')' : '') + (f.recIn && f.recOut ? ' e ' : '') + (f.recOut ? 'uscite fisse (' + ccEur(f.recOut) + ')' : '') + '.';
+                    }
+                } catch (e) {}
+            };
+        })();
+
+        // ---------- collegamenti (senza modificare il codice esistente) ----------
+        (function ccWireRec() {
+            const baseSave = saveData;
+            saveData = function () {
+                if (ccImportExtra) { const x = ccImportExtra; ccImportExtra = null; try { ccApplyImportExtra(x); } catch (e) {} }
+                store.categories = ccCats; store.recurring = ccRec;
+                return baseSave.apply(this, arguments);
+            };
+            const baseImp = importJSONBackup;
+            importJSONBackup = async function (event) {
+                try {
+                    const f = event.target.files && event.target.files[0];
+                    if (f) { const raw = JSON.parse(await f.text()); ccImportExtra = (raw && (Array.isArray(raw.recurring) || Array.isArray(raw.categories))) ? raw : null; }
+                } catch (e) { ccImportExtra = null; }
+                return baseImp.call(this, event);
+            };
+            const baseOpen = openModal;
+            openModal = function (id) { baseOpen.apply(this, arguments); if (id === 'modal-transaction') ccCatSyncSelect(); };
+            const baseApCat = ccApCategory;
+            ccApCategory = function (m) { const c = baseApCat(m); return ccCatExists(c) ? c : 'Altro'; };
+            const start = function () {
+                try {
+                    ccCatLoad(); ccCatSave(); ccCatSyncSelect(); ccInitCatUI();
+                    ccRecLoad(); ccRecSeed(); ccCatSyncSelect(); store.recurring = ccRec; ccInitRecUI();
+                    ccRecRun();
+                    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ccRecRun(); });
+                } catch (e) { if (window.console) console.error(e); }
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+        })();
+        function ccApplyImportExtra(raw) {
+            if (Array.isArray(raw.categories) && raw.categories.length) {
+                ccCats = raw.categories.filter(c => c && c.name).map(c => ({ name: String(c.name), label: String(c.label || c.name), color: c.color || null }));
+                ccCatColors(); ccCatSave(); ccCatSyncSelect();
+            }
+            if (Array.isArray(raw.recurring)) {
+                ccRec = raw.recurring; localStorage.setItem(CC_REC_SEED, '1'); ccRecSave();
+            }
+        }
 
         // ---------- COLLEGAMENTI CON IL CODICE ESISTENTE (senza modificarlo) ----------
         (function ccWire() {
