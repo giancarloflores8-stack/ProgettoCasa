@@ -140,7 +140,91 @@
         .calc-eq { background: #059669; color: #ffffff; font-size: 30px; }
         html.light .calc-num { background: #e2e8f0; color: #0f172a; }
         html.light .calc-fn { background: #cbd5e1; color: #0f172a; }
-    </style>
+    
+/* ============================================================
+   CONTI CHIARI — EDITION NOIR / iPhone 17 Pro
+   Visual redesign. Existing IDs, JS, storage and features untouched.
+   ============================================================ */
+:root { --cc-ink:#0a1223; --cc-card:#14213a; --cc-stroke:rgba(167,193,232,.13); --cc-mint:#b9f3d0; --cc-gold:#f6cb8b; }
+html { -webkit-text-size-adjust:100%; }
+body.bg-slate-950 { background:#070e1b!important; color:#f2f5fb; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif!important; }
+#app-main { max-width:620px; margin:0 auto; padding:calc(116px + var(--sat)) 18px calc(124px + var(--sab))!important; background:radial-gradient(ellipse at 75% 0%,rgba(63,92,145,.18),transparent 50%); }
+#app-header { background:rgba(7,14,27,.95)!important; border:0!important; border-radius:0!important; padding:calc(14px + var(--sat)) 19px 16px!important; box-shadow:none!important; align-items:center; }
+#app-header::after {content:"";position:absolute;bottom:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,rgba(182,213,248,.2),transparent);}
+#app-header .app-logo { height:36px; width:36px; object-fit:contain; padding:5px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:13px; }
+#app-header h1 {font-size:13px!important;font-weight:800!important;letter-spacing:-.035em;max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#header-subtitle {color:#a4b6cf!important;font-size:10px!important;letter-spacing:.06em;text-transform:uppercase;}
+#app-header button {width:39px!important;height:39px!important;min-width:39px;border-radius:14px!important;background:#1b2940!important;border-color:rgba(190,208,237,.14)!important;}
+#app-header > div:last-child > div:last-child {background:#b9f3d0!important;border:0!important;border-radius:13px!important;padding:7px 9px!important;}
+#app-header #top-net-worth {color:#102b25!important;font-weight:900!important;}
+#app-header > div:last-child > div:last-child > span:first-child {color:#35665b!important;}
+.tab-content {animation:ccEnter .25s ease-out;}
+@keyframes ccEnter {from{opacity:.7;transform:translateY(7px)}to{opacity:1;transform:none}}
+.tab-content > div {margin-bottom:16px;}
+.tab-content .bg-slate-900\/90,
+.tab-content .bg-slate-900\/60,
+.tab-content .bg-slate-900\/95,
+.tab-content .bg-slate-900 {background:#142139!important;border:1px solid rgba(169,199,240,.12)!important;box-shadow:0 10px 30px rgba(0,0,0,.16)!important;}
+.tab-content .rounded-2xl {border-radius:23px!important;}
+.tab-content .rounded-3xl {border-radius:29px!important;}
+.tab-content h2,.tab-content h3 {letter-spacing:-.045em!important;}
+.tab-content h3 {font-weight:750!important;}
+.tab-content .text-\[10px\] {font-size:11px!important;line-height:1.45!important;}
+.tab-content .text-\[11px\] {font-size:12px!important;line-height:1.45!important;}
+.tab-content .text-slate-400 {color:#a5b5cd!important;}
+.tab-content .text-indigo-400,.tab-content .text-indigo-300 {color:#c4d6ff!important;}
+.tab-content .text-emerald-400 {color:#b9f3d0!important;}
+.tab-content .text-rose-400 {color:#ff9fae!important;}
+#tab-dashboard > div:first-child {position:relative;isolation:isolate;min-height:218px;padding:25px!important;background:linear-gradient(132deg,#24476b 0%,#193653 42%,#0c2437 100%)!important;border:1px solid rgba(191,230,237,.32)!important;border-radius:30px!important;box-shadow:0 20px 55px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.12)!important;}
+#tab-dashboard > div:first-child::before {content:"";position:absolute;z-index:-1;right:-48px;top:-70px;width:230px;height:230px;border:1px solid rgba(207,242,227,.19);border-radius:50%;box-shadow:0 0 0 35px rgba(203,240,230,.035),0 0 0 80px rgba(203,240,230,.025);pointer-events:none;}
+#tab-dashboard > div:first-child::after {content:"CONTI CHIARI  /  PRIVATE BANKING";position:absolute;right:24px;bottom:16px;font-size:8px;letter-spacing:.18em;color:rgba(222,245,241,.48);font-weight:700;pointer-events:none;}
+#tab-dashboard > div:first-child > div:first-of-type > span:first-child {color:#c5eadf!important;letter-spacing:.17em!important;font-size:10px!important;}
+#dash-total-net {font-size:clamp(36px,10vw,48px)!important;line-height:1.12!important;font-weight:850!important;letter-spacing:-.065em!important;color:#fff!important;margin:14px 0 6px!important;font-variant-numeric:tabular-nums;}
+#tab-dashboard > div:first-child .grid {margin-top:24px!important;padding-top:19px!important;border-color:rgba(255,255,255,.18)!important;}
+#tab-dashboard > div:first-child .text-emerald-400 {color:#b9f3d0!important;}
+#tab-dashboard > div:first-child .text-blue-400 {color:#b7d8ff!important;}
+#tab-dashboard > .grid > div {padding:18px!important;min-height:116px;}
+#tab-dashboard > .grid h3 {font-size:clamp(18px,5.1vw,23px)!important;letter-spacing:-.055em;}
+#tab-dashboard > .grid .fa-solid {font-size:16px!important;opacity:.85;}
+.tab-content button {touch-action:manipulation;min-height:40px;}
+.tab-content button.bg-indigo-600,.tab-content button.bg-emerald-600 {background:#b9f3d0!important;color:#0b2a26!important;border:0!important;font-weight:800!important;box-shadow:0 6px 20px rgba(185,243,208,.12);}
+.tab-content button.bg-indigo-600 i,.tab-content button.bg-emerald-600 i {color:#0b2a26!important;}
+#app-main input,#app-main select,#app-main textarea,.fixed input,.fixed select,.fixed textarea {font-size:16px!important;border-radius:15px;}
+#app-main .grid > div {min-width:0;}
+nav.fixed.bottom-0 {bottom:calc(10px + var(--sab))!important;left:12px!important;right:12px!important;width:auto!important;max-width:594px;margin:0 auto;padding:8px 7px!important;background:rgba(25,38,59,.97)!important;border:1px solid rgba(198,219,249,.18)!important;border-radius:24px!important;box-shadow:0 18px 45px rgba(0,0,0,.55)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);gap:1px;}
+nav.fixed.bottom-0 .tab-item {min-width:0!important;padding:9px 0!important;border-radius:17px!important;color:#98a9c1!important;}
+nav.fixed.bottom-0 .tab-item i {font-size:17px!important;margin-bottom:5px;}
+nav.fixed.bottom-0 .tab-item span {font-size:9px!important;font-weight:650!important;white-space:nowrap;letter-spacing:-.03em;}
+nav.fixed.bottom-0 .tab-item-active {background:#b9f3d0!important;color:#112d29!important;box-shadow:0 4px 12px rgba(0,0,0,.12);}
+nav.fixed.bottom-0 .tab-item-active i,nav.fixed.bottom-0 .tab-item-active span {color:#112d29!important;}
+button.fixed.bottom-20 {bottom:calc(106px + var(--sab))!important;right:20px!important;background:#b9f3d0!important;color:#0b2a26!important;border:2px solid #0d2b28!important;width:58px!important;height:58px!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important;}
+button:focus-visible,input:focus-visible,select:focus-visible {outline:2px solid #b9f3d0!important;outline-offset:3px;}
+@media(max-width:390px) {#app-main{padding-left:13px!important;padding-right:13px!important;}#app-header{padding-left:12px!important;padding-right:12px!important;}#app-header h1{max-width:145px;}nav.fixed.bottom-0{left:7px!important;right:7px!important;}nav.fixed.bottom-0 .tab-item span{font-size:8px!important;}}
+@media(prefers-reduced-motion:reduce){.tab-content{animation:none;}}
+/* Light edition: genuinely different light palette, same information hierarchy */
+html.light body.bg-slate-950 {background:#edf2f4!important;color:#15283c;}
+html.light #app-main {background:radial-gradient(ellipse at 85% 0%,#dfece9,transparent 60%);}
+html.light #app-header {background:rgba(237,242,244,.96)!important;}
+html.light #app-header h1 {color:#15283c!important;}
+html.light #header-subtitle {color:#667b8c!important;}
+html.light #app-header button {background:#fff!important;border-color:#dce6e8!important;}
+html.light #app-header .app-logo {background:#fff;border-color:#dce6e8;}
+html.light .tab-content .bg-slate-900\/90,html.light .tab-content .bg-slate-900\/60,html.light .tab-content .bg-slate-900\/95,html.light .tab-content .bg-slate-900 {background:#fff!important;border-color:#e0e9ec!important;box-shadow:0 9px 25px rgba(20,54,67,.055)!important;}
+html.light #tab-dashboard > div:first-child {background:linear-gradient(135deg,#24476b,#0d2839)!important;border-color:#43697a!important;}
+html.light #tab-dashboard > div:first-child .text-white,html.light #tab-dashboard > div:first-child .text-slate-400 {color:#f4fbff!important;}
+html.light #tab-dashboard > div:first-child .text-indigo-300 {color:#c5eadf!important;}
+html.light #tab-dashboard > div:first-child .text-emerald-400 {color:#b9f3d0!important;}
+html.light #tab-dashboard > div:first-child .text-blue-400 {color:#b7d8ff!important;}
+html.light nav.fixed.bottom-0 {background:rgba(255,255,255,.97)!important;border-color:#dce6e8!important;}
+html.light nav.fixed.bottom-0 .tab-item {color:#657788!important;}
+html.light nav.fixed.bottom-0 .tab-item-active {background:#153c43!important;color:#fff!important;}
+html.light nav.fixed.bottom-0 .tab-item-active i,html.light nav.fixed.bottom-0 .tab-item-active span {color:#fff!important;}
+html.light .tab-content .text-slate-400 {color:#65778b!important;}
+html.light .tab-content .text-indigo-400 {color:#365a81!important;}
+html.light .tab-content .text-emerald-400 {color:#08795c!important;}
+html.light .tab-content button.bg-indigo-600,html.light .tab-content button.bg-emerald-600 {background:#153c43!important;color:#fff!important;}
+
+</style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
 
