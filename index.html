@@ -377,6 +377,30 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
                         <p id="meal-avail-eur" class="pv text-[11px] text-slate-400 mt-1">€ 0.00</p>
                     </div>
                 </div>
+                <!-- Gestione rapida del saldo reale dei buoni -->
+                <div class="cc-meal-quick mt-4 p-3.5 rounded-2xl border border-emerald-400/20" style="background:rgba(12,38,42,.65)">
+                    <p class="text-xs font-bold text-slate-100 mb-1"><i class="fa-solid fa-wallet text-emerald-300 mr-2"></i>Il tuo saldo reale</p>
+                    <p class="text-[11px] text-slate-400 mb-3">Imposta quanti buoni hai adesso, poi scalali quando li usi.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="meal-quick-balance" class="block text-[11px] text-slate-300 mb-1">Buoni attuali</label>
+                            <input id="meal-quick-balance" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 25" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-white" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="ccMealSetCurrentBalance()" class="w-full bg-indigo-600 text-white font-bold rounded-xl px-2 py-2.5 text-xs">Imposta saldo</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <div>
+                            <label for="meal-quick-use" class="block text-[11px] text-slate-300 mb-1">Buoni da scalare</label>
+                            <input id="meal-quick-use" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-white" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="ccMealQuickUse()" class="w-full bg-slate-700 border border-slate-500 text-white font-bold rounded-xl px-2 py-2.5 text-xs"><i class="fa-solid fa-minus mr-1"></i>Scala buoni</button>
+                        </div>
+                    </div>
+                    <p id="meal-quick-msg" role="status" class="text-[11px] text-slate-400 mt-2" aria-live="polite"></p>
+                </div>
                 <div class="grid grid-cols-2 gap-2 mt-3.5">
                     <button type="button" id="meal-today" onclick="ccMealToggleToday()" class="bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"><i class="fa-solid fa-building"></i><span id="meal-today-label">Oggi in sede</span></button>
                     <button type="button" onclick="ccMealOpenUse()" class="bg-slate-800 border border-slate-700 text-slate-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-basket-shopping text-emerald-400"></i>Ho usato buoni</button>
@@ -1257,7 +1281,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
                     <div><label class="block text-[10px] text-slate-400 mb-1">Valore di un buono (€)</label><input type="number" inputmode="decimal" step="0.01" id="meal-set-value" onchange="ccMealSaveSettings()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></div>
                     <div><label class="block text-[10px] text-slate-400 mb-1">Buoni che avevi già</label><input type="number" inputmode="numeric" min="0" id="meal-set-opening" onchange="ccMealSaveSettings()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></div>
                 </div>
-                <p class="text-[10px] text-slate-500 leading-snug">"Disponibili ora" = buoni che avevi già + buoni guadagnati in tutti i mesi − buoni usati. I buoni non cambiano i saldi dei conti.</p>
+                <p class="text-[10px] text-slate-500 leading-snug">"Disponibili ora" = saldo iniziale + correzioni del saldo reale + buoni guadagnati − buoni usati. I buoni non cambiano i saldi dei conti.</p>
             </div>
         </div>
     </div>
@@ -4482,11 +4506,11 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
 
         // ---------- BUONI PASTO ----------
         const CC_MEAL_KEY = 'cc_meal';
-        let ccMeal = { value: 7, opening: 0, days: [], used: [] }, ccMealView = null;
+        let ccMeal = { value: 7, opening: 0, adjustment: 0, days: [], used: [] }, ccMealView = null;
         function ccMealLoad() {
             let m = null;
             try { m = JSON.parse(localStorage.getItem(CC_MEAL_KEY)); } catch (e) {}
-            if (m && typeof m === 'object') ccMeal = { value: Number(m.value) > 0 ? Number(m.value) : 7, opening: Math.max(0, parseInt(m.opening, 10) || 0), days: Array.isArray(m.days) ? m.days.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)) : [], used: Array.isArray(m.used) ? m.used.filter(x => x && x.date && x.n > 0) : [] };
+            if (m && typeof m === 'object') ccMeal = { value: Number(m.value) > 0 ? Number(m.value) : 7, opening: Math.max(0, parseInt(m.opening, 10) || 0), adjustment: Number.isSafeInteger(m.adjustment) ? m.adjustment : 0, days: Array.isArray(m.days) ? m.days.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)) : [], used: Array.isArray(m.used) ? m.used.filter(x => x && x.date && x.n > 0) : [] };
             ccMeal.days = Array.from(new Set(ccMeal.days)).sort();
             const t = new Date(); ccMealView = { y: t.getFullYear(), m: t.getMonth() };
         }
@@ -4496,7 +4520,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             const earnedM = ccMeal.days.filter(d => d.slice(0, 7) === key).length;
             const usedM = ccMeal.used.filter(u => u.date.slice(0, 7) === key).reduce((s, u) => s + u.n, 0);
             const earnedAll = ccMeal.days.length, usedAll = ccMeal.used.reduce((s, u) => s + u.n, 0);
-            return { key: key, earnedM: earnedM, usedM: usedM, avail: ccMeal.opening + earnedAll - usedAll };
+            return { key: key, earnedM: earnedM, usedM: usedM, avail: ccMeal.opening + (ccMeal.adjustment || 0) + earnedAll - usedAll };
         }
         function ccMealEur(n) { return ccEur(n * ccMeal.value); }
         function ccMealRender() {
@@ -4508,7 +4532,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             document.getElementById('meal-count-label').textContent = s.earnedM === 1 ? 'buono' : 'buoni';
             document.getElementById('meal-value').textContent = ccMealEur(s.earnedM) + ' (' + ccEur(ccMeal.value).replace('€ ', '€') + ' ciascuno)';
             document.getElementById('meal-avail').textContent = s.avail;
-            document.getElementById('meal-avail-eur').textContent = ccMealEur(s.avail);
+            document.getElementById('meal-avail-eur').textContent = ccMealEur(s.avail);\n            const quickBalance = document.getElementById('meal-quick-balance'); if (quickBalance && document.activeElement !== quickBalance) quickBalance.value = Math.max(0, s.avail);
             document.getElementById('meal-avail').className = 'pv text-xl font-extrabold ' + (s.avail < 0 ? 'text-rose-400' : 'text-white');
             const today = ccToday(), has = ccMeal.days.indexOf(today) >= 0, b = document.getElementById('meal-today');
             document.getElementById('meal-today-label').textContent = has ? 'In sede oggi ✓' : 'Oggi in sede';
@@ -4565,6 +4589,34 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             list.innerHTML = used.slice().sort((a, b) => b.date.localeCompare(a.date)).map(u =>
                 '<div class="flex items-center justify-between bg-slate-800/50 rounded-xl pl-3 pr-1 py-1 text-[12px]"><span class="text-slate-300">' + ccEsc(u.date.slice(8, 10) + '/' + u.date.slice(5, 7)) + ' · <b class="pv text-white">' + u.n + (u.n === 1 ? ' buono' : ' buoni') + '</b> <span class="pv text-slate-500">(' + ccMealEur(u.n) + ')</span></span>'
                 + '<button type="button" data-use="' + u.id + '" aria-label="Elimina" class="p-3 text-rose-400/80 active:text-rose-500"><i class="fa-solid fa-trash text-[11px]"></i></button></div>').join('');
+        }
+        function ccMealQuickMessage(text, error) {
+            const el = document.getElementById('meal-quick-msg');
+            if (el) { el.textContent = text; el.className = 'text-[11px] mt-2 ' + (error ? 'text-rose-400' : 'text-emerald-300'); }
+        }
+        function ccMealSetCurrentBalance() {
+            const raw = document.getElementById('meal-quick-balance').value.trim();
+            const n = Number(raw);
+            if (!raw || !Number.isSafeInteger(n) || n < 0) {
+                ccMealQuickMessage('Inserisci un numero intero di buoni, da zero in su.', true); return;
+            }
+            const before = ccMealStats().avail;
+            ccMeal.adjustment = (ccMeal.adjustment || 0) + n - before;
+            ccMealSave(); ccMealRender();
+            ccMealQuickMessage('Saldo aggiornato: ' + n + (n === 1 ? ' buono disponibile.' : ' buoni disponibili.'), false);
+        }
+        function ccMealQuickUse() {
+            const raw = document.getElementById('meal-quick-use').value.trim();
+            const n = Number(raw), avail = ccMealStats().avail;
+            if (!raw || !Number.isSafeInteger(n) || n < 1) {
+                ccMealQuickMessage('Inserisci un numero intero maggiore di zero.', true); return;
+            }
+            if (n > avail) {
+                ccMealQuickMessage('Non puoi scalare ' + n + ' buoni: ne hai ' + Math.max(0, avail) + '.', true); return;
+            }
+            ccMeal.used.push({ id: Date.now() + Math.floor(Math.random()*1000), date: ccToday(), n: n });
+            ccMealSave(); ccMealRender();
+            ccMealQuickMessage('Scalati ' + n + ' buoni. Te ne rimangono ' + ccMealStats().avail + '.', false);
         }
         function ccMealAddUse() {
             const msg = document.getElementById('meal-use-msg');
