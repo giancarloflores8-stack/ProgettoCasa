@@ -253,6 +253,15 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
 #meal-card .cc-meal-quick button {min-height:37px!important;height:37px!important;padding:5px 8px!important;border-radius:10px!important;font-size:12px!important;}
 #meal-card #meal-today,#meal-card button[onclick="ccMealOpenUse()"] {min-height:39px!important;padding:8px 4px!important;}
 #meal-card #meal-quick-msg:empty {display:none!important;}
+
+/* V7: real meal voucher balance controls live only in the Manage sheet */
+#modal-meal .cc-meal-quick {margin-top:0!important;margin-bottom:0!important;padding:12px!important;background:rgba(24,48,57,.75)!important;border-color:rgba(137,204,174,.28)!important;}
+#modal-meal .cc-meal-quick label,#modal-meal .cc-meal-quick p {color:#d7e7eb!important;}
+#modal-meal .cc-meal-quick input {background:#eef2f8!important;color:#142638!important;border:1px solid #b6c5d2!important;}
+#modal-meal .cc-meal-quick button {min-height:39px!important;color:#fff!important;}
+#modal-meal .cc-meal-quick button.bg-indigo-600 {background:#163d43!important;}
+#modal-meal .cc-meal-quick button.bg-slate-700 {background:#354763!important;}
+#modal-meal #meal-quick-msg:empty {display:none!important;}
 </style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
@@ -381,30 +390,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
                     </div>
                     <p id="meal-avail-eur" class="pv text-xs text-emerald-300 mt-1">€ 0.00</p>
                 </div>
-                <!-- Gestione rapida del saldo reale dei buoni -->
-                <div class="cc-meal-quick mt-3 p-2.5 rounded-xl border border-emerald-400/20" style="background:rgba(12,38,42,.65)">
-                    <p class="text-xs font-bold text-slate-100 mb-1"><i class="fa-solid fa-wallet text-emerald-300 mr-2"></i>Il tuo saldo reale</p>
-                    <p class="text-[11px] text-slate-400 mb-2">Imposta il saldo e scala quelli utilizzati.</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label for="meal-quick-balance" class="block text-[11px] text-slate-300 mb-0.5">Buoni attuali</label>
-                            <input id="meal-quick-balance" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 25" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
-                        </div>
-                        <div class="flex items-end">
-                            <button type="button" onclick="ccMealSetCurrentBalance()" class="w-full bg-indigo-600 text-white font-bold rounded-lg px-2 py-1.5 text-xs">Imposta</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div>
-                            <label for="meal-quick-use" class="block text-[11px] text-slate-300 mb-0.5">Da scalare</label>
-                            <input id="meal-quick-use" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
-                        </div>
-                        <div class="flex items-end">
-                            <button type="button" onclick="ccMealQuickUse()" class="w-full bg-slate-700 border border-slate-500 text-white font-bold rounded-lg px-2 py-1.5 text-xs"><i class="fa-solid fa-minus mr-1"></i>Scala buoni</button>
-                        </div>
-                    </div>
-                    <p id="meal-quick-msg" role="status" class="text-[11px] text-slate-400 mt-2" aria-live="polite"></p>
-                </div>
+
             </div>
 
             <!-- Movimenti ricorrenti da confermare -->
@@ -1243,6 +1229,31 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
                 <h3 class="text-sm font-bold text-white flex items-center"><i class="fa-solid fa-utensils text-amber-400 text-xs mr-2"></i>Buoni pasto</h3>
                 <button onclick="closeModal('modal-meal')" aria-label="Chiudi" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
+
+            <!-- Gestione del saldo reale, accessibile da Gestisci -->
+            <div class="cc-meal-quick mt-3 p-2.5 rounded-xl border border-emerald-400/20" style="background:rgba(12,38,42,.65)">
+                    <p class="text-xs font-bold text-slate-100 mb-1"><i class="fa-solid fa-wallet text-emerald-300 mr-2"></i>Il tuo saldo reale</p>
+                    <p class="text-[11px] text-slate-400 mb-2">Imposta il saldo e scala quelli utilizzati.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="meal-quick-balance" class="block text-[11px] text-slate-300 mb-0.5">Buoni attuali</label>
+                            <input id="meal-quick-balance" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 25" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="ccMealSetCurrentBalance()" class="w-full bg-indigo-600 text-white font-bold rounded-lg px-2 py-1.5 text-xs">Imposta</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div>
+                            <label for="meal-quick-use" class="block text-[11px] text-slate-300 mb-0.5">Da scalare</label>
+                            <input id="meal-quick-use" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="ccMealQuickUse()" class="w-full bg-slate-700 border border-slate-500 text-white font-bold rounded-lg px-2 py-1.5 text-xs"><i class="fa-solid fa-minus mr-1"></i>Scala buoni</button>
+                        </div>
+                    </div>
+                    <p id="meal-quick-msg" role="status" class="text-[11px] text-slate-400 mt-2" aria-live="polite"></p>
+                </div>
 
             <div class="flex items-center justify-between">
                 <button type="button" onclick="ccMealNav(-1)" aria-label="Mese precedente" class="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 flex items-center justify-center active:scale-95"><i class="fa-solid fa-chevron-left text-sm"></i></button>
@@ -4552,6 +4563,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             document.getElementById('meal-use-msg').textContent = '';
             document.getElementById('meal-set-value').value = ccMeal.value;
             document.getElementById('meal-set-opening').value = ccMeal.opening;
+            document.getElementById('meal-quick-balance').value = Math.max(0, ccMealStats().avail);
             ccMealRenderModal();
             document.getElementById('modal-meal').classList.remove('hidden');
         }
