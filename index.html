@@ -245,6 +245,14 @@ html.light .tab-content button.bg-indigo-600,html.light .tab-content button.bg-e
 html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top-color:#dce6e8!important;}
 @media(max-width:390px){#app-header{padding-left:10px!important;padding-right:10px!important;gap:4px!important;}#app-header .cc-header-brand{gap:5px!important;}#app-header h1{font-size:12px!important;}#app-header .cc-header-actions{gap:3px!important;}#app-header .cc-header-actions button{width:32px!important;min-width:32px!important;height:34px!important;}#app-bottom-nav{left:0!important;right:0!important;}}
 @media(prefers-reduced-motion:reduce){#app-bottom-nav,#app-add-transaction{transition:none!important;}}
+
+/* Buoni pasto: compact touch-friendly layout on iPhone */
+#meal-card {padding:14px!important;}
+#meal-card .cc-meal-quick {padding:10px!important;margin-top:12px!important;}
+#meal-card .cc-meal-quick input {min-height:37px!important;height:37px!important;font-size:16px!important;padding:5px 9px!important;border-radius:10px!important;}
+#meal-card .cc-meal-quick button {min-height:37px!important;height:37px!important;padding:5px 8px!important;border-radius:10px!important;font-size:12px!important;}
+#meal-card #meal-today,#meal-card button[onclick="ccMealOpenUse()"] {min-height:39px!important;padding:8px 4px!important;}
+#meal-card #meal-quick-msg:empty {display:none!important;}
 </style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
@@ -365,45 +373,37 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center"><i class="fa-solid fa-utensils text-amber-400 text-[11px] mr-2"></i>Buoni pasto</h3>
                     <button type="button" onclick="ccMealOpen()" class="text-indigo-400 text-xs font-semibold py-1 pl-3 -mr-1">Gestisci</button>
                 </div>
-                <div class="flex items-end justify-between mt-2.5 gap-3">
-                    <div class="min-w-0">
-                        <p id="meal-month-label" class="text-[11px] text-slate-400">Questo mese</p>
-                        <p class="mt-0.5 leading-none"><span id="meal-count" class="pv text-3xl font-extrabold text-white">0</span> <span id="meal-count-label" class="text-sm text-slate-400">buoni</span></p>
-                        <p id="meal-value" class="pv text-sm font-semibold text-emerald-400 mt-1">€ 0.00</p>
+                <div class="mt-3 mb-1">
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Buoni disponibili</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span id="meal-avail" class="pv text-3xl font-extrabold text-white">0</span>
+                        <span class="text-sm text-slate-400">buoni effettivi</span>
                     </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-[10px] text-slate-400">Disponibili ora</p>
-                        <p class="leading-none mt-0.5"><span id="meal-avail" class="pv text-xl font-extrabold text-white">0</span></p>
-                        <p id="meal-avail-eur" class="pv text-[11px] text-slate-400 mt-1">€ 0.00</p>
-                    </div>
+                    <p id="meal-avail-eur" class="pv text-xs text-emerald-300 mt-1">€ 0.00</p>
                 </div>
                 <!-- Gestione rapida del saldo reale dei buoni -->
-                <div class="cc-meal-quick mt-4 p-3.5 rounded-2xl border border-emerald-400/20" style="background:rgba(12,38,42,.65)">
+                <div class="cc-meal-quick mt-3 p-2.5 rounded-xl border border-emerald-400/20" style="background:rgba(12,38,42,.65)">
                     <p class="text-xs font-bold text-slate-100 mb-1"><i class="fa-solid fa-wallet text-emerald-300 mr-2"></i>Il tuo saldo reale</p>
-                    <p class="text-[11px] text-slate-400 mb-3">Imposta quanti buoni hai adesso, poi scalali quando li usi.</p>
+                    <p class="text-[11px] text-slate-400 mb-2">Imposta il saldo e scala quelli utilizzati.</p>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label for="meal-quick-balance" class="block text-[11px] text-slate-300 mb-1">Buoni attuali</label>
-                            <input id="meal-quick-balance" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 25" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-white" />
+                            <label for="meal-quick-balance" class="block text-[11px] text-slate-300 mb-0.5">Buoni attuali</label>
+                            <input id="meal-quick-balance" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 25" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
                         </div>
                         <div class="flex items-end">
-                            <button type="button" onclick="ccMealSetCurrentBalance()" class="w-full bg-indigo-600 text-white font-bold rounded-xl px-2 py-2.5 text-xs">Imposta saldo</button>
+                            <button type="button" onclick="ccMealSetCurrentBalance()" class="w-full bg-indigo-600 text-white font-bold rounded-lg px-2 py-1.5 text-xs">Imposta</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 mt-3">
+                    <div class="grid grid-cols-2 gap-2 mt-2">
                         <div>
-                            <label for="meal-quick-use" class="block text-[11px] text-slate-300 mb-1">Buoni da scalare</label>
-                            <input id="meal-quick-use" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-white" />
+                            <label for="meal-quick-use" class="block text-[11px] text-slate-300 mb-0.5">Da scalare</label>
+                            <input id="meal-quick-use" type="number" min="1" step="1" inputmode="numeric" value="1" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-white" />
                         </div>
                         <div class="flex items-end">
-                            <button type="button" onclick="ccMealQuickUse()" class="w-full bg-slate-700 border border-slate-500 text-white font-bold rounded-xl px-2 py-2.5 text-xs"><i class="fa-solid fa-minus mr-1"></i>Scala buoni</button>
+                            <button type="button" onclick="ccMealQuickUse()" class="w-full bg-slate-700 border border-slate-500 text-white font-bold rounded-lg px-2 py-1.5 text-xs"><i class="fa-solid fa-minus mr-1"></i>Scala buoni</button>
                         </div>
                     </div>
                     <p id="meal-quick-msg" role="status" class="text-[11px] text-slate-400 mt-2" aria-live="polite"></p>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-3.5">
-                    <button type="button" id="meal-today" onclick="ccMealToggleToday()" class="bg-indigo-600 active:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"><i class="fa-solid fa-building"></i><span id="meal-today-label">Oggi in sede</span></button>
-                    <button type="button" onclick="ccMealOpenUse()" class="bg-slate-800 border border-slate-700 text-slate-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-basket-shopping text-emerald-400"></i>Ho usato buoni</button>
                 </div>
             </div>
 
@@ -4524,19 +4524,14 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
         }
         function ccMealEur(n) { return ccEur(n * ccMeal.value); }
         function ccMealRender() {
-            const c = document.getElementById('meal-count');
-            if (!c) return;
-            const s = ccMealStats(), t = new Date();
-            document.getElementById('meal-month-label').textContent = 'Questo mese · ' + CC_MESI_FULL[t.getMonth()].toLowerCase();
-            c.textContent = s.earnedM;
-            document.getElementById('meal-count-label').textContent = s.earnedM === 1 ? 'buono' : 'buoni';
-            document.getElementById('meal-value').textContent = ccMealEur(s.earnedM) + ' (' + ccEur(ccMeal.value).replace('€ ', '€') + ' ciascuno)';
-            document.getElementById('meal-avail').textContent = s.avail;
-            document.getElementById('meal-avail-eur').textContent = ccMealEur(s.avail);\n            const quickBalance = document.getElementById('meal-quick-balance'); if (quickBalance && document.activeElement !== quickBalance) quickBalance.value = Math.max(0, s.avail);
-            document.getElementById('meal-avail').className = 'pv text-xl font-extrabold ' + (s.avail < 0 ? 'text-rose-400' : 'text-white');
-            const today = ccToday(), has = ccMeal.days.indexOf(today) >= 0, b = document.getElementById('meal-today');
-            document.getElementById('meal-today-label').textContent = has ? 'In sede oggi ✓' : 'Oggi in sede';
-            b.className = (has ? 'bg-emerald-600 active:bg-emerald-500' : 'bg-indigo-600 active:bg-indigo-500') + ' text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all';
+            const availEl = document.getElementById('meal-avail');
+            if (!availEl) return;
+            const stats = ccMealStats();
+            availEl.textContent = Math.max(0, stats.avail);
+            availEl.className = 'pv text-3xl font-extrabold ' + (stats.avail < 0 ? 'text-rose-400' : 'text-white');
+            document.getElementById('meal-avail-eur').textContent = ccMealEur(Math.max(0, stats.avail));
+            const quickBalance = document.getElementById('meal-quick-balance');
+            if (quickBalance && document.activeElement !== quickBalance) quickBalance.value = Math.max(0, stats.avail);
             const tab = document.getElementById('tab-analisi');
             if (tab && !tab.classList.contains('hidden')) { try { renderAnalysisCharts(); } catch (e) {} }
         }
@@ -4603,6 +4598,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             const before = ccMealStats().avail;
             ccMeal.adjustment = (ccMeal.adjustment || 0) + n - before;
             ccMealSave(); ccMealRender();
+            document.getElementById('meal-quick-balance').blur();
             ccMealQuickMessage('Saldo aggiornato: ' + n + (n === 1 ? ' buono disponibile.' : ' buoni disponibili.'), false);
         }
         function ccMealQuickUse() {
@@ -4616,6 +4612,7 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
             }
             ccMeal.used.push({ id: Date.now() + Math.floor(Math.random()*1000), date: ccToday(), n: n });
             ccMealSave(); ccMealRender();
+            document.getElementById('meal-quick-use').blur();
             ccMealQuickMessage('Scalati ' + n + ' buoni. Te ne rimangono ' + ccMealStats().avail + '.', false);
         }
         function ccMealAddUse() {
