@@ -262,6 +262,36 @@ html.light #app-bottom-nav{background:rgba(248,251,251,.98)!important;border-top
 #modal-meal .cc-meal-quick button.bg-indigo-600 {background:#163d43!important;}
 #modal-meal .cc-meal-quick button.bg-slate-700 {background:#354763!important;}
 #modal-meal #meal-quick-msg:empty {display:none!important;}
+
+/* ============================================================
+   V8 — Correzioni solo visive per iPhone 17 Pro
+   (nessuna modifica a JS, calcoli, dati o storage)
+   ============================================================ */
+
+/* 1. Spazio vuoto sotto l'header: il padding-top impostato dal JS veniva annullato
+      da !important, quindi qui lo allineiamo all'altezza reale dell'header */
+#app-main{padding-top:calc(var(--sat) + 80px)!important;}
+
+/* 2. Titolo header: va a capo in modo bilanciato, niente emoji da sola sulla seconda riga */
+#app-header h1{text-wrap:balance;}
+
+/* 3. Sfondo: il gradiente passa dal contenitore scorrevole al body, cosi' non si vedono
+      piu' bordi/riquadri chiari sotto l'header */
+body.bg-slate-950{background-image:radial-gradient(ellipse at 75% 0%,rgba(63,92,145,.18),transparent 50%)!important;background-repeat:no-repeat!important;}
+html.light body.bg-slate-950{background-image:radial-gradient(ellipse at 85% 0%,#dfece9,transparent 60%)!important;}
+#app-main,html.light #app-main{background:transparent!important;}
+
+/* 4. Barra in basso: meno spazio vuoto sotto le icone (resta sopra l'indicatore Home) */
+#app-bottom-nav{padding-bottom:max(8px,calc(var(--sab) - 10px))!important;}
+#app-add-transaction{bottom:calc(83px + max(8px,calc(var(--sab) - 10px)))!important;}
+
+/* 5. Intestazioni di sezione: il sottotitolo non finisce piu' sotto il pulsante */
+.tab-content .flex.justify-between.items-center:has(> div > h2){gap:12px;}
+.tab-content .flex.justify-between.items-center:has(> div > h2) > div:first-child{min-width:0;flex:1 1 auto;}
+.tab-content .flex.justify-between.items-center:has(> div > h2) > button{flex:none;white-space:nowrap;}
+
+/* 6. Card patrimonio: l'etichetta "CONTI CHIARI / PRIVATE BANKING" non si sovrappone piu' ai valori */
+#tab-dashboard > div:first-child{padding-bottom:46px!important;}
 </style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
