@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Conti Chiari - Mobile Finance App</title>
     <meta name="apple-mobile-web-app-title" content="Conti Chiari">
-    <meta name="theme-color" content="#090d16">
+    <meta name="theme-color" content="#070e1b">
     <script>try { if (localStorage.getItem('cc_theme') === 'light') document.documentElement.classList.add('light'); if (localStorage.getItem('cc_privacy') === '1') document.documentElement.classList.add('privacy'); } catch (e) {}</script>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
@@ -292,6 +292,10 @@ html.light body.bg-slate-950{background-image:radial-gradient(ellipse at 85% 0%,
 
 /* 6. Card patrimonio: l'etichetta "CONTI CHIARI / PRIVATE BANKING" non si sovrappone piu' ai valori */
 #tab-dashboard > div:first-child{padding-bottom:46px!important;}
+
+/* 7. Barra di stato in alto: stesso colore del tema attivo (scuro/chiaro) anche dopo il cambio tema */
+html{background-color:#070e1b!important;}
+html.light{background-color:#edf2f4!important;}
 </style>
 </head>
 <body class="h-full w-full bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
@@ -2087,8 +2091,13 @@ html.light body.bg-slate-950{background-image:radial-gradient(ellipse at 85% 0%,
             if (icon) {
                 icon.className = 'fa-solid text-xs ' + (light ? 'fa-moon text-indigo-500' : 'fa-sun text-amber-400');
             }
-            const meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', light ? '#f1f5f9' : '#090d16');
+            // iOS ignora spesso la modifica di un <meta theme-color> esistente: lo ricreo, cosi' la barra di stato si aggiorna subito
+            const color = light ? '#edf2f4' : '#070e1b';
+            document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', 'theme-color');
+            meta.setAttribute('content', color);
+            document.head.appendChild(meta);
         }
         function toggleTheme() {
             const next = ccIsLight() ? 'dark' : 'light';
