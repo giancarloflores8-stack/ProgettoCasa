@@ -606,28 +606,6 @@ html.light{background-color:#edf2f4!important;}
                 </div>
             </div>
 
-            <!-- ANALISI INTELLIGENTI: suggerimenti locali, senza servizi esterni -->
-            <section id="an-insights-panel" class="bg-slate-900/90 border border-indigo-500/25 rounded-2xl p-4 shadow-sm space-y-3" aria-labelledby="an-insights-title">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm" aria-hidden="true"></i>
-                    <h3 id="an-insights-title" class="text-xs font-bold text-slate-200 uppercase tracking-wider">Analisi intelligenti e suggerimenti</h3>
-                </div>
-                <p class="text-[11px] text-slate-400">Osservazioni automatiche basate sui movimenti registrati. I confronti mensili usano mesi completi.</p>
-                <div id="an-insights-list" class="space-y-2" aria-live="polite"></div>
-            </section>
-
-            <!-- NUOVI STRUMENTI DI ANALISI: sola lettura dei movimenti -->
-            <section id="an-smart-tools" class="space-y-3" aria-label="Strumenti di analisi avanzata">
-                <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Approfondimenti finanziari</h3>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Spese anomale</h3><p class="text-[11px] text-slate-400">Movimenti insoliti rispetto alle altre spese della stessa categoria.</p><div id="an-smart-anomalies" class="space-y-2"></div></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Confronto tra periodi completi</h3><div id="an-smart-periods" class="space-y-2"></div></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Possibili abbonamenti</h3><p class="text-[11px] text-slate-400">Indizi ricavati dai movimenti, da verificare: nessun abbonamento viene creato automaticamente.</p><div id="an-smart-subs" class="space-y-2"></div></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3"><h3 class="text-sm font-bold">Simulatore di risparmio</h3><label for="an-smart-reduction" class="text-xs text-slate-300">Riduzione ipotetica della spesa mensile: <strong id="an-smart-reduction-value" class="pv">€ 50</strong></label><input id="an-smart-reduction" type="range" min="0" max="500" step="10" value="50" class="w-full accent-indigo-500" oninput="ccRenderSmartSimulator()"><div id="an-smart-simulation" class="pv text-sm"></div><p class="text-[11px] text-slate-500">Simulazione matematica, non previsione né rendimento garantito.</p></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Indicatore orientativo di salute finanziaria</h3><div id="an-smart-health" class="space-y-2"></div><p class="text-[11px] text-slate-500">Indice informativo basato sui movimenti registrati; non è un rating creditizio né una consulenza finanziaria.</p></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><div class="flex justify-between items-center gap-2"><h3 class="text-sm font-bold">Resoconto automatico mensile</h3><button type="button" onclick="ccCopySmartReport()" class="text-xs text-indigo-400 font-semibold">Copia testo</button></div><label for="an-smart-report-month" class="text-xs text-slate-400">Mese</label><select id="an-smart-report-month" onchange="ccRenderSmartReport()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs"></select><div id="an-smart-report" class="pv whitespace-pre-line text-xs text-slate-300 leading-relaxed"></div></div>
-                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Traguardi e record personali</h3><div id="an-smart-records" class="space-y-2"></div></div>
-            </section>
-
             <h3 class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold pt-2 pl-1">Entrate e uscite</h3>
 
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
@@ -744,6 +722,38 @@ html.light{background-color:#edf2f4!important;}
                 <h3 class="text-xs font-bold text-slate-300">Le 5 spese più alte</h3>
                 <div id="an-top-list" class="space-y-1.5"></div>
             </div>
+
+            <!-- TESTI E APPROFONDIMENTI: a scomparsa, sotto i grafici -->
+            <details id="an-text-details" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <summary class="flex items-center justify-between cursor-pointer select-none text-sm font-bold text-white">
+                    <span><i class="fa-solid fa-wand-magic-sparkles text-indigo-400 mr-2"></i>Analisi e approfondimenti</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                </summary>
+                <div class="space-y-4 mt-4">
+            <!-- ANALISI INTELLIGENTI: suggerimenti locali, senza servizi esterni -->
+            <section id="an-insights-panel" class="bg-slate-900/90 border border-indigo-500/25 rounded-2xl p-4 shadow-sm space-y-3" aria-labelledby="an-insights-title">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm" aria-hidden="true"></i>
+                    <h3 id="an-insights-title" class="text-xs font-bold text-slate-200 uppercase tracking-wider">Analisi intelligenti e suggerimenti</h3>
+                </div>
+                <p class="text-[11px] text-slate-400">Osservazioni automatiche basate sui movimenti registrati. I confronti mensili usano mesi completi.</p>
+                <div id="an-insights-list" class="space-y-2" aria-live="polite"></div>
+            </section>
+
+            <!-- NUOVI STRUMENTI DI ANALISI: sola lettura dei movimenti -->
+            <section id="an-smart-tools" class="space-y-3" aria-label="Strumenti di analisi avanzata">
+                <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Approfondimenti finanziari</h3>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Spese anomale</h3><p class="text-[11px] text-slate-400">Movimenti insoliti rispetto alle altre spese della stessa categoria.</p><div id="an-smart-anomalies" class="space-y-2"></div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Confronto tra periodi completi</h3><div id="an-smart-periods" class="space-y-2"></div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Possibili abbonamenti</h3><p class="text-[11px] text-slate-400">Indizi ricavati dai movimenti, da verificare: nessun abbonamento viene creato automaticamente.</p><div id="an-smart-subs" class="space-y-2"></div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3"><h3 class="text-sm font-bold">Simulatore di risparmio</h3><label for="an-smart-reduction" class="text-xs text-slate-300">Riduzione ipotetica della spesa mensile: <strong id="an-smart-reduction-value" class="pv">€ 50</strong></label><input id="an-smart-reduction" type="range" min="0" max="500" step="10" value="50" class="w-full accent-indigo-500" oninput="ccRenderSmartSimulator()"><div id="an-smart-simulation" class="pv text-sm"></div><p class="text-[11px] text-slate-500">Simulazione matematica, non previsione né rendimento garantito.</p></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Indicatore orientativo di salute finanziaria</h3><div id="an-smart-health" class="space-y-2"></div><p class="text-[11px] text-slate-500">Indice informativo basato sui movimenti registrati; non è un rating creditizio né una consulenza finanziaria.</p></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><div class="flex justify-between items-center gap-2"><h3 class="text-sm font-bold">Resoconto automatico mensile</h3><button type="button" onclick="ccCopySmartReport()" class="text-xs text-indigo-400 font-semibold">Copia testo</button></div><label for="an-smart-report-month" class="text-xs text-slate-400">Mese</label><select id="an-smart-report-month" onchange="ccRenderSmartReport()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs"></select><div id="an-smart-report" class="pv whitespace-pre-line text-xs text-slate-300 leading-relaxed"></div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2"><h3 class="text-sm font-bold">Traguardi e record personali</h3><div id="an-smart-records" class="space-y-2"></div></div>
+            </section>
+
+                </div>
+            </details>
         </section>
 
         <!-- OBIETTIVI DI RISPARMIO -->
@@ -765,6 +775,21 @@ html.light{background-color:#edf2f4!important;}
                     <div id="goals-total-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%"></div>
                 </div>
                 <p class="text-[10px] text-slate-400 mt-1.5">su un totale di <span id="goals-total-target">€ 0.00</span> da raggiungere</p>
+            </div>
+
+            <div id="goals-chart-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+                <div class="flex justify-between items-center gap-2">
+                    <h3 class="text-xs font-bold text-slate-300">Quanto hai messo da parte ogni mese</h3>
+                    <select id="gc-months" onchange="ccRenderGoalsChart()" class="bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-[11px] text-slate-200">
+                        <option value="6" selected>6 mesi</option>
+                        <option value="12">12 mesi</option>
+                    </select>
+                </div>
+                <select id="gc-goal" onchange="ccRenderGoalsChart()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-slate-200"></select>
+                <div id="gc-wrap" class="h-52 relative"><canvas id="chart-goalmonthly"></canvas></div>
+                <p id="gc-empty" class="hidden text-[11px] text-slate-500 py-6 text-center">Ancora nessun versamento: tocca "Versa / Preleva" su un obiettivo per iniziare.</p>
+                <div id="gc-summary" class="grid grid-cols-3 gap-2 text-center"></div>
+                <p class="text-[10px] text-slate-500 leading-snug">Barre: versamenti del mese (rosso se hai prelevato). Linea: totale accumulato fino a quel mese.</p>
             </div>
 
             <div id="goals-list" class="space-y-3"></div>
@@ -1494,6 +1519,7 @@ html.light{background-color:#edf2f4!important;}
             setHeaderHidden(false);
 
             if(tabId === 'analisi') renderAnalysisCharts();
+            if(tabId === 'obiettivi') { try { ccRenderGoalsChart(); } catch (e) {} }
         }
 
         // CARICAMENTO E SALVATAGGIO JSON BACKUP
@@ -2143,6 +2169,7 @@ html.light{background-color:#edf2f4!important;}
 
             if (!goals.length) {
                 list.innerHTML = '<div class="bg-slate-900/60 border border-dashed border-slate-700 rounded-2xl p-6 text-center text-xs text-slate-400">Nessun obiettivo ancora.<br>Tocca <b class="text-indigo-300">Nuovo</b> per crearne uno.</div>';
+                ccRenderGoalsChart();
                 return;
             }
 
@@ -2183,15 +2210,75 @@ html.light{background-color:#edf2f4!important;}
                     + '<div class="flex justify-between items-start">'
                     + '<div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-xl">' + ccEsc(g.icon || '🎯') + '</div>'
                     + '<div><h4 class="text-sm font-bold text-white">' + ccEsc(g.name) + '</h4><p class="text-[10px] text-slate-400">' + deadlineText + '</p></div></div>'
-                    + '<div class="flex items-center space-x-4 text-slate-500 pt-1">'
-                    + '<button onclick="openGoalEdit(' + g.id + ')" class="active:text-indigo-400"><i class="fa-solid fa-pen text-xs"></i></button>'
-                    + '<button onclick="deleteGoal(' + g.id + ')" class="text-rose-400/80"><i class="fa-solid fa-trash text-xs"></i></button></div></div>'
+                    + '</div>'
                     + '<div><div class="flex justify-between items-baseline text-[11px]"><span class="text-emerald-400 font-bold text-sm">' + ccEur(saved) + '</span><span class="text-slate-400">di ' + ccEur(g.target) + '</span></div>'
                     + '<div class="h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5"><div class="h-full rounded-full ' + (done ? 'bg-emerald-500' : 'bg-indigo-500') + '" style="width:' + pct.toFixed(0) + '%"></div></div>'
                     + '<div class="flex justify-between text-[10px] text-slate-400 mt-1.5"><span>' + pct.toFixed(0) + '%</span><span>' + hint + '</span></div></div>'
-                    + '<button onclick="openContribution(' + g.id + ')" class="w-full bg-indigo-600/90 active:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl"><i class="fa-solid fa-piggy-bank mr-1.5"></i>Versa / Preleva</button>'
+                    + '<div class="flex items-stretch gap-2">'
+                    + '<button onclick="openContribution(' + g.id + ')" class="flex-1 bg-indigo-600/90 active:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl"><i class="fa-solid fa-piggy-bank mr-1.5"></i>Versa / Preleva</button>'
+                    + '<button onclick="openGoalEdit(' + g.id + ')" aria-label="Modifica obiettivo" class="bg-slate-800 border border-slate-700 active:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl"><i class="fa-solid fa-pen mr-1.5"></i>Modifica</button>'
+                    + '<button onclick="deleteGoal(' + g.id + ')" aria-label="Elimina obiettivo" class="bg-rose-500/10 border border-rose-500/30 active:bg-rose-500/20 text-rose-400 text-xs font-semibold px-3 py-2.5 rounded-xl"><i class="fa-solid fa-trash mr-1.5"></i>Elimina</button></div>'
                     + historyHtml + '</div>';
             }).join('');
+            ccRenderGoalsChart();
+        }
+
+        // ===== GRAFICO VERSAMENTI MENSILI SUGLI OBIETTIVI =====
+        function ccRenderGoalsChart() {
+            const card = document.getElementById('goals-chart-card');
+            if (!card) return;
+            const goals = store.goals || [];
+            card.classList.toggle('hidden', !goals.length);
+            if (!goals.length) return;
+
+            const sel = document.getElementById('gc-goal');
+            const prev = sel.value || 'all';
+            sel.innerHTML = '<option value="all">Tutti gli obiettivi</option>' + goals.map(g => '<option value="' + g.id + '">' + ccEsc((g.icon || '🎯') + ' ' + g.name) + '</option>').join('');
+            sel.value = Array.from(sel.options).some(o => o.value === prev) ? prev : 'all';
+
+            const n = parseInt(document.getElementById('gc-months').value, 10) || 6;
+            const months = ccMonthsList(n);
+            const picked = sel.value === 'all' ? goals : goals.filter(g => String(g.id) === sel.value);
+            const all = [];
+            picked.forEach(g => (g.contributions || []).forEach(k => all.push(k)));
+
+            const perMonth = months.map(() => 0);
+            let before = 0;
+            all.forEach(k => {
+                const m = (k.date || '').slice(0, 7);
+                if (m < months[0]) before += k.amount;
+                else { const i = months.indexOf(m); if (i >= 0) perMonth[i] += k.amount; }
+            });
+            let run = before;
+            const cum = perMonth.map(v => (run += v));
+            const r2 = v => Math.round(v * 100) / 100;
+            const has = all.length > 0;
+
+            document.getElementById('gc-wrap').classList.toggle('hidden', !has);
+            document.getElementById('gc-empty').classList.toggle('hidden', has);
+            const sum = document.getElementById('gc-summary');
+            const box = (label, val, cls) => '<div class="bg-slate-800/50 rounded-xl py-2 px-1"><p class="text-[10px] text-slate-400">' + label + '</p><p class="pv text-xs font-bold ' + cls + '">' + val + '</p></div>';
+            const total = r2(run), thisM = r2(perMonth[perMonth.length - 1]);
+            const avg = r2(perMonth.reduce((a, b) => a + b, 0) / months.length);
+            sum.innerHTML = has ? box('Questo mese', (thisM >= 0 ? '+' : '-') + ccEur(Math.abs(thisM)), thisM >= 0 ? 'text-emerald-400' : 'text-rose-400')
+                + box('Media mensile', ccEur(avg), 'text-white') + box('Totale messo da parte', ccEur(total), 'text-emerald-400') : '';
+            if (!has || typeof Chart === 'undefined') return;
+
+            Chart.defaults.color = ccIsLight() ? '#475569' : '#94a3b8';
+            Chart.defaults.borderColor = ccIsLight() ? 'rgba(100,116,139,0.18)' : 'rgba(148,163,184,0.12)';
+            const priv = document.documentElement.classList.contains('privacy');
+            const labels = months.map(m => MESI[Number(m.split('-')[1]) - 1]);
+            ccMk('chart-goalmonthly', {
+                type: 'bar',
+                data: { labels: labels, datasets: [
+                    { type: 'bar', label: 'Versato nel mese', data: perMonth.map(r2), backgroundColor: perMonth.map(v => v >= 0 ? '#f59e0b' : '#f43f5e'), borderRadius: 6, yAxisID: 'y', order: 2 },
+                    { type: 'line', label: 'Totale accumulato', data: cum.map(r2), borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, pointRadius: 3, yAxisID: 'y1', order: 1 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false,
+                    scales: { y: { position: 'left', ticks: { display: !priv } }, y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { display: !priv } } },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { enabled: !priv, callbacks: { label: c => ' ' + c.dataset.label + ': ' + ccEur(c.parsed.y) } } } }
+            });
         }
 
         function openGoalModal() {
