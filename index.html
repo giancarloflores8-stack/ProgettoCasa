@@ -66,6 +66,10 @@
         #cc-lock{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#090d16,#111936 70%,#312e81);display:flex;align-items:center;justify-content:center;padding:calc(24px + var(--cc-top)) 22px calc(24px + var(--cc-bottom))}
         #cc-lock.hidden{display:none}
         .cc-lock-card{width:min(100%,390px);text-align:center}
+        #cc-lock h1{color:#ffffff!important}
+        #cc-lock #cc-pin-title{color:#ffffff!important;font-size:16px;font-weight:700;line-height:1.35;margin-top:10px;padding:0 8px}
+        #cc-lock #cc-pin-reset{color:#cbd5e1!important}
+        #cc-lock #cc-pin-error{color:#fda4af!important}
         .cc-pin-dots{display:flex;justify-content:center;gap:14px;margin:24px}
         .cc-pin-dot{width:14px;height:14px;border:2px solid #818cf8;border-radius:50%}
         .cc-pin-dot.on{background:#818cf8}
@@ -1447,7 +1451,7 @@ html.light{background-color:#edf2f4!important;}
                 <i class="fa-solid fa-wallet"></i>
             </div>
             <h1 class="text-2xl font-extrabold mt-5">Conti Chiari</h1>
-            <p id="cc-pin-title" class="text-sm text-slate-300 mt-2">Inserisci il PIN</p>
+            <p id="cc-pin-title" class="text-sm text-slate-300 mt-2">Inserisci il PIN che hai scelto in precedenza</p>
             <div id="cc-pin-dots" class="cc-pin-dots"></div>
             <div id="cc-keypad" class="cc-keypad"></div>
             <p id="cc-pin-error" class="text-xs text-rose-400 h-5 mt-3"></p>
@@ -2925,7 +2929,7 @@ html.light{background-color:#edf2f4!important;}
             drawPinDots();
             const lockEl = document.getElementById('cc-lock');
             if (lockEl) lockEl.classList.remove('hidden');
-            setPinTitle(m === 'setup' ? 'Crea un PIN di 4 cifre' : m === 'confirm' ? 'Conferma il nuovo PIN' : 'Inserisci il PIN');
+            setPinTitle(m === 'setup' ? 'Crea un PIN di 4 cifre' : m === 'confirm' ? 'Conferma il nuovo PIN' : 'Inserisci il PIN che hai scelto in precedenza');
         }
 
         function hideLock() {
